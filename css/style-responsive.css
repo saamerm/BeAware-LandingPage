@@ -566,7 +566,7 @@ Primary use: MultiPurpose Template
     .countdown-number > b{
         bottom: -20px;
         font-size: 9px;
-        color: rgba(255,255,255, .85);
+        color: rgba(206, 222, 233, .85);
     } 
     .text-mobile {
         font-size: 110%;
