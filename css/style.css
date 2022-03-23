@@ -52,7 +52,6 @@ Primary use: MultiPurpose Template
     24.2. Comments
     24.3. Sidebar
 25. Shop
-26. Pricing
 27. Shortcodes
     27.1. Owl Carousel
     27.2. Tabs
@@ -4772,106 +4771,6 @@ table.shopping-cart-table tr th,
 table.shopping-cart-table tr td{
     vertical-align: middle;
 }
-
-
-/* ==============================
-   Pricing
-   ============================== */
-
-.pricing-item{
-    margin: 0 0 30px;
-    position: relative;
-    text-align: center;
-}
-.pricing-item-inner{
-    border: 1px solid #eaeaea;
-    vertical-align: middle;
-    
-    -webkit-transition: all 0.27s cubic-bezier(0.000, 0.000, 0.580, 1.000);  
-    -moz-transition: all 0.27s cubic-bezier(0.000, 0.000, 0.580, 1.000); 
-    -o-transition: all 0.27s cubic-bezier(0.000, 0.000, 0.580, 1.000);
-    -ms-transition: all 0.27s cubic-bezier(0.000, 0.000, 0.580, 1.000); 
-    transition: all 0.27s cubic-bezier(0.000, 0.000, 0.580, 1.000);
-}
-
-.pricing-item-inner:hover{
-    border-color: #aaa;
-}
-.main .pricing-item-inner{
-    border-color: #aaa;
-}
-
-.pricing-wrap{
-    position: relative;
-    
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    
-    padding: 30px 20px;
-    text-align: center;
-    overflow: hidden;
-}
-
-.pricing-icon{
-    padding-top: 10px;
-    padding-bottom: 5px;
-    position: relative;
-    font-size: 32px;
-    z-index: 1;
-}
-.pricing-title{
-    position: relative;
-    margin-bottom: 40px;
-    font-size: 15px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    z-index: 1;
-}
-.pr-list{
-    margin: 0 -20px 30px;
-    padding: 0;
-    
-    color: rgba(27, 68, 117, 0.79);
-    font-size: 12px;
-    font-weight: 400;
-    text-transform: uppercase;    
-    letter-spacing: 2px;
-}
-.pr-list li{
-    padding: 12px 20px;
-    list-style: none;
-    border-bottom: 1px solid #f1f1f1;
-}
-.pr-list li:first-child{
-    border-top: 1px solid #f1f1f1;
-}
-.pricing-num{
-    font-size: 40px;
-    font-weight: 300;
-    line-height: 1;
-    
-}
-.pricing-num sup{
-    font-family: "Open Sans", Arial, Helvetica, sans-serif;
-    font-size: 18px;
-    font-weight: 400;
-    position: relative;
-    top: -20px;
-    left: -3px;
-    margin-left: -7px;
-}
-.pr-button{
-    margin: 30px -20px 0;
-    padding-top: 30px;
-    border-top: 1px solid #f1f1f1;
-}
-.pr-per{
-    color: rgba(27, 68, 117, .85);
-    font-size: 12px;
-}
-
 
 
 /* ==============================

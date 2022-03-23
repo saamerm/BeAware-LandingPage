@@ -31,8 +31,8 @@ website:   	http://www.themepunch.com
 
 	color: #000000;
 	text-shadow: none;
-	background-color: rgb(255, 255, 255);
-	background-color: rgba(255, 255, 255, 1);
+	background-color: rgb(206, 222, 233);
+	background-color: rgba(206, 222, 233, 1);
 	text-decoration: none;
 	min-width: 408px;
 	min-height: 3px;
@@ -56,22 +56,22 @@ text-decoration:none;
 text-transform:uppercase;
 letter-spacing:8px;
 border-width:0px;
-border-color:rgb(0, 0, 0);
+border-color:rgb(27, 68, 117);
 border-style:none;
 }
 
 .tp-caption.whitedivider3px {
 color:#000000;
 text-shadow:none;
-background-color:rgb(255, 255, 255);
-background-color:rgba(255, 255, 255, 1);
+background-color:rgb(206, 222, 233);
+background-color:rgba(206, 222, 233, 1);
 text-decoration:none;
 font-size:0px;
 line-height:0;
 min-width:468px;
 min-height:3px;
 border-width:0px;
-border-color:rgb(0, 0, 0);
+border-color:rgb(27, 68, 117);
 border-style:none;
 }
 
@@ -87,7 +87,7 @@ text-decoration:none;
 text-transform:uppercase;
 letter-spacing:5px;
 border-width:0px;
-border-color:rgb(0, 0, 0);
+border-color:rgb(27, 68, 117);
 border-style:none;
 }
 
@@ -96,29 +96,29 @@ font-size:25px;
 line-height:25px;
 font-weight:800;
 
-color:rgb(255, 255, 255);
+color:rgb(206, 222, 233);
 text-decoration:none;
 background-color:transparent;
 text-shadow:none;
 text-transform:uppercase;
 letter-spacing:5px;
 border-width:0px;
-border-color:rgb(0, 0, 0);
+border-color:rgb(27, 68, 117);
 border-style:none;
 }
 
 .tp-caption.whitedivider3px_vertical {
 color:#000000;
 text-shadow:none;
-background-color:rgb(255, 255, 255);
-background-color:rgba(255, 255, 255, 1);
+background-color:rgb(206, 222, 233);
+background-color:rgba(206, 222, 233, 1);
 text-decoration:none;
 font-size:0px;
 line-height:0;
 min-width:3px;
 min-height:130px;
 border-width:0px;
-border-color:rgb(0, 0, 0);
+border-color:rgb(27, 68, 117);
 border-style:none;
 }
 
@@ -134,7 +134,7 @@ text-decoration:none;
 text-transform:uppercase;
 letter-spacing:5px;
 border-width:0px;
-border-color:rgb(0, 0, 0);
+border-color:rgb(27, 68, 117);
 border-style:none;
 }
 
@@ -152,7 +152,7 @@ letter-spacing:5px;
 max-width:470px;
 white-space:normal !important;
 border-width:0px;
-border-color:rgb(0, 0, 0);
+border-color:rgb(27, 68, 117);
 border-style:none;
 }
 
@@ -176,7 +176,7 @@ font-size: 60px;
 line-height: 60px;
 font-weight: 300;
  
-background-color: rgba(0, 0, 0, 0);
+background-color: rgba(27, 68, 117, 0);
 text-decoration: none;
 text-transform: uppercase;
 letter-spacing: 8px;
@@ -192,7 +192,7 @@ font-size: 34px;
 line-height: 34px;
 font-weight: 300;
  
-background-color: rgba(0, 0, 0, 0);
+background-color: rgba(27, 68, 117, 0);
 text-decoration: none;
 text-transform: uppercase;
 letter-spacing: 5px;
@@ -242,7 +242,7 @@ white-space:nowrap;
 
 .tp-caption.big_dark {
 position:absolute;
-color:#333;
+color:#1B4375;
 font-weight:700;
 font-size:70px;
 line-height:70px;
@@ -254,7 +254,7 @@ white-space:nowrap;
 
 .tp-caption.medium_dark {
 position:absolute;
-color:#333;
+color:#1B4375;
 font-weight:300;
 font-size:40px;
 line-height:40px;
@@ -269,7 +269,7 @@ white-space:nowrap;
 .tp-caption.medium_grey {
 position:absolute;
 color:#fff;
-text-shadow:0px 2px 5px rgba(0, 0, 0, 0.5);
+text-shadow:0px 2px 5px rgba(27, 68, 117, 0.5);
 font-weight:700;
 font-size:20px;
 line-height:20px;
@@ -285,7 +285,7 @@ white-space:nowrap;
 .tp-caption.small_text {
 position:absolute;
 color:#fff;
-text-shadow:0px 2px 5px rgba(0, 0, 0, 0.5);
+text-shadow:0px 2px 5px rgba(27, 68, 117, 0.5);
 font-weight:700;
 font-size:14px;
 line-height:20px;
@@ -299,7 +299,7 @@ white-space:nowrap;
 .tp-caption.medium_text {
 position:absolute;
 color:#fff;
-text-shadow:0px 2px 5px rgba(0, 0, 0, 0.5);
+text-shadow:0px 2px 5px rgba(27, 68, 117, 0.5);
 font-weight:700;
 font-size:20px;
 line-height:20px;
@@ -321,7 +321,7 @@ background-color:transparent;
 text-align:center;
 text-shadow:#000 0px 5px 10px;
 border-width:0px;
-border-color:rgb(255, 255, 255);
+border-color:rgb(206, 222, 233);
 border-style:none;
 }
 
@@ -336,14 +336,14 @@ background-color:transparent;
 text-align:center;
 text-shadow:#000 0px 5px 10px;
 border-width:0px;
-border-color:rgb(255, 255, 255);
+border-color:rgb(206, 222, 233);
 border-style:none;
 }
 
 .tp-caption.large_text {
 position:absolute;
 color:#fff;
-text-shadow:0px 2px 5px rgba(0, 0, 0, 0.5);
+text-shadow:0px 2px 5px rgba(27, 68, 117, 0.5);
 font-weight:700;
 font-size:40px;
 line-height:40px;
@@ -373,7 +373,7 @@ border-style:none;
 .tp-caption.very_large_text {
 position:absolute;
 color:#fff;
-text-shadow:0px 2px 5px rgba(0, 0, 0, 0.5);
+text-shadow:0px 2px 5px rgba(27, 68, 117, 0.5);
 font-weight:700;
 font-size:60px;
 line-height:60px;
@@ -508,9 +508,9 @@ white-space:nowrap;
 }
 
 .tp-caption.boxshadow {
--moz-box-shadow:0px 0px 20px rgba(0, 0, 0, 0.5);
--webkit-box-shadow:0px 0px 20px rgba(0, 0, 0, 0.5);
-box-shadow:0px 0px 20px rgba(0, 0, 0, 0.5);
+-moz-box-shadow:0px 0px 20px rgba(27, 68, 117, 0.5);
+-webkit-box-shadow:0px 0px 20px rgba(27, 68, 117, 0.5);
+box-shadow:0px 0px 20px rgba(27, 68, 117, 0.5);
 }
 
 .tp-caption.black {
@@ -571,15 +571,15 @@ font-size:30px;
 line-height:75px;
 font-weight:800;
  
-color:rgb(255, 255, 255);
+color:rgb(206, 222, 233);
 text-decoration:none;
-background-color:rgb(0, 0, 0);
-background-color:rgba(0, 0, 0, 0.498039);
+background-color:rgb(27, 68, 117);
+background-color:rgba(27, 68, 117, 0.798039);
 padding:50px 25px;
 text-align:center;
 border-radius:500px 500px 500px 500px;
 border-width:0px;
-border-color:rgb(0, 0, 0);
+border-color:rgb(27, 68, 117);
 border-style:none;
 }
 
@@ -588,13 +588,13 @@ font-size:50px;
 line-height:70px;
 font-weight:300;
  
-color:rgb(255, 255, 255);
+color:rgb(206, 222, 233);
 text-decoration:none;
-background-color:rgb(0, 0, 0);
+background-color:rgb(27, 68, 117);
 padding:0px 20px 5px;
 text-shadow:none;
 border-width:0px;
-border-color:rgb(255, 255, 255);
+border-color:rgb(206, 222, 233);
 border-style:none;
 }
 
@@ -650,7 +650,7 @@ font-weight:700;
 font-family:Arial;
 color:#ffffff;
 text-decoration:none;
-background-color:rgba(0, 0, 0, 1);
+background-color:rgba(27, 68, 117, 1);
 text-shadow:none;
 margin:0px;
 letter-spacing:-1.5px;
@@ -659,7 +659,7 @@ width:150px;
 white-space:normal !important;
 height:auto;
 border-width:0px;
-border-color:rgb(255, 255, 255);
+border-color:rgb(206, 222, 233);
 border-style:none;
 }
 
@@ -741,7 +741,7 @@ font-size:20px;
 line-height:20px;
 font-weight:800;
  
-color:rgb(255, 255, 255);
+color:rgb(206, 222, 233);
 text-decoration:none;
 background-color:rgb(52, 73, 94);
 padding:10px;
@@ -783,7 +783,7 @@ font-size:20px;
 line-height:20px;
 font-weight:800;
  
-color:rgb(255, 255, 255);
+color:rgb(206, 222, 233);
 text-decoration:none;
 background-color:rgb(227, 58, 12);
 padding:10px;
@@ -810,7 +810,7 @@ font-size:20px;
 line-height:20px;
 font-weight:800;
  
-color:rgb(255, 255, 255);
+color:rgb(206, 222, 233);
 text-decoration:none;
 background-color:rgb(243, 156, 18);
 padding:10px;
@@ -834,7 +834,7 @@ font-size:58px;
 line-height:60px;
 font-weight:800;
  
-color:rgb(255, 255, 255);
+color:rgb(206, 222, 233);
 text-decoration:none;
 background-color:transparent;
 border-width:0px;
@@ -847,7 +847,7 @@ font-size:30px;
 line-height:36px;
 font-weight:300;
  
-color:rgb(255, 255, 255);
+color:rgb(206, 222, 233);
 text-decoration:none;
 background-color:transparent;
 padding:0px;
@@ -861,7 +861,7 @@ font-size:34px;
 line-height:40px;
 font-weight:300;
  
-color:rgb(255, 255, 255);
+color:rgb(206, 222, 233);
 text-decoration:none;
 background-color:transparent;
 padding:0px;
@@ -892,7 +892,7 @@ letter-spacing: 1px;
 line-height:20px;
 font-weight:400;
  
-color:rgb(255, 255, 255);
+color:rgb(206, 222, 233);
 text-decoration:none;
 background-color:rgba(0,0,0, .75);
 padding:10px;
@@ -905,7 +905,7 @@ font-size:30px;
 line-height:36px;
 font-weight:300;
  
-color:rgb(0, 0, 0);
+color:rgb(27, 68, 117);
 text-decoration:none;
 background-color:transparent;
 padding:0px;
@@ -919,7 +919,7 @@ font-size:58px;
 line-height:60px;
 font-weight:800;
  
-color:rgb(0, 0, 0);
+color:rgb(27, 68, 117);
 text-decoration:none;
 background-color:transparent;
 border-width:0px;
@@ -946,7 +946,7 @@ font-size:17px;
 line-height:28px;
 font-weight:300;
  
-color:rgb(255, 255, 255);
+color:rgb(206, 222, 233);
 text-decoration:none;
 background-color:transparent;
 padding:0px;
@@ -966,9 +966,9 @@ font-size:40px;
 line-height:40px;
 font-weight:800;
  
-color:rgb(255, 255, 255);
+color:rgb(206, 222, 233);
 text-decoration:none;
-background-color:rgb(0, 0, 0);
+background-color:rgb(27, 68, 117);
 padding:10px 20px 15px;
 border-width:0px;
 border-color:rgb(255, 214, 88);
@@ -980,13 +980,13 @@ font-size:30px;
 line-height:30px;
 font-weight:300;
  
-color:rgb(0, 0, 0);
+color:rgb(27, 68, 117);
 text-decoration:none;
-background-color:rgb(255, 255, 255);
+background-color:rgb(206, 222, 233);
 padding:5px 15px 10px;
 text-shadow:none;
 border-width:0px;
-border-color:rgb(0, 0, 0);
+border-color:rgb(27, 68, 117);
 border-style:none;
 }
 
@@ -995,7 +995,7 @@ font-size:20px;
 line-height:20px;
 font-weight:800;
  
-color:rgb(255, 255, 255);
+color:rgb(206, 222, 233);
 text-decoration:none;
 background-color:rgb(243, 156, 18);
 padding:10px;
@@ -1007,9 +1007,9 @@ border-style:none;
 
 
 .tp-caption.boxshadow{
-		-moz-box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
-		-webkit-box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
-		box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
+		-moz-box-shadow: 0px 0px 20px rgba(27, 68, 117, 0.5);
+		-webkit-box-shadow: 0px 0px 20px rgba(27, 68, 117, 0.5);
+		box-shadow: 0px 0px 20px rgba(27, 68, 117, 0.5);
 	}
 
 .tp-caption.black{
@@ -1079,11 +1079,11 @@ border-style:none;
 
 .tp-simpleresponsive .button				{	padding:6px 13px 5px; border-radius: 3px; -moz-border-radius: 3px; -webkit-border-radius: 3px; height:30px;
 												cursor:pointer;
-												color:#fff !important; text-shadow:0px 1px 1px rgba(0, 0, 0, 0.6) !important; font-size:15px; line-height:45px !important;
+												color:#fff !important; text-shadow:0px 1px 1px rgba(27, 68, 117, 0.6) !important; font-size:15px; line-height:45px !important;
 												background:url(../images/gradient/g30.png) repeat-x top; font-weight: bold; letter-spacing: -1px;
 											}
 
-.tp-simpleresponsive  .button.big			{	color:#fff; text-shadow:0px 1px 1px rgba(0, 0, 0, 0.6); font-weight:bold; padding:9px 20px; font-size:19px;  line-height:57px !important; background:url(../images/gradient/g40.png) repeat-x top;}
+.tp-simpleresponsive  .button.big			{	color:#fff; text-shadow:0px 1px 1px rgba(27, 68, 117, 0.6); font-weight:bold; padding:9px 20px; font-size:19px;  line-height:57px !important; background:url(../images/gradient/g40.png) repeat-x top;}
 
 
 .tp-simpleresponsive  .purchase:hover,
@@ -1617,7 +1617,7 @@ border-style:none;
 .tp-bullets.preview1 						{ 	height: 21px; }
 .tp-bullets.preview1 .bullet 				{	cursor: pointer;
 											    position: relative !important;
-											    background: rgba(0, 0, 0, 0.15) !important;
+											    background: rgba(27, 68, 117, 0.15) !important;
 											    /*-webkit-border-radius: 10px;
 											    border-radius: 10px;*/
 											    -webkit-box-shadow: none;
@@ -1625,7 +1625,7 @@ border-style:none;
 											    box-shadow: none;
 											    width: 5px !important;
 											    height: 5px !important;
-											    border: 8px solid rgba(0, 0, 0, 0) !important;
+											    border: 8px solid rgba(27, 68, 117, 0) !important;
 											    display: inline-block;
 											    margin-right: 5px !important;
 											    margin-bottom: 0px !important;
@@ -1647,7 +1647,7 @@ border-style:none;
 												background: #aaa !important;
 												width: 5px !important;
 											    height: 5px !important;
-											    border: 8px solid rgba(255, 255, 255, 1) !important;
+											    border: 8px solid rgba(206, 222, 233, 1) !important;
 }
 
 												
@@ -1707,7 +1707,7 @@ border-style:none;
 .tp-bullets.preview2 						{ 	height: 17px; }
 .tp-bullets.preview2 .bullet 				{	cursor: pointer;
 											    position: relative !important;
-											    background: rgba(0, 0, 0, 0.5) !important;
+											    background: rgba(27, 68, 117, 0.5) !important;
 											    -webkit-border-radius: 10px;
 											    border-radius: 10px;
 											    -webkit-box-shadow: none;
@@ -1715,7 +1715,7 @@ border-style:none;
 											    box-shadow: none;
 											    width: 6px !important;
 											    height: 6px !important;
-											    border: 5px solid rgba(0, 0, 0, 0) !important;
+											    border: 5px solid rgba(27, 68, 117, 0) !important;
 											    display: inline-block;
 											    margin-right: 2px !important;
 											    margin-bottom: 0px !important;
@@ -1734,10 +1734,10 @@ border-style:none;
 .tp-bullets.preview2 .bullet.selected 		{	-webkit-box-shadow: none;
 											    -moz-box-shadow: none;
 											    box-shadow: none;
-												background: rgba(255, 255, 255, 1) !important;
+												background: rgba(206, 222, 233, 1) !important;
 												width: 6px !important;
 											    height: 6px !important;
-											    border: 5px solid rgba(0, 0, 0, 1) !important;
+											    border: 5px solid rgba(27, 68, 117, 1) !important;
 } 
 
 
@@ -1822,7 +1822,7 @@ border-style:none;
 .tp-bullets.preview3 						{ 	height: 17px; }
 .tp-bullets.preview3 .bullet 				{	cursor: pointer;
 											    position: relative !important;
-											    background: rgba(0, 0, 0, 0.5) !important;
+											    background: rgba(27, 68, 117, 0.5) !important;
 											    -webkit-border-radius: 10px;
 											    border-radius: 10px;
 											    -webkit-box-shadow: none;
@@ -1830,7 +1830,7 @@ border-style:none;
 											    box-shadow: none;
 											    width: 6px !important;
 											    height: 6px !important;
-											    border: 5px solid rgba(0, 0, 0, 0) !important;
+											    border: 5px solid rgba(27, 68, 117, 0) !important;
 											    display: inline-block;
 											    margin-right: 2px !important;
 											    margin-bottom: 0px !important;
@@ -1849,10 +1849,10 @@ border-style:none;
 .tp-bullets.preview3 .bullet.selected 		{	-webkit-box-shadow: none;
 											    -moz-box-shadow: none;
 											    box-shadow: none;
-												background: rgba(255, 255, 255, 1) !important;
+												background: rgba(206, 222, 233, 1) !important;
 												width: 6px !important;
 											    height: 6px !important;
-											    border: 5px solid rgba(0, 0, 0, 1) !important;
+											    border: 5px solid rgba(27, 68, 117, 1) !important;
 } 
 
 	
@@ -1972,7 +1972,7 @@ border-style:none;
 .tp-bullets.preview4 						{ 	height: 17px; }
 .tp-bullets.preview4 .bullet 				{	cursor: pointer;
 											    position: relative !important;
-											    background: rgba(0, 0, 0, 0.5) !important;
+											    background: rgba(27, 68, 117, 0.5) !important;
 											    -webkit-border-radius: 10px;
 											    border-radius: 10px;
 											    -webkit-box-shadow: none;
@@ -1980,7 +1980,7 @@ border-style:none;
 											    box-shadow: none;
 											    width: 6px !important;
 											    height: 6px !important;
-											    border: 5px solid rgba(0, 0, 0, 0) !important;
+											    border: 5px solid rgba(27, 68, 117, 0) !important;
 											    display: inline-block;
 											    margin-right: 2px !important;
 											    margin-bottom: 0px !important;
@@ -2001,10 +2001,10 @@ border-style:none;
 .tp-bullets.preview4 .bullet.selected 		{	-webkit-box-shadow: none;
 											    -moz-box-shadow: none;
 											    box-shadow: none;
-												background: rgba(255, 255, 255, 1) !important;
+												background: rgba(206, 222, 233, 1) !important;
 												width: 6px !important;
 											    height: 6px !important;
-											    border: 5px solid rgba(0, 0, 0, 1) !important;
+											    border: 5px solid rgba(27, 68, 117, 1) !important;
 } 
 
 
