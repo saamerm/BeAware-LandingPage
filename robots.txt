@@ -1,0 +1,10 @@
+User-agent: *
+Allow: *.css
+Allow: *.js
+Allow: *.jpg
+Allow: *.png
+Allow: *.gif
+Disallow: /manager/
+
+Host: https://deafassistant.com
+Sitemap: https://deafassistant.com/sitemap.xml
