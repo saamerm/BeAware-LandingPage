@@ -1812,8 +1812,8 @@ a.logo:hover{
     text-align: left;
     border-left: none;
     border-right: none;
-    border-bottom: 1px solid rgba(206, 222, 233, .065);
-    color: rgba(27, 68, 117, .85);
+    border-bottom: 1px solid rgba(255, 222, 233, .065);
+    color: rgba(255, 68, 117, .95);
     letter-spacing: 1px;
     cursor: pointer;
 }
