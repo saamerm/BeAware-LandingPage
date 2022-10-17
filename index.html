@@ -97,8 +97,8 @@ You can find the code of your language here - https://www.w3schools.com/tags/ref
                                 <ul class="mn-sub">
                                     
                                     <li><a href="index.html">English</a></li>
-                                    <li><a href="index-fr.html">French</a></li>
-                                    <li><a href="index-ge.html">German</a></li>
+                                    <li><a href="index-fr.html">Français</a></li>
+                                    <li><a href="index-ge.html">Deutsche</a></li>
                                     
                                 </ul>
                                 
@@ -106,7 +106,7 @@ You can find the code of your language here - https://www.w3schools.com/tags/ref
                             <!-- End Languages -->
                             <!-- Button -->
                             <li>
-                                <a href="https://testflight.apple.com/join/3ixeJPSz"><span class="btn btn-mod btn-circle"><i class="fa fa-download"></i> Download Now</span></a>
+                                <a href="https://apps.apple.com/app/beaware-deaf-hard-of-hearing/id1609670787"><span class="btn btn-mod btn-circle"><i class="fa fa-download"></i> Download Now</span></a>
                             </li>
                             <!-- End Button -->
                             
@@ -168,7 +168,7 @@ You can find the code of your language here - https://www.w3schools.com/tags/ref
                                     <!-- Download -->
                                     <div class="align-center">
                                     
-                                        <a href="https://testflight.apple.com/join/3ixeJPSz" class="download-button round mb-sm-10">
+                                        <a href="https://apps.apple.com/app/beaware-deaf-hard-of-hearing/id1609670787" class="download-button round mb-sm-10">
                                             <span class="db-icon">
                                                 <i class="fa fa-apple"></i>
                                             </span>
@@ -474,20 +474,21 @@ You can find the code of your language here - https://www.w3schools.com/tags/ref
         <script type="text/javascript" src="js/jquery.ajaxchimp.min.js"></script>        
         <!--[if lt IE 10]><script type="text/javascript" src="js/placeholder.js"></script><![endif]-->
         <script type="text/javascript" src="js/analytics.js"></script>
-        <script>
-            window.productHuntUpcoming = {
-              appId: 178446,
-              position: 'bottomLeft',
-            };
-          
-            (function(doc, scr, src, a, b) {
-              a = doc.createElement(scr);
-              b = doc.getElementsByTagName(scr)[0];
-              a.async = true;
-              a.src = src;
-              b.parentNode.insertBefore(a, b);
-            })(document, 'script', 'https://assets.producthunt.com/assets/upwigloader.js');
-        </script>        
+        <script type="text/javascript">
+            $(document).ready(function () {
+                var userLang = navigator.language || navigator.userLanguage;
+                if (userLang.startsWith("fr")) {
+                        window.location.href = 'index-fr.html';
+                }
+                else if (userLang.startsWith("de")) {
+                        window.location.href = 'index-ge.html';
+                }
+                else {
+                        window.location.href = 'index.html';
+                }
+            });
+        </script>            
+               
         <script type="application/ld+json">
             {
                 "@context": "https://schema.org",
