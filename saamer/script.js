@@ -16,7 +16,7 @@ $(document).ready(function() {
   // Loads the initial quote - without pressing the button
   const unusedVariable = setInterval(recurringFunction, 1000);  
   
-callUserViewedAPI("sam");
+callUserViewedAPI("saamer");
 });
 
 
@@ -51,7 +51,7 @@ function showRightTranscript(){
 
 var localization = ""
 function loadLang(lang){
-  $.getJSON("https://conferencecaptioning.com/sam/" + lang + ".json", (text) => {
+  $.getJSON("https://conferencecaptioning.com/saamer/" + lang + ".json", (text) => {
     localization = text
     document.getElementById("caption-header").html(text['caption-header']);
     // if(isStreamingCaptions){
@@ -104,7 +104,7 @@ function stopTimer() {
 }
 
 function getTranscript() {
-  var url="https://script.google.com/macros/s/AKfycbzqOWlC9bT6TtLp1QJLzAkwDZJKTcCZYnoDhN4JIMXTo5lEvtPruYb-3vrILj__yO_A/exec?streamName=sam";
+  var url="https://script.google.com/macros/s/AKfycbzqOWlC9bT6TtLp1QJLzAkwDZJKTcCZYnoDhN4JIMXTo5lEvtPruYb-3vrILj__yO_A/exec?streamName=saamer";
   // To avoid using JQuery, you can use this https://stackoverflow.com/questions/3229823/how-can-i-pass-request-headers-with-jquerys-getjson-method
   $.getJSON(
     url,
