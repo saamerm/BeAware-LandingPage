@@ -42,7 +42,7 @@ $(document).ready(function() {
   $("#unmute").on("click", unmuteButtonTapped);
   console.log("SaamerGoing!");
   // $('#mute').hide();
-  $('#unmute').hide();
+  $('#mute').hide();
   console.log("SaamerFinished!");
   //$("#arabic").on("click", function() { translate("arabic"); });
   // Loads the initial quote - without pressing the button
@@ -88,12 +88,15 @@ function unmuteButtonTapped() {
   }
 }
 
+var isPlayingSpeech = false
 function mute(){
+  isPlayingSpeech = false
   $('#unmute').show();
   $('#mute').hide();
 }
 
 function unmute(){
+  isPlayingSpeech = true
   $('#mute').show();
   $('#unmute').hide();
 }
@@ -153,17 +156,18 @@ function recurringFunction() {
 
 function startTimer() {
   $("#get-live-caption").html("Stop Streaming");
-  $("#get-live-caption").textContent = languageData[languageCode]['get-live-caption-stop']
+  $("#get-live-caption").html(languageData[languageCode]['get-live-caption-stop'])
   // $("#get-live-caption").html(localization['get-live-caption-stop']);
 }
 
 function stopTimer() {
   $("#get-live-caption").html("Get Live Captions");
-  $("#get-live-caption").textContent = languageData[languageCode]['get-live-caption']
+  $("#get-live-caption").html(languageData[languageCode]['get-live-caption'])
   // $("#get-live-caption").html(localization['get-live-caption']);
   
 }
 
+var readText = ""
 function getTranscript() {
   var url="https://script.google.com/macros/s/AKfycbzqOWlC9bT6TtLp1QJLzAkwDZJKTcCZYnoDhN4JIMXTo5lEvtPruYb-3vrILj__yO_A/exec?streamName=audioenhancement";
   // To avoid using JQuery, you can use this https://stackoverflow.com/questions/3229823/how-can-i-pass-request-headers-with-jquerys-getjson-method
@@ -174,6 +178,12 @@ function getTranscript() {
       // console.log(json)
       if (a && a.Transcript && a.Transcript != "") {
         // transcript = a.Transcript;
+        if (languageCode == "en"){
+          readLogic(a.Transcript)
+        } else {
+          readLogic(a.Transcript_FR)
+        }    
+        
         translations['eng'] = a.Transcript; //english
         translations['french'] = a.Transcript_FR;
         // console.log(translations.eng)
@@ -188,6 +198,66 @@ function getTranscript() {
       }
     }
   );
+}
+
+function readLogic(transcript){
+  if (readText == ""){
+      readText = transcript  
+        
+  } else {
+    var a = getNumberOfWords(transcript)
+    var b = getNumberOfWords(translations[currentLanguage])
+    console.log(a-b)
+    if (a > b){
+      readText = removeWords(transcript, b)
+      console.log(readText)
+      if (isPlayingSpeech){
+        console.log("ReadText")
+        // if (readText.trim() !== ''){
+          speakText(readText, languageCode)
+        // }
+      }    
+    }
+  }
+
+  // if (isPlayingSpeech){
+  //   if (readText.trim() !== ''){
+  //     speakText(readText, languageCode)
+  //   }
+  // }
+}
+
+// Initialize the speech synthesis
+const synth = window.speechSynthesis;
+
+// Keep track of the current speech utterance
+let currentUtterance = null;
+function speakText(newText, langCode) {
+  // Clear the previous utterance if it exists
+  if (currentUtterance) {
+    synth.cancel();
+  }
+
+  // Remove the old text from the new text if it exists
+  if (currentUtterance && newText.includes(currentUtterance.text)) {
+    newText = newText.replace(currentUtterance.text, "");
+  }
+
+  // Create a new utterance with the latest text and language code
+  const utterance = new SpeechSynthesisUtterance(newText);
+  utterance.lang = langCode;
+
+  // Set the new utterance as the current utterance
+  currentUtterance = utterance;
+
+  // Event handler to play the next utterance after the current one ends
+  utterance.onend = function () {
+    // You can perform additional actions after the utterance ends if needed
+    console.log("Current utterance ended. Playing the next utterance.");
+  };
+
+  // Speak the latest text
+  synth.speak(utterance);
 }
 
 var currentLanguage = "eng" // "french" is the other choice
@@ -207,6 +277,35 @@ function translate(language){
   $("#"+language).className = "active";
   // $("#live-caption").html(translations[language]);
 }
+
+  function getNumberOfWords(inputString){
+    if (inputString.trim() !== '') {
+      // Split the string into an array of words
+      const wordsArray = inputString.split(/\s+/);
+
+      // Get the number of words
+      return wordsArray.length;
+    }
+  }
+
+  function removeWords(inputString, numberOfWordsToRemove) {
+    // Check if the input string is not empty
+    if (inputString && inputString.trim() !== '') {
+      const wordsArray = inputString.split(/\s+/);
+
+      // Remove the specified number of words from the beginning
+      const newWordsArray = wordsArray.slice(numberOfWordsToRemove);
+  
+      // Join the remaining words to form the new string
+      const newString = newWordsArray.join(' ');
+
+      // Return the modified string
+      return newString;
+    } else {
+      // Return an empty string if the input is empty
+      return '';
+    }
+  };
 
   function callUserViewedAPI(streamName) {
   const apiUrl = `https://localhost:5001/api/v1/stream/view-counter`;
