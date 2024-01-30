@@ -1,6 +1,32 @@
-$(document).ready(function() {
+const languageData = {
+  'en': {
+    "caption-header":"Event Live Captioning",
+    "get-live-caption":"Get Live Captions",
+    "get-live-caption-stop":"Stop Streaming",
+    "english-language":"English",
+    "french-language":"Français",
+    "live-caption-empty":"Transcription will display here",
+    "hotmail":"PS: I love you. Get your free live-event transcription"
+  },
+  'fr': {
+    "caption-header":"Sous-titrage en direct",
+    "get-live-caption":"Obtenir des sous-titres en direct",
+    "get-live-caption-stop":"Arrêter le streaming",
+    "english-language":"English",
+    "french-language":"Français",
+    "live-caption-empty":"La transcription s'affichera ici",
+    "hotmail":"PS je t'aime. Obtenez votre transcription gratuite de l'événement en direct sur"
+  }
+};
 
-  loadLang("eng")
+$(document).ready(function() {
+  console.log(languageData)
+  try {
+    loadLang("eng")
+  } catch (error) {
+    console.error(error);
+  }
+  
   $("#french").click(function () {
     // console.log("SaamerD!");
     translate("french");
@@ -12,11 +38,17 @@ $(document).ready(function() {
 
   // Loads quotes as user wishes on clicking the button
   $("#get-live-caption").on("click", buttonTapped);
+  $("#mute").on("click", muteButtonTapped);
+  $("#unmute").on("click", unmuteButtonTapped);
+  console.log("SaamerGoing!");
+  // $('#mute').hide();
+  $('#unmute').hide();
+  console.log("SaamerFinished!");
   //$("#arabic").on("click", function() { translate("arabic"); });
   // Loads the initial quote - without pressing the button
   const unusedVariable = setInterval(recurringFunction, 1000);  
   
-callUserViewedAPI("audioenhancement");
+// callUserViewedAPI("audioenhancement");
 });
 
 
@@ -26,9 +58,9 @@ var translations =  {
   french: ""
 };
 
-eng = document.getElementById("eng");
+eng = $("#eng");
 //arabic = document.getElementById("arabic");
-french = document.getElementById("french");
+french = $("#french");
 
 var isStreamingCaptions = false; 
 function buttonTapped() {
@@ -40,39 +72,70 @@ function buttonTapped() {
   isStreamingCaptions = !isStreamingCaptions;
 }
 
+function muteButtonTapped() {
+  if (isStreamingCaptions){
+    mute();
+  } else {
+    alert("Captions are not streaming");
+  }
+}
+
+function unmuteButtonTapped() {
+  if (isStreamingCaptions){
+    unmute();
+  } else {
+    alert("Captions are not streaming");
+  }
+}
+
+function mute(){
+  $('#unmute').show();
+  $('#mute').hide();
+}
+
+function unmute(){
+  $('#mute').show();
+  $('#unmute').hide();
+}
+
 function showRightTranscript(){
   if (currentLanguage === "eng"){
-    transcript = translations.eng
+    transcript = translations['eng']
   } else {
-    transcript = translations.french
+    transcript = translations['french']
   }
   $("#live-caption").html(transcript);
 }
 
-var localization = ""
+var languageCode = "en"
 function loadLang(lang){
-  $.getJSON("https://deafassistant.com/audioenhancement/" + lang + ".json", (text) => {
-    localization = text
-    document.getElementById("caption-header").html(text['caption-header']);
+  if (lang == "eng") {
+    languageCode = "en"
+  } else {
+    languageCode = "fr"
+  }
+    console.log(languageData)
+    console.log(languageData[languageCode])
+    console.log(languageCode)
+    $("#caption-header").html(languageData[languageCode]['caption-header']);
     // if(isStreamingCaptions){
     //   document.getElementById("get-live-caption").html(text['get-live-caption-stop']);
     // }
     // else{
     //   document.getElementById("get-live-caption").html(text['get-live-caption']);
     // }
-    document.getElementById("live-caption-empty").html(text['live-caption-empty']);
-    document.getElementById("hotmail").html(text['hotmail']);
-    document.getElementById("eng").html(text['english-language']);
-    document.getElementById("french").html(text['french-language']);
-  });
+    $("#live-caption-empty").html(languageData[languageCode]['live-caption-empty']);
+    $("#hotmail").html(languageData[languageCode]['hotmail']);
+    $("#eng").html(languageData[languageCode]['english-language']);
+    $("#french").html(languageData[languageCode]['french-language']);
 }
 
 var transcript = "";
 var isTesting = false; //TODO: Before publishing, Change this to false
 var counter = 0; // Only used for debug
 function recurringFunction() {
-  if (translations.eng == ""){ //if transcript is empty, show/hide the placeholder
-    $('#live-caption-empty').show;
+  if (translations['eng'] == ""){ //if transcript is empty, show/hide the placeholder
+    $('#live-caption-empty').show();
   }
   else {
     $('#live-caption-empty').hide();
@@ -90,17 +153,15 @@ function recurringFunction() {
 
 function startTimer() {
   $("#get-live-caption").html("Stop Streaming");
-  $("#get-live-caption").html(localization['get-live-caption-stop']);
-  // eng.className = "active";
-  //arabic.className = "disabled";
-  // french.className = "disabled";
+  $("#get-live-caption").textContent = languageData[languageCode]['get-live-caption-stop']
+  // $("#get-live-caption").html(localization['get-live-caption-stop']);
 }
 
 function stopTimer() {
   $("#get-live-caption").html("Get Live Captions");
-  $("#get-live-caption").html(localization['get-live-caption']);
-  //arabic.className = "";
-  // french.className = "";
+  $("#get-live-caption").textContent = languageData[languageCode]['get-live-caption']
+  // $("#get-live-caption").html(localization['get-live-caption']);
+  
 }
 
 function getTranscript() {
@@ -113,8 +174,8 @@ function getTranscript() {
       // console.log(json)
       if (a && a.Transcript && a.Transcript != "") {
         // transcript = a.Transcript;
-        translations.eng = a.Transcript; //english
-        translations.french = a.Transcript_FR;
+        translations['eng'] = a.Transcript; //english
+        translations['french'] = a.Transcript_FR;
         // console.log(translations.eng)
         // console.log(translations.french)
 
@@ -131,6 +192,11 @@ function getTranscript() {
 
 var currentLanguage = "eng" // "french" is the other choice
 function translate(language){
+  if (currentLanguage == "eng") {
+    languageCode = "en"
+  } else {
+    languageCode = "fr"
+  }
   currentLanguage = language
   loadLang(language)
   // console.log("SaamerE!");
@@ -138,7 +204,7 @@ function translate(language){
   eng.className = "";
   //arabic.className = "";
   french.className = "";
-  document.getElementById(language).className = "active";
+  $("#"+language).className = "active";
   // $("#live-caption").html(translations[language]);
 }
 
@@ -167,3 +233,4 @@ function translate(language){
       console.error('API call failed with an exception:', error);
     });
 }
+
