@@ -1,3 +1,24 @@
+const languageData = {
+  'en': {
+    "caption-header":"Event Live Captioning",
+    "get-live-caption":"Get Live Captions",
+    "get-live-caption-stop":"Stop Streaming",
+    "english-language":"English",
+    "french-language":"Français",
+    "live-caption-empty":"Transcription will display here",
+    "hotmail":"PS: I love you. Get your free live-event transcription"
+  },
+  'fr': {
+    "caption-header":"Sous-titrage en direct",
+    "get-live-caption":"Obtenir des sous-titres en direct",
+    "get-live-caption-stop":"Arrêter le streaming",
+    "english-language":"English",
+    "french-language":"Français",
+    "live-caption-empty":"La transcription s'affichera ici",
+    "hotmail":"PS je t'aime. Obtenez votre transcription gratuite de l'événement en direct sur"
+  }
+};
+
 $(document).ready(function() {
 
   try {
@@ -5,7 +26,7 @@ $(document).ready(function() {
   } catch (error) {
     console.error(error);
   }
-  
+
   $("#french").click(function () {
     // console.log("SaamerD!");
     translate("french");
@@ -19,15 +40,13 @@ $(document).ready(function() {
   $("#get-live-caption").on("click", buttonTapped);
   $("#mute").on("click", muteButtonTapped);
   $("#unmute").on("click", unmuteButtonTapped);
-  console.log("SaamerGoing!");
   $('#mute').hide();
-  $('#unmute').hide();
-  console.log("SaamerFinished!");
+
   //$("#arabic").on("click", function() { translate("arabic"); });
   // Loads the initial quote - without pressing the button
   const unusedVariable = setInterval(recurringFunction, 1000);  
   
-callUserViewedAPI("audioenhancement");
+  callUserViewedAPI("audioenhancement2"); // automatically converted during replace, to the stream name
 });
 
 
@@ -37,9 +56,9 @@ var translations =  {
   french: ""
 };
 
-eng = document.getElementById("eng");
+eng = $("#eng");
 //arabic = document.getElementById("arabic");
-french = document.getElementById("french");
+french = $("#french");
 
 var isStreamingCaptions = false; 
 function buttonTapped() {
@@ -51,61 +70,67 @@ function buttonTapped() {
   isStreamingCaptions = !isStreamingCaptions;
 }
 
+function muteButtonTapped() {
+  if (isStreamingCaptions){
+    mute();
+  } else {
+    alert("Captions are not streaming");
+  }
+}
+
 function unmuteButtonTapped() {
   if (isStreamingCaptions){
     unmute();
+  } else {
+    alert("Captions are not streaming");
   }
 }
 
-function unmuteButtonTapped() {
-  if (isStreamingCaptions){
-    mute();
-  }
-}
-
+var isPlayingSpeech = false
 function mute(){
-  $('#unmute').show;
+  isPlayingSpeech = false
+  $('#unmute').show();
   $('#mute').hide();
 }
 
-function mute(){
-  $('#mute').show;
+function unmute(){
+  isPlayingSpeech = true
+  $('#mute').show();
   $('#unmute').hide();
 }
 
 function showRightTranscript(){
   if (currentLanguage === "eng"){
-    transcript = translations.eng
+    transcript = translations['eng']
   } else {
-    transcript = translations.french
+    transcript = translations['french']
   }
-  $("#live-caption").html(transcript);
+  if ($("#live-caption").text() !== transcript){
+    $("#live-caption").html(transcript);
+  }
 }
 
 var localization = ""
+var languageCode = "en"
 function loadLang(lang){
-  $.getJSON("https://deafassistant.com/audioenhancement/" + lang + ".json", (text) => {
-    localization = text
-    document.getElementById("caption-header").html(text['caption-header']);
-    // if(isStreamingCaptions){
-    //   document.getElementById("get-live-caption").html(text['get-live-caption-stop']);
-    // }
-    // else{
-    //   document.getElementById("get-live-caption").html(text['get-live-caption']);
-    // }
-    document.getElementById("live-caption-empty").html(text['live-caption-empty']);
-    document.getElementById("hotmail").html(text['hotmail']);
-    document.getElementById("eng").html(text['english-language']);
-    document.getElementById("french").html(text['french-language']);
-  });
+  if (lang == "eng") {
+    languageCode = "en"
+  } else {
+    languageCode = "fr"
+  }
+  $("#caption-header").html(languageData[languageCode]['caption-header']);
+  $("#live-caption-empty").html(languageData[languageCode]['live-caption-empty']);
+  $("#hotmail").html(languageData[languageCode]['hotmail']);
+  $("#eng").html(languageData[languageCode]['english-language']);
+  $("#french").html(languageData[languageCode]['french-language']);
 }
 
 var transcript = "";
 var isTesting = false; //TODO: Before publishing, Change this to false
 var counter = 0; // Only used for debug
 function recurringFunction() {
-  if (translations.eng == ""){ //if transcript is empty, show/hide the placeholder
-    $('#live-caption-empty').show;
+  if (translations['eng'] == ""){ //if transcript is empty, show/hide the placeholder
+    $('#live-caption-empty').show();
   }
   else {
     $('#live-caption-empty').hide();
@@ -123,21 +148,17 @@ function recurringFunction() {
 
 function startTimer() {
   $("#get-live-caption").html("Stop Streaming");
-  $("#get-live-caption").html(localization['get-live-caption-stop']);
-  // eng.className = "active";
-  //arabic.className = "disabled";
-  // french.className = "disabled";
+  $("#get-live-caption").html(languageData[languageCode]['get-live-caption-stop'])
 }
 
 function stopTimer() {
   $("#get-live-caption").html("Get Live Captions");
-  $("#get-live-caption").html(localization['get-live-caption']);
-  //arabic.className = "";
-  // french.className = "";
+  $("#get-live-caption").html(languageData[languageCode]['get-live-caption'])
 }
 
+var readText = ""
 function getTranscript() {
-  var url="https://script.google.com/macros/s/AKfycbzqOWlC9bT6TtLp1QJLzAkwDZJKTcCZYnoDhN4JIMXTo5lEvtPruYb-3vrILj__yO_A/exec?streamName=audioenhancement";
+  var url="https://script.google.com/macros/s/AKfycbzqOWlC9bT6TtLp1QJLzAkwDZJKTcCZYnoDhN4JIMXTo5lEvtPruYb-3vrILj__yO_A/exec?streamName=audioenhancement2";
   // To avoid using JQuery, you can use this https://stackoverflow.com/questions/3229823/how-can-i-pass-request-headers-with-jquerys-getjson-method
   $.getJSON(
     url,
@@ -146,24 +167,90 @@ function getTranscript() {
       // console.log(json)
       if (a && a.Transcript && a.Transcript != "") {
         // transcript = a.Transcript;
-        translations.eng = a.Transcript; //english
-        translations.french = a.Transcript_FR;
-        // console.log(translations.eng)
-        // console.log(translations.french)
+        if (languageCode == "en"){
+          readLogic(a.Transcript)
+        } else {
+          readLogic(a.Transcript_FR)
+        }    
+        translations['eng'] = a.Transcript; //english
+        translations['french'] = a.Transcript_FR;
 
-        // translations.arabic = a.Transcript_AR;
-        // $("#live-caption").html(transcript);
         if (!a.IsActivelyStreaming){
           buttonTapped(); // Automatically stop streaming if event is not live
         }
-
       }
     }
   );
 }
 
+function readLogic(transcript){
+  if (readText == ""){
+      readText = transcript  
+        
+  } else {
+    var a = getNumberOfWords(transcript)
+    var b = getNumberOfWords(translations[currentLanguage])
+    console.log(a-b)
+    if (a > b){
+      readText = removeWords(transcript, b)
+      console.log(readText)
+      if (isPlayingSpeech){
+        console.log("ReadText")
+        // if (readText.trim() !== ''){
+          speakText(readText, languageCode)
+        // }
+      }    
+    }
+  }
+
+  // if (isPlayingSpeech){
+  //   if (readText.trim() !== ''){
+  //     speakText(readText, languageCode)
+  //   }
+  // }
+}
+
+// Initialize the speech synthesis
+const synth = window.speechSynthesis;
+
+// Keep track of the current speech utterance
+let currentUtterance = null;
+function speakText(newText, langCode) {
+  // Clear the previous utterance if it exists
+  if (currentUtterance) {
+    synth.cancel();
+  }
+
+  // Remove the old text from the new text if it exists
+  if (currentUtterance && newText.includes(currentUtterance.text)) {
+    newText = newText.replace(currentUtterance.text, "");
+  }
+
+  // Create a new utterance with the latest text and language code
+  const utterance = new SpeechSynthesisUtterance(newText);
+  utterance.lang = langCode;
+
+  // Set the new utterance as the current utterance
+  currentUtterance = utterance;
+
+  // Event handler to play the next utterance after the current one ends
+  utterance.onend = function () {
+    // You can perform additional actions after the utterance ends if needed
+    console.log("Current utterance ended. Playing the next utterance.");
+  };
+
+  // Speak the latest text
+  synth.speak(utterance);
+}
+
 var currentLanguage = "eng" // "french" is the other choice
 function translate(language){
+  if (currentLanguage == "eng") {
+    languageCode = "en"
+  } else {
+    languageCode = "fr"
+  }
+
   currentLanguage = language
   loadLang(language)
   // console.log("SaamerE!");
@@ -171,9 +258,38 @@ function translate(language){
   eng.className = "";
   //arabic.className = "";
   french.className = "";
-  document.getElementById(language).className = "active";
-  // $("#live-caption").html(translations[language]);
+  $("#"+language).className = "active";
 }
+
+function getNumberOfWords(inputString){
+  if (inputString.trim() !== '') {
+    // Split the string into an array of words
+    const wordsArray = inputString.split(/\s+/);
+
+    // Get the number of words
+    return wordsArray.length;
+  }
+}
+
+function removeWords(inputString, numberOfWordsToRemove) {
+  // Check if the input string is not empty
+  if (inputString && inputString.trim() !== '') {
+    const wordsArray = inputString.split(/\s+/);
+
+    // Remove the specified number of words from the beginning
+    const newWordsArray = wordsArray.slice(numberOfWordsToRemove);
+
+    // Join the remaining words to form the new string
+    const newString = newWordsArray.join(' ');
+
+    // Return the modified string
+    return newString;
+  } else {
+    // Return an empty string if the input is empty
+    return '';
+  }
+};
+
 
   function callUserViewedAPI(streamName) {
   const apiUrl = `https://localhost:5001/api/v1/stream/view-counter`;
@@ -199,4 +315,5 @@ function translate(language){
       // Handle network or other errors here
       console.error('API call failed with an exception:', error);
     });
+    
 }

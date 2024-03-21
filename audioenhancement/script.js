@@ -107,7 +107,10 @@ function showRightTranscript(){
   } else {
     transcript = translations['french']
   }
-  $("#live-caption").html(transcript);
+  console.log()
+  if ($("#live-caption").text() !== transcript){
+    $("#live-caption").html(transcript);
+  }
 }
 
 var languageCode = "en"
