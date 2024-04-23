@@ -176,7 +176,7 @@ function getTranscript() {
         translations['eng'] = a.transcript; //english
         translations['french'] = a.translation;
 
-        if (!a.IsActivelyStreaming){
+        if (!a.isActivelyStreaming){
           buttonTapped(); // Automatically stop streaming if event is not live
         }
       }
