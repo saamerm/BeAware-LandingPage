@@ -166,15 +166,15 @@ function getTranscript() {
     function (a) {
       var json = JSON.stringify(a);
       // console.log(json)
-      if (a && a.Transcript && a.Transcript != "") {
+      if (a && a.transcript && a.transcript != "") {
         // transcript = a.Transcript;
         if (languageCode == "en"){
-          readLogic(a.Transcript)
+          readLogic(a.transcript)
         } else {
-          readLogic(a.Transcript_FR)
+          readLogic(a.translation)
         }    
-        translations['eng'] = a.Transcript; //english
-        translations['french'] = a.Transcript_FR;
+        translations['eng'] = a.transcript; //english
+        translations['french'] = a.translation;
 
         if (!a.IsActivelyStreaming){
           buttonTapped(); // Automatically stop streaming if event is not live
