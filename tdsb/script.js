@@ -158,20 +158,15 @@ function stopTimer() {
 
 var readText = ""
 function getTranscript() {
+  $.support.cors = true;           
   var url="https://api.deafassistant.com/stream/LiteGetStream?streamName=tdsb";
   // urlRequest.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")  // the request is JSON
   // urlRequest.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Accept")        // the expected response is also JSON
 
   // To avoid using JQuery, you can use this https://stackoverflow.com/questions/3229823/how-can-i-pass-request-headers-with-jquerys-getjson-method
-  $.ajax({
-    beforeSend: function(request) {
-      request.setRequestHeader("Content-Type", 'application/json; charset=utf-8');
-      request.setRequestHeader("Accept", 'application/json; charset=utf-8');
-      request.setRequestHeader("Access-Control-Allow-Origin", '*');
-    },
-    dataType: "json",
-    url: url,
-    success: function(a) {
+  $.getJSON(
+    url,
+    function (a) {
       var json = JSON.stringify(a);
       // console.log(json)
       if (a && a.transcript && a.transcript != "") {
@@ -190,7 +185,7 @@ function getTranscript() {
       }
         //Your code
     }
-});
+);
 }
 
 function readLogic(transcript){

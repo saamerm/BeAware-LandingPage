@@ -46,7 +46,7 @@ $(document).ready(function() {
   // Loads the initial quote - without pressing the button
   const unusedVariable = setInterval(recurringFunction, 1000);  
   
-  callUserViewedAPI("liberal"); // automatically converted during replace, to the stream name
+  // callUserViewedAPI("liberal"); // automatically converted during replace, to the stream name
 });
 
 
