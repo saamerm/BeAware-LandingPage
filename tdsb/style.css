@@ -1,5 +1,5 @@
 .holder {
-  font-family: sans-serif;
+  font-family: SF Pro Text,SF Pro Icons,Helvetica Neue,Helvetica,Arial,sans-serif;
   font-size: 1.5em;
   line-height: 1.75;
   margin: auto;
@@ -93,7 +93,7 @@ input:focus {
 .ios-button-text{
   color: var(--neutrals-white, #FFF);
   text-align: center;
-  font-family: Roboto;
+  font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
   font-size: 18px;
   font-style: normal;
   font-weight: 600;
@@ -129,7 +129,7 @@ input:focus {
 #header
 {
 	background-color:#1d3b78;
-	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-family:SF Pro Text,SF Pro Icons,Helvetica Neue,Helvetica,Arial,sans-serif;
 	display:block;
   width: 100%;
 }
@@ -139,7 +139,7 @@ input:focus {
 	font-weight:normal;
 	padding-top:20px;
 	margin-left:10px;
-	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-family:SF Pro Text,SF Pro Icons,Helvetica Neue,Helvetica,Arial,sans-serif;
 	margin-top:0;
 	margin-bottom:0;
   color: white;
@@ -151,7 +151,7 @@ input:focus {
 	font-weight:normal;
 	font-size:14px;
 	padding:5px 0 20px 80px;
-	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-family:SF Pro Text,SF Pro Icons,Helvetica Neue,Helvetica,Arial,sans-serif;
 	margin-top:0;
 	margin-bottom:0;
   color: white;
