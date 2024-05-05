@@ -134,6 +134,11 @@ function loadLang(lang){
     $("#hotmail").html(languageData[languageCode]['hotmail']);
     $("#eng").html(languageData[languageCode]['english-language']);
     $("#french").html(languageData[languageCode]['french-language']);
+  if (isStreamingCaptions){
+    $("#get-live-caption").html(languageData[languageCode]['get-live-caption'])
+  } else {
+    $("#get-live-caption").html(languageData[languageCode]['get-live-caption-stop'])
+  }
 }
 
 var transcript = "";
