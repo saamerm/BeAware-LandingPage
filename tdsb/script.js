@@ -78,6 +78,7 @@ $(document).ready(function() {
   
   // callUserViewedAPI("124"); // automatically converted during replace, to the stream name
   checkLanguage();
+  isStreamingCaptions = false
 });
 
 // Transcript or translation
@@ -187,23 +188,7 @@ function stopTimer() {
 }
 
 var readText = ""
-function getLanguageOnPageLoad() {
-  $.support.cors = true;           
-  var url="https://api.deafassistant.com/stream/LiteGetStream?streamName=tdsb";
-  
-  // To avoid using JQuery, you can use this https://stackoverflow.com/questions/3229823/how-can-i-pass-request-headers-with-jquerys-getjson-method
-  $.getJSON(
-    url,
-    function (a) {
-      if (a && a.transcript && a.transcript != "") {
-        response['input'] = a.transcript
-        response['inputLanguage'] = a.inputLanguage.substring(0, 2);
-        response['output1'] = a.translation
-        response['outputLanguage1'] = a.outputLanguage.substring(0, 2);
-      }
-    }
-  );
-}
+
 function getTranscript() {
   $.support.cors = true;           
   var url="https://api.deafassistant.com/stream/LiteGetStream?streamName=tdsb";
