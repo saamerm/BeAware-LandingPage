@@ -3,37 +3,67 @@ const languageData = {
     "caption-header":"Event Live Captioning",
     "get-live-caption":"Get Live Captions",
     "get-live-caption-stop":"Stop Streaming",
-    "english-language":"English",
-    "french-language":"Français",
     "live-caption-empty":"Transcription will display here",
-    "hotmail":"PS: I love you. Get your free live-event transcription"
+    "hotmail":"PS: I love you. Get your free live-event transcription at ",
+    "name":"English"
   },
   'fr': {
     "caption-header":"Sous-titrage en direct",
     "get-live-caption":"Obtenir des sous-titres en direct",
     "get-live-caption-stop":"Arrêter le streaming",
-    "english-language":"English",
-    "french-language":"Français",
     "live-caption-empty":"La transcription s'affichera ici",
-    "hotmail":"PS je t'aime. Obtenez votre transcription gratuite de l'événement en direct sur"
+    "hotmail":"PS je t'aime. Obtenez votre transcription gratuite de l'événement en direct sur ",
+    "name":"Français"
+  },
+  'es': {
+    "caption-header":"Subtítulos en vivo de eventos",
+    "get-live-caption":"Obtener subtítulos en vivo",
+    "get-live-caption-stop":"Detener transmisión",
+    "live-caption-empty":"La transcripción se mostrará aquí",
+    "hotmail":"PD: Te amo. Obtén tu transcripción gratuita del evento en vivo en ",
+    "name":"Español"
+  },
+  'de': {
+    "caption-header":"Live-Untertitel für Ereignisse",
+    "get-live-caption":"Live-Untertitel abrufen",
+    "get-live-caption-stop":"Streaming beenden",
+    "live-caption-empty":"Transkript wird hier angezeigt",
+    "hotmail":"PS: Ich liebe dich. Holen Sie sich Ihre kostenlose Live-Event-Transkription unter ",
+    "name":"Deutsche"
+  },
+  'zh': {
+    "caption-header":"事件实时字幕",
+    "get-live-caption":"获取实时字幕",
+    "get-live-caption-stop":"停止直播",
+    "live-caption-empty":"转录内容将显示在此处",
+    "hotmail":"PS: 我爱你。在这里获取免费的现场活动转录: ",
+    "name":"中文"
+  },
+  'ar': {
+    "caption-header":"التسمية التوضيحية المباشرة للحدث",
+    "get-live-caption":"احصل على تسميات توضيحية مباشرة",
+    "get-live-caption-stop":"إيقاف البث",
+    "live-caption-empty":"سيتم عرض النص هنا",
+    "hotmail":"ملاحظة: أنا أحبك. احصل على نسخة مجانية من الحدث المباشر على ",
+    "name":"العربية"
   }
 };
 
 $(document).ready(function() {
 
   try {
-    loadLang("eng")
+    loadLang(response['inputLanguage'])
   } catch (error) {
     console.error(error);
   }
 
-  $("#french").click(function () {
+  $("#output1").click(function () {
     // console.log("SaamerD!");
-    translate("french");
+    translate(response['outputLanguage1']);
   });
-  $("#eng").click(function () {
+  $("#input").click(function () {
     // console.log("SaamerD!");
-    translate("eng");
+    translate(response['inputLanguage']);
   });
 
   // Loads quotes as user wishes on clicking the button
@@ -46,19 +76,17 @@ $(document).ready(function() {
   // Loads the initial quote - without pressing the button
   const unusedVariable = setInterval(recurringFunction, 1000);  
   
-  // callUserViewedAPI("tdsb"); // automatically converted during replace, to the stream name
+  // callUserViewedAPI("124"); // automatically converted during replace, to the stream name
+  checkLanguage();
 });
 
-
-var translations =  {
-  eng: "",
-  // arabic: "",
-  french: ""
+// Transcript or translation
+var response =  {
+  input: "",
+  inputLanguage: "en",
+  output1: "",
+  outputLanguage1: "fr"
 };
-
-eng = $("#eng");
-//arabic = document.getElementById("arabic");
-french = $("#french");
 
 var isStreamingCaptions = false; 
 function buttonTapped() {
@@ -100,33 +128,30 @@ function unmute(){
 }
 
 function showRightTranscript(){
-  if (currentLanguage === "eng"){
-    transcript = translations['eng']
+  if (currentLanguage === response['inputLanguage']){
+    transcript = response['input']
   } else {
-    transcript = translations['french']
+    transcript = response['output1']
   }
-  if ($("#live-caption").text() !== transcript){
+  if ($("#live-caption").text() !== transcript){ // Only update DOM if needed, not with every API call
     $("#live-caption").html(transcript);
   }
 }
 
 var localization = ""
-var languageCode = "en"
+var languageCode = response['inputLanguage'] // Initial value
 function loadLang(lang){
-  if (lang == "eng") {
-    languageCode = "en"
-  } else {
-    languageCode = "fr"
-  }
-  $("#caption-header").html(languageData[languageCode]['caption-header']);
-  $("#live-caption-empty").html(languageData[languageCode]['live-caption-empty']);
-  $("#hotmail").html(languageData[languageCode]['hotmail']);
-  $("#eng").html(languageData[languageCode]['english-language']);
-  $("#french").html(languageData[languageCode]['french-language']);
+  console.log("lang")
+  console.log(lang)
+  $("#caption-header").html(languageData[lang]['caption-header']);
+  $("#live-caption-empty").html(languageData[lang]['live-caption-empty']);
+  $("#hotmail").html(languageData[lang]['hotmail']);
+  $("#input").html(languageData[response['inputLanguage']]['name']);
+  $("#output1").html(languageData[response['outputLanguage1']]['name']);
   if (isStreamingCaptions){
-    $("#get-live-caption").html(languageData[languageCode]['get-live-caption'])
+    $("#get-live-caption").html(languageData[lang]['get-live-caption'])
   } else {
-    $("#get-live-caption").html(languageData[languageCode]['get-live-caption-stop'])
+    $("#get-live-caption").html(languageData[lang]['get-live-caption-stop'])
   }
 }
 
@@ -134,7 +159,7 @@ var transcript = "";
 var isTesting = false; //TODO: Before publishing, Change this to false
 var counter = 0; // Only used for debug
 function recurringFunction() {
-  if (translations['eng'] == ""){ //if transcript is empty, show/hide the placeholder
+  if (response['input'] == ""){ //if transcript is empty, show/hide the placeholder
     $('#live-caption-empty').show();
   }
   else {
@@ -152,22 +177,37 @@ function recurringFunction() {
 }
 
 function startTimer() {
-  $("#get-live-caption").html("Stop Streaming");
+  // $("#get-live-caption").html("Stop Streaming");
   $("#get-live-caption").html(languageData[languageCode]['get-live-caption-stop'])
 }
 
 function stopTimer() {
-  $("#get-live-caption").html("Get Live Captions");
+  // $("#get-live-caption").html("Get Live Captions");
   $("#get-live-caption").html(languageData[languageCode]['get-live-caption'])
 }
 
 var readText = ""
+function getLanguageOnPageLoad() {
+  $.support.cors = true;           
+  var url="https://api.deafassistant.com/stream/LiteGetStream?streamName=tdsb";
+  
+  // To avoid using JQuery, you can use this https://stackoverflow.com/questions/3229823/how-can-i-pass-request-headers-with-jquerys-getjson-method
+  $.getJSON(
+    url,
+    function (a) {
+      if (a && a.transcript && a.transcript != "") {
+        response['input'] = a.transcript
+        response['inputLanguage'] = a.inputLanguage.substring(0, 2);
+        response['output1'] = a.translation
+        response['outputLanguage1'] = a.outputLanguage.substring(0, 2);
+      }
+    }
+  );
+}
 function getTranscript() {
   $.support.cors = true;           
   var url="https://api.deafassistant.com/stream/LiteGetStream?streamName=tdsb";
-  // urlRequest.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")  // the request is JSON
-  // urlRequest.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Accept")        // the expected response is also JSON
-
+  
   // To avoid using JQuery, you can use this https://stackoverflow.com/questions/3229823/how-can-i-pass-request-headers-with-jquerys-getjson-method
   $.getJSON(
     url,
@@ -176,13 +216,18 @@ function getTranscript() {
       // console.log(json)
       if (a && a.transcript && a.transcript != "") {
         // transcript = a.Transcript;
+
+        // This is for audio enhancement
         if (languageCode == "en"){
           readLogic(a.transcript)
         } else {
           readLogic(a.translation)
-        }    
-        translations['eng'] = a.transcript; //english
-        translations['french'] = a.translation;
+        }  
+
+        response['input'] = a.transcript
+        response['inputLanguage'] = a.inputLanguage.substring(0, 2);
+        response['output1'] = a.translation
+        response['outputLanguage1'] = a.outputLanguage.substring(0, 2);
 
         if (!a.isActivelyStreaming){
           buttonTapped(); // Automatically stop streaming if event is not live
@@ -190,16 +235,41 @@ function getTranscript() {
       }
         //Your code
     }
-);
+  );
 }
 
+function checkLanguage() {
+  $.support.cors = true;           
+  var url="https://api.deafassistant.com/stream/LiteGetStream?streamName=tdsb";
+  
+  // To avoid using JQuery, you can use this https://stackoverflow.com/questions/3229823/how-can-i-pass-request-headers-with-jquerys-getjson-method
+  $.getJSON(
+    url,
+    function (a) {
+      var json = JSON.stringify(a);
+      // console.log(json)
+      if (a && a.transcript && a.transcript != "") {
+        // transcript = a.Transcript;
+        response['inputLanguage'] = a.inputLanguage.substring(0, 2);
+        response['outputLanguage1'] = a.outputLanguage.substring(0, 2);
+        // Translate the page to the input language
+        translate(response['inputLanguage']);
+        // Change the language options at the bottom of the page
+        $("#input").html(languageData[response['inputLanguage']]['name']);
+        $("#output1").html(languageData[response['outputLanguage1']]['name']);      
+      }
+    }
+  );
+}
+
+// Audio enhancement
 function readLogic(transcript){
   if (readText == ""){
       readText = transcript  
         
   } else {
     var a = getNumberOfWords(transcript)
-    var b = getNumberOfWords(translations[currentLanguage])
+    // var b = getNumberOfWords(translations[currentLanguage]) //TODO: Fix this
     console.log(a-b)
     if (a > b){
       readText = removeWords(transcript, b)
@@ -253,22 +323,18 @@ function speakText(newText, langCode) {
   synth.speak(utterance);
 }
 
-var currentLanguage = "eng" // "french" is the other choice
+var currentLanguage = "en" // "french" is the other choice
 function translate(language){
-  if (currentLanguage == "eng") {
-    languageCode = "en"
-  } else {
-    languageCode = "fr"
-  }
-
+  languageCode = language
   currentLanguage = language
+  console.log("language")
+  console.log(language)
   loadLang(language)
   // console.log("SaamerE!");
   // console.log("H" + language);
-  eng.className = "";
-  //arabic.className = "";
-  french.className = "";
-  $("#"+language).className = "active";
+  // $("#input").className = "";
+  // $("#output1").className = "";
+  // $("#"+language).className = "active";
 }
 
 function getNumberOfWords(inputString){
@@ -325,5 +391,4 @@ function removeWords(inputString, numberOfWordsToRemove) {
       // Handle network or other errors here
       console.error('API call failed with an exception:', error);
     });
-    
 }
