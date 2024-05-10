@@ -50,7 +50,6 @@ const languageData = {
 };
 
 $(document).ready(function() {
-
   try {
     loadLang(response['inputLanguage'])
   } catch (error) {
@@ -92,6 +91,7 @@ var response =  {
 var isStreamingCaptions = false; 
 function buttonTapped() {
   if (isStreamingCaptions){
+    // If streaming captions and the button is tapped, stop
     stopTimer() 
   } else{ 
     startTimer();
@@ -142,6 +142,7 @@ function showRightTranscript(){
 var localization = ""
 var languageCode = response['inputLanguage'] // Initial value
 function loadLang(lang){
+  readText == "" // Reset the reading logic
   console.log("lang")
   console.log(lang)
   $("#caption-header").html(languageData[lang]['caption-header']);
@@ -150,9 +151,9 @@ function loadLang(lang){
   $("#input").html(languageData[response['inputLanguage']]['name']);
   $("#output1").html(languageData[response['outputLanguage1']]['name']);
   if (isStreamingCaptions){
-    $("#get-live-caption").html(languageData[lang]['get-live-caption'])
-  } else {
     $("#get-live-caption").html(languageData[lang]['get-live-caption-stop'])
+  } else {
+    $("#get-live-caption").html(languageData[lang]['get-live-caption'])
   }
 }
 
@@ -178,12 +179,14 @@ function recurringFunction() {
 }
 
 function startTimer() {
-  // $("#get-live-caption").html("Stop Streaming");
+  // If the user taps on the Start streaming button, then show the Stop Streaming message
   $("#get-live-caption").html(languageData[languageCode]['get-live-caption-stop'])
 }
 
 function stopTimer() {
   // $("#get-live-caption").html("Get Live Captions");
+
+  // If the user taps on the Stop streaming button, then show the Start Streaming message
   $("#get-live-caption").html(languageData[languageCode]['get-live-caption'])
 }
 
@@ -201,18 +204,17 @@ function getTranscript() {
       // console.log(json)
       if (a && a.transcript && a.transcript != "") {
         // transcript = a.Transcript;
-
-        // This is for audio enhancement
-        if (languageCode == "en"){
-          readLogic(a.transcript)
-        } else {
-          readLogic(a.translation)
-        }  
-
         response['input'] = a.transcript
         response['inputLanguage'] = a.inputLanguage.substring(0, 2);
         response['output1'] = a.translation
         response['outputLanguage1'] = a.outputLanguage.substring(0, 2);
+
+        // This is for audio enhancement
+        if (languageCode == response['inputLanguage']){
+          readLogic(a.transcript)
+        } else {
+          readLogic(a.translation)
+        }  
 
         if (!a.isActivelyStreaming){
           buttonTapped(); // Automatically stop streaming if event is not live
@@ -248,16 +250,15 @@ function checkLanguage() {
 }
 
 // Audio enhancement
-function readLogic(transcript){
-  if (readText == ""){
-      readText = transcript  
-        
+function readLogic(message){
+  if (readText == ""){ // The first time don't read, else it will start reading from the beginning
+      readText = message  
   } else {
-    var a = getNumberOfWords(transcript)
-    // var b = getNumberOfWords(translations[currentLanguage]) //TODO: Fix this
+    var a = getNumberOfWords(message)
+    var b = getNumberOfWords(readText)
     console.log(a-b)
-    if (a > b){
-      readText = removeWords(transcript, b)
+    if (a > b){ // If there are any words that are unread, then read
+      readText = removeWords(message, b)
       console.log(readText)
       if (isPlayingSpeech){
         console.log("ReadText")
