@@ -142,7 +142,7 @@ function showRightTranscript(){
 var localization = ""
 var languageCode = response['inputLanguage'] // Initial value
 function loadLang(lang){
-  readText == "" // Reset the reading logic
+  readText = "" // Reset the reading logic
   console.log("lang")
   console.log(lang)
   $("#caption-header").html(languageData[lang]['caption-header']);
@@ -267,13 +267,8 @@ function readLogic(message){
         // }
       }    
     }
+    readText = message
   }
-
-  // if (isPlayingSpeech){
-  //   if (readText.trim() !== ''){
-  //     speakText(readText, languageCode)
-  //   }
-  // }
 }
 
 // Initialize the speech synthesis
