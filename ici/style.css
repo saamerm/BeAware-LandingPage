@@ -112,14 +112,7 @@ input:focus {
   font-weight: 600;
   line-height: normal;
 }
-#live-caption{
-/*     height: 400px; */
-    max-height: 370px;
-    overflow-y: scroll;
-    font-size: large;
-    padding: 10px;
-}
-
+      
 .scroller {
   max-height: 100%;
   overflow: auto;
