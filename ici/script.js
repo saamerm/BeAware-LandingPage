@@ -38,6 +38,8 @@ $(document).ready(function() {
 
   // Loads quotes as user wishes on clicking the button
   $("#get-live-caption").on("click", buttonTapped);
+  $("#live-caption-empty").on("click", buttonTapped);
+  $("#live-caption").on("click", buttonTapped);
   $("#mute").on("click", muteButtonTapped);
   $("#unmute").on("click", unmuteButtonTapped);
   $('#mute').hide();
@@ -164,7 +166,7 @@ function stopTimer() {
 var readText = ""
 function getTranscript() {
   $.support.cors = true;           
-  var url="https://api.deafassistant.com/stream/LiteGetStream?streamName=ici";
+  var url="https://api.deafassistant.com/stream/LiteGetStream?streamName=irvingmasjid";
   
   // To avoid using JQuery, you can use this https://stackoverflow.com/questions/3229823/how-can-i-pass-request-headers-with-jquerys-getjson-method
   $.getJSON(
