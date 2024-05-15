@@ -119,14 +119,6 @@ input:focus {
     font-size: large;
     padding: 10px;
 }
-#footer {
-    bottom: 0;
-    width: 100%;
-    position: absolute;
-    height: $height-footer;
-    background-color: #f5f5f5;
-    margin: 0px 0;
-  }
 
 .scroller {
   max-height: 100%;
