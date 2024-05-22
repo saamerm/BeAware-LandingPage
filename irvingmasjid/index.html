@@ -50,15 +50,18 @@
   <link rel="stylesheet" href="./style.css">
 </head>
 <body style="width: 100%; margin: 0px">
-  <!-- partial:index.partial.html -->
+
+  <!-- Hides during Video Streaming 1-->
   <div id="header" class="customPadding" style="justify-content: center;background-color:#999999">
-    <!-- <div style="display:flex"> -->
       <img style="height:40px; width:150px; justify-content: center;" src="images/logo-light.png" alt="Logo of BeAware the Deaf Assistant that created this tool">
       <img style="height:24px; width:24px; justify-content: center;" src="./images/x.png" alt="jointly collaborating with">
       <img style="height: 43.3px; width:auto; justify-content: center;" src="https://www.irvingmasjid.org/wp-content/uploads/2024/02/cropped-cropped-transparent-logo-300x180-1.png" alt="logo of Irvingmasjid">
       <h1 id="caption-header" class="caption-header" style="font-size: 24px; justify-content: center;">Event Live Captioning</h1>
     <!-- </div> -->
   </div>
+  <!-- Hides during Video Streaming Ends-->
+
+  <!-- Hides during Video Streaming 2-->
   <div id="holder" class="holder">
   <div style="display: flex; justify-content: center; padding: 0px 0px 10px 0px">
     <button id="get-live-caption" style="background-color:#999999" class="center ios-button ios-button-text">Get Live Captions</button>
@@ -87,19 +90,23 @@
   </a>
   </div>
   </div>
+  <!-- Hides during Video Streaming Ends-->
+
   <!-- For Video Streaming only -->
   <div class="outer-div" id="outer-div">
     <div class="inner-div">
-      <div class="holder2" style="height: 100px; border: #AAAAAA; border-style: solid;">
+      <div id="holder2" class="holder2" style="height: 100px; border: #AAAAAA; border-style: solid;">
         <div id="live-caption-empty" class="scroller2 scroller-empty">Transcription will display here</div>
         <div id="live-caption" aria-live="assertive" class="scroller2"></div>
       </div>
     </div>
   </div>
+  <!-- For Video Streaming only Ends-->
+
   <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js'></script>
   <script src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.min.js'></script>
   <script src="./script.js"></script>
   <script src="https://conferencecaptioning.com/js/analytics.js"></script>
   
-  </body>  
+</body>  
 </html>

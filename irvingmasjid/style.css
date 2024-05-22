@@ -12,7 +12,8 @@
 .holder2 {
 	font-family:"SF Pro Text","SF Pro Icons","Helvetica Neue",Helvetica,Verdana,Arial,sans-serif;
   font-size: 2em;
-  text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 42px #0fa, 0 0 82px #0fa,0 0 92px #0fa;
+  color: #FFF;
+  text-shadow: 1px 1px 2px #111, 0 0 25px #111, 0 0 5px #111;
   line-height: 1.75;
   margin: auto;
   width: 100%;

@@ -51,14 +51,25 @@ $(document).ready(function() {
 });
 
 var forVideoParam = false
+var autoRetrieveParam = false
+var videoTextColorParam = ""
 function getValueFromUrlParams() {
   var urlParams = new URLSearchParams(window.location.search);
   forVideoParam = urlParams.get('forVideo');
+  videoTextColorParam = urlParams.get('videoTextColor');
+  autoRetrieveParam = urlParams.get('autoRetrieve');
   if (forVideoParam){
     $('#holder').hide();
     $('#header').hide();
   } else {
     $('#outer-div').hide();
+  }
+  if (videoTextColorParam != ""){
+    // $("#myParagraph").css({"backgroundColor": "black", "color": "white"});
+    $("#holder2").css({ "color": "#" + videoTextColorParam });    
+  }
+  if (autoRetrieveParam){
+    buttonTapped()
   }
 }
 
