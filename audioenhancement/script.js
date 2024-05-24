@@ -20,13 +20,14 @@ const languageData = {
 };
 
 $(document).ready(function() {
-  console.log(languageData)
+  getValueFromUrlParams();
+
   try {
     loadLang("eng")
   } catch (error) {
     console.error(error);
   }
-  
+
   $("#french").click(function () {
     // console.log("SaamerD!");
     translate("french");
@@ -40,17 +41,37 @@ $(document).ready(function() {
   $("#get-live-caption").on("click", buttonTapped);
   $("#mute").on("click", muteButtonTapped);
   $("#unmute").on("click", unmuteButtonTapped);
-  console.log("SaamerGoing!");
-  // $('#mute').hide();
   $('#mute').hide();
-  console.log("SaamerFinished!");
+
   //$("#arabic").on("click", function() { translate("arabic"); });
   // Loads the initial quote - without pressing the button
   const unusedVariable = setInterval(recurringFunction, 1000);  
   
-// callUserViewedAPI("audioenhancement");
+  // callUserViewedAPI("irvingmasjid"); // automatically converted during replace, to the stream name
 });
 
+var forVideoParam = false
+var autoRetrieveParam = false
+var videoTextColorParam = ""
+function getValueFromUrlParams() {
+  var urlParams = new URLSearchParams(window.location.search);
+  forVideoParam = urlParams.get('forVideo');
+  videoTextColorParam = urlParams.get('videoTextColor');
+  autoRetrieveParam = urlParams.get('autoRetrieve');
+  if (forVideoParam){
+    $('#holder').hide();
+    $('#header').hide();
+  } else {
+    $('#outer-div').hide();
+  }
+  if (videoTextColorParam != ""){
+    // $("#myParagraph").css({"backgroundColor": "black", "color": "white"});
+    $("#holder2").css({ "color": "#" + videoTextColorParam });    
+  }
+  if (autoRetrieveParam){
+    buttonTapped()
+  }
+}
 
 var translations =  {
   eng: "",
@@ -107,12 +128,12 @@ function showRightTranscript(){
   } else {
     transcript = translations['french']
   }
-  console.log()
   if ($("#live-caption").text() !== transcript){
     $("#live-caption").html(transcript);
   }
 }
 
+var localization = ""
 var languageCode = "en"
 function loadLang(lang){
   if (lang == "eng") {
@@ -120,20 +141,11 @@ function loadLang(lang){
   } else {
     languageCode = "fr"
   }
-    console.log(languageData)
-    console.log(languageData[languageCode])
-    console.log(languageCode)
-    $("#caption-header").html(languageData[languageCode]['caption-header']);
-    // if(isStreamingCaptions){
-    //   document.getElementById("get-live-caption").html(text['get-live-caption-stop']);
-    // }
-    // else{
-    //   document.getElementById("get-live-caption").html(text['get-live-caption']);
-    // }
-    $("#live-caption-empty").html(languageData[languageCode]['live-caption-empty']);
-    $("#hotmail").html(languageData[languageCode]['hotmail']);
-    $("#eng").html(languageData[languageCode]['english-language']);
-    $("#french").html(languageData[languageCode]['french-language']);
+  $("#caption-header").html(languageData[languageCode]['caption-header']);
+  $("#live-caption-empty").html(languageData[languageCode]['live-caption-empty']);
+  $("#hotmail").html(languageData[languageCode]['hotmail']);
+  $("#eng").html(languageData[languageCode]['english-language']);
+  $("#french").html(languageData[languageCode]['french-language']);
   if (!isStreamingCaptions){
     $("#get-live-caption").html(languageData[languageCode]['get-live-caption'])
   } else {
@@ -165,45 +177,39 @@ function recurringFunction() {
 function startTimer() {
   $("#get-live-caption").html("Stop Streaming");
   $("#get-live-caption").html(languageData[languageCode]['get-live-caption-stop'])
-  // $("#get-live-caption").html(localization['get-live-caption-stop']);
 }
 
 function stopTimer() {
   $("#get-live-caption").html("Get Live Captions");
   $("#get-live-caption").html(languageData[languageCode]['get-live-caption'])
-  // $("#get-live-caption").html(localization['get-live-caption']);
-  
 }
 
 var readText = ""
 function getTranscript() {
-  var url="https://script.google.com/macros/s/AKfycbzqOWlC9bT6TtLp1QJLzAkwDZJKTcCZYnoDhN4JIMXTo5lEvtPruYb-3vrILj__yO_A/exec?streamName=audioenhancement";
+  $.support.cors = true;           
+  var url="https://api.deafassistant.com/stream/LiteGetStream?streamName=ae";
+  
   // To avoid using JQuery, you can use this https://stackoverflow.com/questions/3229823/how-can-i-pass-request-headers-with-jquerys-getjson-method
   $.getJSON(
     url,
     function (a) {
       var json = JSON.stringify(a);
       // console.log(json)
-      if (a && a.Transcript && a.Transcript != "") {
+      if (a && a.transcript && a.transcript != "") {
         // transcript = a.Transcript;
         if (languageCode == "en"){
-          readLogic(a.Transcript)
+          readLogic(a.transcript)
         } else {
-          readLogic(a.Transcript_FR)
+          readLogic(a.translation)
         }    
-        
-        translations['eng'] = a.Transcript; //english
-        translations['french'] = a.Transcript_FR;
-        // console.log(translations.eng)
-        // console.log(translations.french)
+        translations['eng'] = a.transcript; //english
+        translations['french'] = a.translation;
 
-        // translations.arabic = a.Transcript_AR;
-        // $("#live-caption").html(transcript);
-        if (!a.IsActivelyStreaming){
+        if (!a.isActivelyStreaming){
           buttonTapped(); // Automatically stop streaming if event is not live
         }
-
       }
+        //Your code
     }
   );
 }
@@ -275,6 +281,7 @@ function translate(language){
   } else {
     languageCode = "fr"
   }
+
   currentLanguage = language
   loadLang(language)
   // console.log("SaamerE!");
@@ -283,40 +290,40 @@ function translate(language){
   //arabic.className = "";
   french.className = "";
   $("#"+language).className = "active";
-  // $("#live-caption").html(translations[language]);
 }
 
-  function getNumberOfWords(inputString){
-    if (inputString.trim() !== '') {
-      // Split the string into an array of words
-      const wordsArray = inputString.split(/\s+/);
+function getNumberOfWords(inputString){
+  if (inputString.trim() !== '') {
+    // Split the string into an array of words
+    const wordsArray = inputString.split(/\s+/);
 
-      // Get the number of words
-      return wordsArray.length;
-    }
+    // Get the number of words
+    return wordsArray.length;
   }
+}
 
-  function removeWords(inputString, numberOfWordsToRemove) {
-    // Check if the input string is not empty
-    if (inputString && inputString.trim() !== '') {
-      const wordsArray = inputString.split(/\s+/);
+function removeWords(inputString, numberOfWordsToRemove) {
+  // Check if the input string is not empty
+  if (inputString && inputString.trim() !== '') {
+    const wordsArray = inputString.split(/\s+/);
 
-      // Remove the specified number of words from the beginning
-      const newWordsArray = wordsArray.slice(numberOfWordsToRemove);
-  
-      // Join the remaining words to form the new string
-      const newString = newWordsArray.join(' ');
+    // Remove the specified number of words from the beginning
+    const newWordsArray = wordsArray.slice(numberOfWordsToRemove);
 
-      // Return the modified string
-      return newString;
-    } else {
-      // Return an empty string if the input is empty
-      return '';
-    }
-  };
+    // Join the remaining words to form the new string
+    const newString = newWordsArray.join(' ');
+
+    // Return the modified string
+    return newString;
+  } else {
+    // Return an empty string if the input is empty
+    return '';
+  }
+};
+
 
   function callUserViewedAPI(streamName) {
-  const apiUrl = `https://localhost:5001/api/v1/stream/view-counter`;
+  const apiUrl = `http://api.deafassistant.com/api/v1/stream/view-counter`;
   const requestData = {
     method: 'POST',
     headers: {
@@ -339,5 +346,5 @@ function translate(language){
       // Handle network or other errors here
       console.error('API call failed with an exception:', error);
     });
+    
 }
-
