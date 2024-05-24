@@ -189,7 +189,7 @@ function stopTimer() {
 var readText = ""
 function getTranscript() {
   $.support.cors = true;           
-  var url="https://api.deafassistant.com/stream/LiteGetStream?streamName=audio";
+  var url="https://api.deafassistant.com/stream/LiteGetStream?streamName=ae";
   
   // To avoid using JQuery, you can use this https://stackoverflow.com/questions/3229823/how-can-i-pass-request-headers-with-jquerys-getjson-method
   $.getJSON(
