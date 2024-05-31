@@ -39,6 +39,8 @@ $(document).ready(function() {
 
   // Loads quotes as user wishes on clicking the button
   $("#get-live-caption").on("click", buttonTapped);
+  $("#live-caption-empty").on("click", buttonTapped);
+  $("#live-caption").on("click", buttonTapped);
   $("#mute").on("click", muteButtonTapped);
   $("#unmute").on("click", unmuteButtonTapped);
   $('#mute').hide();
