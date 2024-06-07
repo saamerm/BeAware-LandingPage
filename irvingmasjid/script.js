@@ -133,6 +133,9 @@ function showRightTranscript(){
   if ($("#live-caption").text() !== transcript){
     $("#live-caption").html(transcript);
   }
+  if ($("#live-caption2").text() !== transcript){
+    $("#live-caption2").html(transcript);
+  }
 }
 
 var localization = ""
@@ -145,6 +148,7 @@ function loadLang(lang){
   }
   $("#caption-header").html(languageData[languageCode]['caption-header']);
   $("#live-caption-empty").html(languageData[languageCode]['live-caption-empty']);
+  $("#live-caption-empty2").html(languageData[languageCode]['live-caption-empty']);
   $("#hotmail").html(languageData[languageCode]['hotmail']);
   $("#eng").html(languageData[languageCode]['english-language']);
   $("#french").html(languageData[languageCode]['french-language']);
@@ -160,10 +164,15 @@ var isTesting = false; //TODO: Before publishing, Change this to false
 var counter = 0; // Only used for debug
 function recurringFunction() {
   if (translations['eng'] == ""){ //if transcript is empty, show/hide the placeholder
-    $('#live-caption-empty').show();
+    if (forVideoParam){
+      $('#live-caption-empty2').show();
+    } else {
+      $('#live-caption-empty2').show();
+    }
   }
   else {
     $('#live-caption-empty').hide();
+    $('#live-caption-empty2').hide();
     showRightTranscript()
   }
   if (isStreamingCaptions) {
