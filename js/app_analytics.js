@@ -76,15 +76,19 @@
      data: myJSObject,
      success: function (response) {
        console.log(response);
-       if (navigator.vendor.includes("Apple") || navigator.userAgent.includes("Safari")){
-          window.location.href = "https://apps.apple.com/app/beaware-deaf-hard-of-hearing/id1609670787"
-        }
-        else {
-          window.location.href = "https://play.google.com/store/apps/details?id=com.beaware.deafassistant"
-        }
      },
      error: function (error) {
        console.log(error.responseText);
      },
+     complete: function(data) {
+      console.log("Done");
+      if (navigator.vendor.includes("Apple") || navigator.userAgent.includes("Safari")){
+        window.location.href = "https://apps.apple.com/app/beaware-deaf-hard-of-hearing/id1609670787"
+      }
+      else {
+        window.location.href = "https://play.google.com/store/apps/details?id=com.beaware.deafassistant"
+      }
+     }
+
    });
  }
