@@ -195,8 +195,6 @@ function getTranscript() {
         } else {
           readLogic(a.translation)
         }    
-        translations['eng'] = a.transcript; //english
-        translations['french'] = a.translation;
 
         if (!a.isActivelyStreaming){
           buttonTapped(); // Automatically stop streaming if event is not live
@@ -320,7 +318,6 @@ function removeWords(inputString, numberOfWordsToRemove) {
   }
 };
 
-
 function callUserViewedAPI(streamName) {
   const apiUrl = `http://api.deafassistant.com/api/v1/stream/view-counter`;
   const requestData = {
@@ -344,8 +341,7 @@ function callUserViewedAPI(streamName) {
     .catch((error) => {
       // Handle network or other errors here
       console.error('API call failed with an exception:', error);
-    });
-    
+    });    
 }
 
 const languageData = {
