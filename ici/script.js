@@ -82,10 +82,17 @@ function muteButtonTapped() {
 
 function unmuteButtonTapped() {
   if (isStreamingCaptions){
+    iOSSpeakerFix();
     unmute();
   } else {
     alert("Captions are not streaming");
   }
+}
+
+function iOSSpeakerFix() {
+  // Create a new utterance with the latest text and language code
+  const utterance = new SpeechSynthesisUtterance("");
+  synth.speak(utterance);
 }
 
 var isPlayingSpeech = false

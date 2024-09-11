@@ -9,6 +9,19 @@
   text-align: center;
 }    
 
+.overlay2 {
+  background-color: rgba(0, 0, 0, 0.35); /* Semi-transparent grey */
+  color: white;
+  text-align: center;
+  min-width: none;
+  min-height: none;
+  /* padding: 10px; */
+  /* position:absolute; */
+  display: flex;
+  justify-content: center;
+
+}
+
 .holder2 {
 	font-family:"SF Pro Text","SF Pro Icons","Helvetica Neue",Helvetica,Verdana,Arial,sans-serif;
   font-size: 2em;
@@ -149,7 +162,7 @@ input:focus {
   }
 
 .scroller {
-  max-height: 50%;
+  max-height: 87%;
   overflow: auto;
   display: flex;
   flex-direction: column-reverse;
