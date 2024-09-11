@@ -85,10 +85,17 @@ function muteButtonTapped() {
 
 function unmuteButtonTapped() {
   if (isStreamingCaptions){
+    iOSSpeakerFix();
     unmute();
   } else {
     alert("Captions are not streaming");
   }
+}
+
+function iOSSpeakerFix() {
+  // Create a new utterance with the latest text and language code
+  const utterance = new SpeechSynthesisUtterance("");
+  synth.speak(utterance);
 }
 
 var isPlayingSpeech = false
@@ -138,6 +145,7 @@ function loadLang(lang){
 
 var transcript = "";
 var isTesting = false; //TODO: Before publishing, Change this to false
+var testTranscript = "A /n \n ";
 var counter = 0; // Only used for debug
 function recurringFunction() {
   if (response['input'] == ""){ //if transcript is empty, show/hide the placeholder
@@ -154,8 +162,10 @@ function recurringFunction() {
   }
   if (isStreamingCaptions) {
     if (isTesting) {
-      transcript = transcript + transcript;
+      testTranscript = testTranscript + testTranscript
+      transcript = testTranscript;
       $("#live-caption").html(transcript+counter++);
+      $('#live-caption-empty').hide();
     } else {
       getTranscript();
     }
