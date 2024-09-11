@@ -166,6 +166,15 @@ function recurringFunction() {
       transcript = testTranscript;
       $("#live-caption").html(transcript+counter++);
       $('#live-caption-empty').hide();
+      $('#live-caption-empty2').hide();
+      // Only update DOM if needed, not with every API call
+      if ($("#live-caption").text() !== transcript){
+        $("#live-caption").html(transcript);
+      }
+      if ($("#live-caption2").text() !== transcript){
+        $("#live-caption2").html(transcript);
+      }
+
     } else {
       getTranscript();
     }
