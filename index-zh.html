@@ -568,32 +568,7 @@ You can find the code of your language here - https://www.w3schools.com/tags/ref
         <script type="text/javascript" src="js/contact-form.js"></script>
         <script type="text/javascript" src="js/jquery.ajaxchimp.min.js"></script>        
         <!--[if lt IE 10]><script type="text/javascript" src="js/placeholder.js"></script><![endif]-->
-        <script type="text/javascript" src="js/analytics.js"></script>
-        <script type="text/javascript">
-            $(document).ready(function () {
-                var userLang = navigator.language || navigator.userLanguage;
-                // Dont navigate if you come from another deaf assistant page
-                if (document.referrer.includes("deafassistant.com")){
-                    console.log("Internal")
-                } 
-                else if (userLang.startsWith("fr")) {
-                        window.location.href = 'index-fr.html';
-                }
-                else if (userLang.startsWith("de")) {
-                        window.location.href = 'index-ge.html';
-                }
-                else if (userLang.startsWith("es")) {
-                        window.location.href = 'index-es.html';
-                }
-                else if (userLang.startsWith("ar")) {
-                        window.location.href = 'index-ar.html';
-                }
-                else if (userLang.startsWith("nl")) {
-                        window.location.href = 'index-nl.html';
-                }
-            });
-        </script>            
-               
+        <script type="text/javascript" src="js/analytics.js"></script>                                
         <script type="application/ld+json">
             {
                 "@context": "https://schema.org",
