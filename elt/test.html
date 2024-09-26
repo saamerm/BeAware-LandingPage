@@ -114,7 +114,7 @@
         output.scrollTop = output.scrollHeight;
 
         // Send transcript via POST API call
-        sendTranscript(transcript);
+        sendTranscript(output.textContent);
       });
 
       // Restart recognition if it stops unexpectedly
