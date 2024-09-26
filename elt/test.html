@@ -95,16 +95,18 @@
 
       // Event for handling the results
       recognition.addEventListener("result", (event) => {
-        const transcript = Array.from(event.results)
-          .map((result) => result[0].transcript)
-          .join("");
-
+        // console.log(event.results[event.results.length - 1])
+        // console.log(event.results[event.results.length - 1].SpeechRecognitionAlternative)
+        const transcript = event.results[event.results.length - 1][0].transcript
         // Replace initial text on the first transcript
         if (isFirstTranscript) {
           output.textContent = "";
           isFirstTranscript = false;
         }
 
+        // Speech 1 |2   |3     |4
+        // Words  a |b   |c     |d
+        // Result a |a b |a b c |a b c d
         // Append new transcript to the existing text without repeating
         output.textContent += ` ${transcript}`;
 
@@ -159,11 +161,11 @@
       };
 
       // Check every second to ensure recording continues if the user taps "Start"
-      setInterval(() => {
-        if (isRecording && !recognition.starting) {
-          recognition.start(); // Keep starting recognition to avoid it stopping unexpectedly
-        }
-      }, 1000);
+    //   setInterval(() => {
+    //     if (isRecording && !recognition.starting) {
+    //       recognition.start(); // Keep starting recognition to avoid it stopping unexpectedly
+    //     }
+    //   }, 1000);
     </script>
   </body>
 </html>

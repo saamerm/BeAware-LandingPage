@@ -41,10 +41,11 @@
         margin-top: 20px;
         padding: 10px;
         width: 80%;
+        height: 150px; /* Set a fixed height */
         background-color: #fff;
         border: 1px solid #ccc;
         border-radius: 5px;
-        min-height: 100px;
+        overflow-y: auto; /* Enable vertical scrolling */
         white-space: pre-wrap;
         word-wrap: break-word;
         text-align: left;
@@ -74,6 +75,7 @@
 
       recognition.continuous = true;
       let isRecording = false;
+      let isFirstTranscript = true; // To check if we need to replace the initial text
 
       // Start recording
       startBtn.addEventListener("click", () => {
@@ -93,12 +95,23 @@
 
       // Event for handling the results
       recognition.addEventListener("result", (event) => {
-        const transcript = Array.from(event.results)
-          .map((result) => result[0].transcript)
-          .join("");
+        // console.log(event.results[event.results.length - 1])
+        // console.log(event.results[event.results.length - 1].SpeechRecognitionAlternative)
+        const transcript = event.results[event.results.length - 1][0].transcript
+        // Replace initial text on the first transcript
+        if (isFirstTranscript) {
+          output.textContent = "";
+          isFirstTranscript = false;
+        }
 
-        // Append new transcript to existing text
+        // Speech 1 |2   |3     |4
+        // Words  a |b   |c     |d
+        // Result a |a b |a b c |a b c d
+        // Append new transcript to the existing text without repeating
         output.textContent += ` ${transcript}`;
+
+        // Auto-scroll to the bottom of the output box
+        output.scrollTop = output.scrollHeight;
 
         // Send transcript via POST API call
         sendTranscript(transcript);
@@ -115,13 +128,13 @@
       const sendTranscript = async (transcript) => {
         const data = {
           timestamp: new Date().toISOString(),
-          roomName: "EncoreLearningTesting", // Updated roomName
-          description: "Description2",
+          roomName: "encorelearningtesting", // Updated roomName
+          description: "Encore learning testing",
           transcript: transcript,
           isActivelyStreaming: true,
           translation: "Translation2",
           inputLanguage: "en",
-          outputLanguage: "de",
+          outputLanguage: "es",
           isPremiumCustomer: true,
         };
 
@@ -148,11 +161,11 @@
       };
 
       // Check every second to ensure recording continues if the user taps "Start"
-      setInterval(() => {
-        if (isRecording && !recognition.starting) {
-          recognition.start(); // Keep starting recognition to avoid it stopping unexpectedly
-        }
-      }, 1000);
+    //   setInterval(() => {
+    //     if (isRecording && !recognition.starting) {
+    //       recognition.start(); // Keep starting recognition to avoid it stopping unexpectedly
+    //     }
+    //   }, 1000);
     </script>
   </body>
 </html>
