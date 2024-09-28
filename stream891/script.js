@@ -53,12 +53,13 @@ $(document).ready(function() {
 var forVideoParam = false
 var autoRetrieveParam = false
 var videoTextColorParam = ""
-
+var chromaParam = ""
 function getValueFromUrlParams() {
   var urlParams = new URLSearchParams(window.location.search);
   forVideoParam = urlParams.get('forVideo');
   videoTextColorParam = urlParams.get('videoTextColor');
   autoRetrieveParam = urlParams.get('autoRetrieve');
+  chromaParam = urlParams.get('chroma');
 
   if (forVideoParam){
     $('#holder').hide();
@@ -72,6 +73,10 @@ function getValueFromUrlParams() {
   }
   if (autoRetrieveParam){
     buttonTapped()
+  }
+  // If a chroma parameter is passed, update the background color
+  if (chromaParam != "") {
+    document.body.style.backgroundColor = `#${chromaParam}`;
   }
 }
 
