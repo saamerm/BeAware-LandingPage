@@ -1,4 +1,7 @@
 $(document).ready(function() {
+  // Needs to be here because of autoRetrieve = true
+  isStreamingCaptions = false
+
   getValueFromUrlParams();
 
   try {
@@ -24,11 +27,10 @@ $(document).ready(function() {
 
   //$("#arabic").on("click", function() { translate("arabic"); });
   // Loads the initial quote - without pressing the button
-  const unusedVariable = setInterval(recurringFunction, 1000);  
+  const unusedVariable = setInterval(recurringFunction, 1000);   
   
   // callUserViewedAPI("brandon"); // automatically converted during replace, to the stream name
   checkLanguage();	
-  isStreamingCaptions = false
 });
 
 var forVideoParam = false
