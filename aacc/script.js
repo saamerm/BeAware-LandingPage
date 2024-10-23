@@ -10,6 +10,9 @@ $(document).ready(function() {
   $("#output1").click(function () {
     translate(response['outputLanguage1']);
   });
+  $("#output2").click(function () {
+    translate(response['outputLanguage2']);
+  });
   $("#input").click(function () {
     translate(response['inputLanguage']);
   });
@@ -66,7 +69,9 @@ var response =  {
   input: "",
   inputLanguage: "en",
   output1: "",
-  outputLanguage1: "fr"
+  outputLanguage1: "es",
+  output2: "",
+  outputLanguage2: "ar"
 };
 
 var isStreamingCaptions = false; 
@@ -119,8 +124,10 @@ function unmute(){
 function showRightTranscript(){
   if (languageCode === response['inputLanguage']){
     transcript = response['input']
-  } else {
+  } else if (languageCode === response['ouputLanguage1']) {
     transcript = response['output1']
+  } else {
+    transcript = response['output2']
   }
   // Only update DOM if needed, not with every API call
   if ($("#live-caption").text() !== transcript){
@@ -141,6 +148,7 @@ function loadLang(lang){
   $("#hotmail").html(languageData[lang]['hotmail']);
   $("#input").html(languageData[response['inputLanguage']]['name']);
   $("#output1").html(languageData[response['outputLanguage1']]['name']);
+  $("#output2").html(languageData[response['outputLanguage2']]['name']);
   if (isStreamingCaptions){
     $("#get-live-caption").html(languageData[lang]['get-live-caption-stop'])
   } else {
@@ -200,13 +208,17 @@ function getTranscript() {
         response['inputLanguage'] = a.inputLanguage.substring(0, 2);
         response['output1'] = a.translation
         response['outputLanguage1'] = a.outputLanguage.substring(0, 2);
+        response['output2'] = a.translation2
+        response['outputLanguage2'] = a.outputLanguag2.substring(0, 2);
 
         // This is for audio enhancement        
         if (languageCode == response['inputLanguage']){
           readLogic(a.transcript)
-        } else {
+        } else if (languageCode == response['outputLanguage']){
           readLogic(a.translation)
-        }    
+        } else {
+          readLogic(a.translation2)
+        }
         
         if (!a.isActivelyStreaming){
           buttonTapped(); // Automatically stop streaming if event is not live
@@ -231,11 +243,19 @@ function checkLanguage() {
         // transcript = a.Transcript;
         response['inputLanguage'] = a.inputLanguage.substring(0, 2);
         response['outputLanguage1'] = a.outputLanguage.substring(0, 2);
+        response['outputLanguage2'] = a.outputLanguage2.substring(0, 2);
         // Translate the page to the input language
         translate(response['inputLanguage']);
         // Change the language options at the bottom of the page
         $("#input").html(languageData[response['inputLanguage']]['name']);
         $("#output1").html(languageData[response['outputLanguage1']]['name']);      
+        if (response['outputLanguage2'] && response['outputLanguage2'] != ""){      
+          $("#output2").html(languageData[response['outputLanguage2']]['name']);      
+        } 
+        // TODO: Add this line
+        // else {
+        //   $("#output2").hide();
+        // }
       }
     }
   );
