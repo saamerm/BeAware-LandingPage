@@ -253,9 +253,9 @@ function checkLanguage() {
           $("#output2").html(languageData[response['outputLanguage2']]['name']);      
         } 
         // TODO: Add this line
-        // else {
-        //   $("#output2").hide();
-        // }
+        else {
+          $("#output2").hide();
+        }
       }
     }
   );
