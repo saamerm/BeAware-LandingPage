@@ -157,7 +157,7 @@ function loadLang(lang){
 }
 
 var transcript = "";
-var isTesting = true; //TODO: Before publishing, Change this to false
+var isTesting = false; //TODO: Before publishing, Change this to false
 var counter = 0; // Only used for debug
 function recurringFunction() {
   if (response['input'] == ""){ //if transcript is empty, show/hide the placeholder
