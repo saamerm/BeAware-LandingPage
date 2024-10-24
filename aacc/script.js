@@ -157,7 +157,7 @@ function loadLang(lang){
 }
 
 var transcript = "";
-var isTesting = false; //TODO: Before publishing, Change this to false
+var isTesting = true; //TODO: Before publishing, Change this to false
 var counter = 0; // Only used for debug
 function recurringFunction() {
   if (response['input'] == ""){ //if transcript is empty, show/hide the placeholder
@@ -174,7 +174,7 @@ function recurringFunction() {
   }
   if (isStreamingCaptions) {
     if (isTesting) {
-      transcript = transcript + transcript;
+      transcript = transcript + " a " + transcript;
       $("#live-caption").html(transcript+counter++);
     } else {
       getTranscript();
@@ -252,7 +252,7 @@ function checkLanguage() {
         if (response['outputLanguage2'] && response['outputLanguage2'] != ""){      
           $("#output2").html(languageData[response['outputLanguage2']]['name']);      
         } 
-        // TODO: Add this line
+        // TODO: Remove these 3 lines to force the 3rd language to be there
         else {
           $("#output2").hide();
         }
@@ -384,7 +384,7 @@ const languageData = {
     "english-language":"English",
     "french-language":"Français",
     "live-caption-empty":"Transcription will display here",
-    "hotmail":"PS: I love you. Get your free live-event transcription",
+    "hotmail":"PS: I love you. Get free event subtitles & translations",
     "name":"English"
   },
   'fr': {
