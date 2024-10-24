@@ -124,7 +124,7 @@ function unmute(){
 function showRightTranscript(){
   if (languageCode === response['inputLanguage']){
     transcript = response['input']
-  } else if (languageCode === response['ouputLanguage1']) {
+  } else if (languageCode === response['outputLanguage']) {
     transcript = response['output1']
   } else {
     transcript = response['output2']
