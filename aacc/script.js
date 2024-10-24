@@ -8,7 +8,7 @@ $(document).ready(function() {
   }
 
   $("#output1").click(function () {
-    translate(response['outputLanguage1']);
+    translate(response['outputLanguage']);
   });
   $("#output2").click(function () {
     translate(response['outputLanguage2']);
@@ -69,7 +69,7 @@ var response =  {
   input: "",
   inputLanguage: "en",
   output1: "",
-  outputLanguage1: "es",
+  outputLanguage: "es",
   output2: "",
   outputLanguage2: "ar"
 };
@@ -147,7 +147,7 @@ function loadLang(lang){
   $("#live-caption-empty2").html(languageData[lang]['live-caption-empty']); // For video
   $("#hotmail").html(languageData[lang]['hotmail']);
   $("#input").html(languageData[response['inputLanguage']]['name']);
-  $("#output1").html(languageData[response['outputLanguage1']]['name']);
+  $("#output1").html(languageData[response['outputLanguage']]['name']);
   $("#output2").html(languageData[response['outputLanguage2']]['name']);
   if (isStreamingCaptions){
     $("#get-live-caption").html(languageData[lang]['get-live-caption-stop'])
@@ -207,9 +207,9 @@ function getTranscript() {
         response['input'] = a.transcript
         response['inputLanguage'] = a.inputLanguage.substring(0, 2);
         response['output1'] = a.translation
-        response['outputLanguage1'] = a.outputLanguage.substring(0, 2);
+        response['outputLanguage'] = a.outputLanguage.substring(0, 2);
         response['output2'] = a.translation2
-        response['outputLanguage2'] = a.outputLanguag2.substring(0, 2);
+        response['outputLanguage2'] = a.outputLanguage2.substring(0, 2);
 
         // This is for audio enhancement        
         if (languageCode == response['inputLanguage']){
@@ -242,13 +242,13 @@ function checkLanguage() {
       if (a && a.transcript && a.transcript != "") {
         // transcript = a.Transcript;
         response['inputLanguage'] = a.inputLanguage.substring(0, 2);
-        response['outputLanguage1'] = a.outputLanguage.substring(0, 2);
+        response['outputLanguage'] = a.outputLanguage.substring(0, 2);
         response['outputLanguage2'] = a.outputLanguage2.substring(0, 2);
         // Translate the page to the input language
         translate(response['inputLanguage']);
         // Change the language options at the bottom of the page
         $("#input").html(languageData[response['inputLanguage']]['name']);
-        $("#output1").html(languageData[response['outputLanguage1']]['name']);      
+        $("#output1").html(languageData[response['outputLanguage']]['name']);      
         if (response['outputLanguage2'] && response['outputLanguage2'] != ""){      
           $("#output2").html(languageData[response['outputLanguage2']]['name']);      
         } 
