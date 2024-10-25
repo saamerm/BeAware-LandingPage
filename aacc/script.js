@@ -378,7 +378,7 @@ function callUserViewedAPI(streamName) {
 
 const languageData = {
   'en': {
-    "caption-header":"Event Live Captioning",
+    "caption-header":"Live Captions",
     "get-live-caption":"Get Live Captions",
     "get-live-caption-stop":"Stop Streaming",
     "english-language":"English",
