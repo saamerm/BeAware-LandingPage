@@ -11,7 +11,10 @@ $(document).ready(function() {
   }
 
   $("#output1").click(function () {
-    translate(response['outputLanguage1']);
+    translate(response['outputLanguage']);
+  });
+  $("#output2").click(function () {
+    translate(response['outputLanguage2']);
   });
   $("#input").click(function () {
     translate(response['inputLanguage']);
@@ -27,7 +30,7 @@ $(document).ready(function() {
 
   //$("#arabic").on("click", function() { translate("arabic"); });
   // Loads the initial quote - without pressing the button
-  const unusedVariable = setInterval(recurringFunction, 1000);   
+  const unusedVariable = setInterval(recurringFunction, 1000);  
   
   // callUserViewedAPI("muhsen"); // automatically converted during replace, to the stream name
   checkLanguage();	
@@ -68,7 +71,9 @@ var response =  {
   input: "",
   inputLanguage: "en",
   output1: "",
-  outputLanguage1: "fr"
+  outputLanguage: "es",
+  output2: "",
+  outputLanguage2: "ar"
 };
 
 var isStreamingCaptions = false; 
@@ -121,8 +126,10 @@ function unmute(){
 function showRightTranscript(){
   if (languageCode === response['inputLanguage']){
     transcript = response['input']
-  } else {
+  } else if (languageCode === response['outputLanguage']) {
     transcript = response['output1']
+  } else {
+    transcript = response['output2']
   }
   // Only update DOM if needed, not with every API call
   if ($("#live-caption").text() !== transcript){
@@ -142,7 +149,8 @@ function loadLang(lang){
   $("#live-caption-empty2").html(languageData[lang]['live-caption-empty']); // For video
   $("#hotmail").html(languageData[lang]['hotmail']);
   $("#input").html(languageData[response['inputLanguage']]['name']);
-  $("#output1").html(languageData[response['outputLanguage1']]['name']);
+  $("#output1").html(languageData[response['outputLanguage']]['name']);
+  $("#output2").html(languageData[response['outputLanguage2']]['name']);
   if (isStreamingCaptions){
     $("#get-live-caption").html(languageData[lang]['get-live-caption-stop'])
   } else {
@@ -168,7 +176,7 @@ function recurringFunction() {
   }
   if (isStreamingCaptions) {
     if (isTesting) {
-      transcript = transcript + transcript;
+      transcript = transcript + " a " + transcript;
       $("#live-caption").html(transcript+counter++);
     } else {
       getTranscript();
@@ -201,14 +209,18 @@ function getTranscript() {
         response['input'] = a.transcript
         response['inputLanguage'] = a.inputLanguage.substring(0, 2);
         response['output1'] = a.translation
-        response['outputLanguage1'] = a.outputLanguage.substring(0, 2);
+        response['outputLanguage'] = a.outputLanguage.substring(0, 2);
+        response['output2'] = a.translation2
+        response['outputLanguage2'] = a.outputLanguage2.substring(0, 2);
 
         // This is for audio enhancement        
         if (languageCode == response['inputLanguage']){
           readLogic(a.transcript)
-        } else {
+        } else if (languageCode == response['outputLanguage']){
           readLogic(a.translation)
-        }    
+        } else {
+          readLogic(a.translation2)
+        }
         
         if (!a.isActivelyStreaming){
           buttonTapped(); // Automatically stop streaming if event is not live
@@ -232,12 +244,20 @@ function checkLanguage() {
       if (a && a.transcript && a.transcript != "") {
         // transcript = a.Transcript;
         response['inputLanguage'] = a.inputLanguage.substring(0, 2);
-        response['outputLanguage1'] = a.outputLanguage.substring(0, 2);
+        response['outputLanguage'] = a.outputLanguage.substring(0, 2);
+        response['outputLanguage2'] = a.outputLanguage2.substring(0, 2);
         // Translate the page to the input language
         translate(response['inputLanguage']);
         // Change the language options at the bottom of the page
         $("#input").html(languageData[response['inputLanguage']]['name']);
-        $("#output1").html(languageData[response['outputLanguage1']]['name']);      
+        $("#output1").html(languageData[response['outputLanguage']]['name']);      
+        if (response['outputLanguage2'] && response['outputLanguage2'] != ""){      
+          $("#output2").html(languageData[response['outputLanguage2']]['name']);      
+        } 
+        // TODO: Remove these 3 lines to force the 3rd language to be there
+        else {
+          $("#output2").hide();
+        }
       }
     }
   );
@@ -360,13 +380,13 @@ function callUserViewedAPI(streamName) {
 
 const languageData = {
   'en': {
-    "caption-header":"Event Live Captioning",
+    "caption-header":"Live Captions",
     "get-live-caption":"Get Live Captions",
     "get-live-caption-stop":"Stop Streaming",
     "english-language":"English",
     "french-language":"Français",
     "live-caption-empty":"Transcription will display here",
-    "hotmail":"PS: I love you. Get your free live-event transcription",
+    "hotmail":"PS: I love you. Get free event subtitles & translations",
     "name":"English"
   },
   'fr': {
