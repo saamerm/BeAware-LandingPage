@@ -50,6 +50,9 @@ const languageData = {
 };
 
 $(document).ready(function() {
+  // Needs to be here because of autoRetrieve = true
+  isStreamingCaptions = false
+
   try {
     loadLang(response['inputLanguage'])
   } catch (error) {
@@ -77,7 +80,6 @@ $(document).ready(function() {
   
   // callUserViewedAPI("124"); // automatically converted during replace, to the stream name
   checkLanguage();
-  isStreamingCaptions = false
 });
 
 // Transcript or translation

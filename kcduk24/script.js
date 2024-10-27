@@ -1,4 +1,7 @@
 $(document).ready(function() {
+  // Needs to be here because of autoRetrieve = true
+  isStreamingCaptions = false
+
   getValueFromUrlParams();
 
   try {
@@ -28,7 +31,6 @@ $(document).ready(function() {
   
   // callUserViewedAPI("kcduk24"); // automatically converted during replace, to the stream name
   checkLanguage();	
-  isStreamingCaptions = false
 });
 
 var forVideoParam = false
