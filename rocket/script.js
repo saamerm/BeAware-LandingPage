@@ -69,6 +69,8 @@ function getValueFromUrlParams() {
 // Transcript or translation
 var response =  {
   input: "",
+  inputLanguage: "en",
+  output1: "",
   outputLanguage: "fr",
   output2: "",
   outputLanguage2: "es"
@@ -174,7 +176,7 @@ function recurringFunction() {
   }
   if (isStreamingCaptions) {
     if (isTesting) {
-      transcript = transcript + transcript;
+      transcript = transcript + " a " + transcript;
       $("#live-caption").html(transcript+counter++);
     } else {
       getTranscript();
@@ -208,12 +210,16 @@ function getTranscript() {
         response['inputLanguage'] = a.inputLanguage.substring(0, 2);
         response['output1'] = a.translation
         response['outputLanguage'] = a.outputLanguage.substring(0, 2);
-
+        response['output2'] = a.translation2
+        response['outputLanguage2'] = a.outputLanguage2.substring(0, 2);
+        
         // This is for audio enhancement        
         if (languageCode == response['inputLanguage']){
           readLogic(a.transcript)
-        } else {
+        } else if (languageCode == response['outputLanguage']){
           readLogic(a.translation)
+        } else {
+          readLogic(a.translation2)
         }    
         
         if (!a.isActivelyStreaming){
