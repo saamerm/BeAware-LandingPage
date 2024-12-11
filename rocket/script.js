@@ -176,8 +176,7 @@ function recurringFunction() {
   }
   if (isStreamingCaptions) {
     if (isTesting) {
-      transcript = transcript + " a " + transcript;
-      $("#live-caption").html(transcript+counter++);
+      getMockTranscript();
     } else {
       getTranscript();
     }
@@ -265,6 +264,7 @@ function checkLanguage() {
 
 // Audio enhancement
 function readLogic(message){
+  // message is the new text to be read. readText is the older stuff that's already read
   // The first time don't read, else it will start reading from the beginning  
   if (readText == ""){
       readText = message          
@@ -274,11 +274,12 @@ function readLogic(message){
     console.log(a-b)
     // If there are any words that are unread, then read    
     if (a > b){
-      readText = removeWords(message, b)
-      console.log(readText)
+      var readOnlyNeededText = removeWords(message, b) // remove words that have already been read
+      //console.log("Before isPlaying Speech: " + readOnlyNeededText + ". With isPlayingSpeech status= " + isPlayingSpeech)
+      // TODO: Only play if speech is not playing. isPlayingSpeech is an indicator of when the mute button is tapped
       if (isPlayingSpeech){
-        console.log("ReadText")
-        speakText(readText, languageCode)
+        speakText(readOnlyNeededText, languageCode)
+        // console.log("ReadMessage= " + message)
       }    
     }
     readText = message
@@ -286,35 +287,65 @@ function readLogic(message){
 }
 
 // Initialize the speech synthesis
-const synth = window.speechSynthesis;
+let synth = window.speechSynthesis;
 
 // Keep track of the current speech utterance
 let currentUtterance = null;
+let speechQueue = [];
+
 function speakText(newText, langCode) {
-  // Clear the previous utterance if it exists
-  if (currentUtterance) {
-    synth.cancel();
+  if (!synth) {
+    console.error("SpeechSynthesis API is not supported in this browser.");
+    return;
   }
 
-  // Remove the old text from the new text if it exists
-  if (currentUtterance && newText.includes(currentUtterance.text)) {
-    newText = newText.replace(currentUtterance.text, "");
+  // Prevent speaking if no text is provided
+  if (!newText.trim()) {
+    console.warn("No text provided for speech synthesis.");
+    return;
   }
 
-  // Create a new utterance with the latest text and language code
-  const utterance = new SpeechSynthesisUtterance(newText);
+  // Add the new text to the queue
+  speechQueue.push({ text: newText, lang: langCode });
+
+  // If nothing is currently being spoken, start speaking
+  if (!currentUtterance) {
+    processQueue();
+  }
+}
+
+function processQueue() {
+  if (speechQueue.length === 0) {
+    return; // No more items to process
+  }
+
+  const { text, lang } = speechQueue.shift(); // Get the next item in the queue
+  const utterance = new SpeechSynthesisUtterance(text);
+  
   utterance.lang = langCode;
+  utterance.voice = voicesList.find((voice) => voice.lang.slice(0, 2) === langCode);
+  // utterance.pitch = 1; // Adjust pitch (range: 0 to 2)
+  // utterance.rate = 1;  // Adjust rate (range: 0.1 to 10)
+  // utterance.volume = 1; // Adjust volume (range: 0 to 1)
 
-  // Set the new utterance as the current utterance
+  // Set as the current utterance
   currentUtterance = utterance;
 
-  // Event handler to play the next utterance after the current one ends
+  // Event handler for when the utterance ends
   utterance.onend = function () {
-    // You can perform additional actions after the utterance ends if needed
-    console.log("Current utterance ended. Playing the next utterance.");
+    console.log("Speech synthesis completed:", text);
+    currentUtterance = null; // Reset the current utterance
+    processQueue(); // Process the next item in the queue
   };
 
-  // Speak the latest text
+  // Event handler for error during speech synthesis
+  utterance.onerror = function (event) {
+    console.error("An error occurred during speech synthesis:", event.error);
+    currentUtterance = null;
+    processQueue(); // Process the next item in the queue
+  };
+
+  // Speak the text
   synth.speak(utterance);
 }
 
@@ -376,6 +407,52 @@ function callUserViewedAPI(streamName) {
       // Handle network or other errors here
       console.error('API call failed with an exception:', error);
     });    
+}
+
+var mockWord = "a";
+function getMockTranscript() {
+  mockWord = mockWord + " سيبدأ الحدث "; // mock data
+  $("#live-caption").html(transcript+ " " + counter++ + mockWord);
+  var a = mockObject;
+  
+  if (a && a.transcript && a.transcript != "") {
+    
+    response['input'] = a.transcript
+    response['inputLanguage'] = a.inputLanguage.substring(0, 2);
+    response['output1'] = a.translation
+    response['outputLanguage'] = a.outputLanguage.substring(0, 2);
+    response['output2'] = a.translation2
+    response['outputLanguage2'] = a.outputLanguage2.substring(0, 2);
+
+    // This is for audio enhancement        
+    if (languageCode == response['inputLanguage']){
+      readLogic(a.transcript + mockWord)
+    } else if (languageCode == response['outputLanguage']){
+      readLogic(a.translation + mockWord)
+    } else {
+      readLogic(a.translation2 + mockWord) 
+    }
+    
+    if (!a.isActivelyStreaming){
+      buttonTapped(); // Automatically stop streaming if event is not live
+    }
+  }
+}
+
+const mockObject = {
+  "timestamp": "2024-12-10T20:56:50.4571326",
+  "roomName": "rocket",
+  "description": "",
+  "transcript": "The event will start shortly.",
+  "isActivelyStreaming": true,
+  "translation": "El evento comenzará en breve",
+  "translation2": "سيبدأ الحدث قريبا",
+  "inputLanguage": "en-US",
+  "outputLanguage": "es",
+  "outputLanguage2": "ar-001",
+  "isPremiumCustomer": false,
+  "blockStorage": false,
+  "uid": null
 }
 
 const languageData = {
