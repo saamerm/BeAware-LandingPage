@@ -310,11 +310,11 @@ function speakText(newText, langCode) {
 
   // If nothing is currently being spoken, start speaking
   if (!currentUtterance) {
-    processQueue();
+    processQueue(langCode);
   }
 }
 
-function processQueue() {
+function processQueue(langCode) {
   if (speechQueue.length === 0) {
     return; // No more items to process
   }
@@ -323,7 +323,7 @@ function processQueue() {
   const utterance = new SpeechSynthesisUtterance(text);
   
   utterance.lang = langCode;
-  utterance.voice = voicesList.find((voice) => voice.lang.slice(0, 2) === langCode);
+  utterance.voice = window.speechSynthesis.getVoices().find((voice) => voice.lang.slice(0, 2) === langCode);
   // utterance.pitch = 1; // Adjust pitch (range: 0 to 2)
   // utterance.rate = 1;  // Adjust rate (range: 0.1 to 10)
   // utterance.volume = 1; // Adjust volume (range: 0 to 1)
