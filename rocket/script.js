@@ -1,9 +1,23 @@
+// Transcript or translation
+var response =  {
+  input: "",
+  inputLanguage: "en",
+  output1: "",
+  outputLanguage: "fr",
+  output2: "",
+  outputLanguage2: "es"
+};
+var localization = ""
+var languageCode = response['inputLanguage'] // Initial value
+var voiceChoice = window.speechSynthesis.getVoices().find((voice) => voice.lang.slice(0, 2) === languageCode);
+var isStreamingCaptions = false; 
+const layover = "<div class=\"inner-div\">      <div id=\"holder2\" class=\"holder2\" style=\"height: 100px; border: #EEEEEE; border-style: solid;\">        <div id=\"live-caption-empty2\" class=\"scroller2 scroller-empty\">Transcription will display here</div>        <div class=\"scroller2\"><div id=\"live-caption2\" class=\"overlay2\"></div></div>      </div>    </div>"
 $(document).ready(function() {
   // Needs to be here because of autoRetrieve = true
   isStreamingCaptions = false
 
   getValueFromUrlParams();
-
+  checkLanguage();	
   try {
     loadLang(response['inputLanguage'])
   } catch (error) {
@@ -33,7 +47,6 @@ $(document).ready(function() {
   const unusedVariable = setInterval(recurringFunction, 1000);  
   
   // callUserViewedAPI("rocket"); // automatically converted during replace, to the stream name
-  checkLanguage();	
 });
 
 var forVideoParam = false
@@ -64,19 +77,9 @@ function getValueFromUrlParams() {
   if (chromaParam != "") {
     document.body.style.backgroundColor = `#${chromaParam}`;
   }
+  $("#outer-div").html(layover);
 }
 
-// Transcript or translation
-var response =  {
-  input: "",
-  inputLanguage: "en",
-  output1: "",
-  outputLanguage: "fr",
-  output2: "",
-  outputLanguage2: "es"
-};
-
-var isStreamingCaptions = false; 
 function buttonTapped() {
   if (isStreamingCaptions){
     // If streaming captions and the button is tapped, stop
@@ -140,8 +143,6 @@ function showRightTranscript(){
   }
 }
 
-var localization = ""
-var languageCode = response['inputLanguage'] // Initial value
 function loadLang(lang){
   readText = "" // Reset the reading logic
   $("#caption-header").html(languageData[lang]['caption-header']);
@@ -149,8 +150,12 @@ function loadLang(lang){
   $("#live-caption-empty2").html(languageData[lang]['live-caption-empty']); // For video
   $("#hotmail").html(languageData[lang]['hotmail']);
   $("#input").html(languageData[response['inputLanguage']]['name']);
-  $("#output1").html(languageData[response['outputLanguage']]['name']);
-  $("#output2").html(languageData[response['outputLanguage2']]['name']);
+  if (response['outputLanguage'] && response['outputLanguage'] != ""){     // if not null or empty
+    $("#output1").html(languageData[response['outputLanguage']]['name']);
+  }
+  if (response['outputLanguage2'] && response['outputLanguage2'] != ""){     // if not null or empty
+    $("#output2").html(languageData[response['outputLanguage2']]['name']);
+  }
   if (isStreamingCaptions){
     $("#get-live-caption").html(languageData[lang]['get-live-caption-stop'])
   } else {
@@ -202,8 +207,6 @@ function getTranscript() {
   $.getJSON(
     url,
     function (a) {
-      var json = JSON.stringify(a);
-      // console.log(json)
       if (a && a.transcript && a.transcript != "") {
         response['input'] = a.transcript
         response['inputLanguage'] = a.inputLanguage.substring(0, 2);
@@ -217,7 +220,7 @@ function getTranscript() {
           readLogic(a.transcript)
         } else if (languageCode == response['outputLanguage']){
           readLogic(a.translation)
-        } else {
+        } else if (languageCode == response['outputLanguage2']){
           readLogic(a.translation2)
         }    
         
@@ -231,6 +234,10 @@ function getTranscript() {
 }
 
 function checkLanguage() {
+  if (isTesting) {
+    checkMockLanguage();
+    return
+  }
   $.support.cors = true;           
   var url="https://api.deafassistant.com/stream/LiteGetStream?streamName=rocket";
   
@@ -238,10 +245,7 @@ function checkLanguage() {
   $.getJSON(
     url,
     function (a) {
-      var json = JSON.stringify(a);
-      // console.log(json)
       if (a && a.transcript && a.transcript != "") {
-        // transcript = a.Transcript;
         response['inputLanguage'] = a.inputLanguage.substring(0, 2);
         response['outputLanguage'] = a.outputLanguage.substring(0, 2);
         response['outputLanguage2'] = a.outputLanguage2.substring(0, 2);
@@ -249,11 +253,12 @@ function checkLanguage() {
         translate(response['inputLanguage']);
         // Change the language options at the bottom of the page
         $("#input").html(languageData[response['inputLanguage']]['name']);
-        $("#output1").html(languageData[response['outputLanguage']]['name']);      
-        if (response['outputLanguage2'] && response['outputLanguage2'] != ""){      
+        if (response['outputLanguage'] && response['outputLanguage'] != ""){     // if not null or empty
+          $("#output1").html(languageData[response['outputLanguage']]['name']);
+        }        
+        if (response['outputLanguage2'] && response['outputLanguage2'] != ""){     // if not null or empty 
           $("#output2").html(languageData[response['outputLanguage2']]['name']);      
         } 
-        // TODO: Remove these 3 lines to force the 3rd language to be there
         else {
           $("#output2").hide();
         }
@@ -315,15 +320,23 @@ function speakText(newText, langCode) {
 }
 
 function processQueue(langCode) {
+
   if (speechQueue.length === 0) {
     return; // No more items to process
   }
 
   const { text, lang } = speechQueue.shift(); // Get the next item in the queue
   const utterance = new SpeechSynthesisUtterance(text);
-  
+
+  if (voiceChoice){
+    utterance.voice = voiceChoice
+  } else {
+    alert("This language is not available for playback on your device. Please try another device");
+    muteButtonTapped()
+    return
+  }
+
   utterance.lang = langCode;
-  utterance.voice = window.speechSynthesis.getVoices().find((voice) => voice.lang.slice(0, 2) === langCode);
   // utterance.pitch = 1; // Adjust pitch (range: 0 to 2)
   // utterance.rate = 1;  // Adjust rate (range: 0.1 to 10)
   // utterance.volume = 1; // Adjust volume (range: 0 to 1)
@@ -349,9 +362,11 @@ function processQueue(langCode) {
   synth.speak(utterance);
 }
 
+// Translate the page to this language
 function translate(language){
   languageCode = language
   loadLang(language)
+  voiceChoice = window.speechSynthesis.getVoices().find((voice) => voice.lang.slice(0, 2) === languageCode);
 }
 
 function getNumberOfWords(inputString){
@@ -410,13 +425,38 @@ function callUserViewedAPI(streamName) {
 }
 
 var mockWord = "a";
+function checkMockLanguage() {
+  var a = mockObject3;
+  if (a && a.transcript && a.transcript != "") {
+    response['inputLanguage'] = a.inputLanguage.substring(0, 2);
+    response['outputLanguage'] = a.outputLanguage.substring(0, 2);
+    response['outputLanguage2'] = a.outputLanguage2.substring(0, 2);
+    // Translate the page to the input language
+    translate(response['inputLanguage']);
+    // Change the language options at the bottom of the page
+    $("#input").html(languageData[response['inputLanguage']]['name']);
+    if (response['outputLanguage'] && response['outputLanguage'] != ""){     // if not null or empty
+      $("#output1").html(languageData[response['outputLanguage']]['name']);    
+    } else {
+      $("#output1").hide();
+    }
+    if (response['outputLanguage2'] && response['outputLanguage2'] != ""){     // if not null or empty 
+      $("#output2").html(languageData[response['outputLanguage2']]['name']);      
+    } 
+    // TODO: Remove these 3 lines to force the 3rd language to be there
+    else {
+      $("#output2").hide();
+    }
+  }
+}
+
 function getMockTranscript() {
-  mockWord = mockWord + " سيبدأ الحدث "; // mock data
+  mockWord = mockWord + " .سيبدأ الحدث. "; // mock arabic data
+  // mockWord = mockWord + " Donde esta el baño."; // mock spanish data
   $("#live-caption").html(transcript+ " " + counter++ + mockWord);
-  var a = mockObject;
+  var a = mockObject3;
   
   if (a && a.transcript && a.transcript != "") {
-    
     response['input'] = a.transcript
     response['inputLanguage'] = a.inputLanguage.substring(0, 2);
     response['output1'] = a.translation
@@ -429,7 +469,7 @@ function getMockTranscript() {
       readLogic(a.transcript + mockWord)
     } else if (languageCode == response['outputLanguage']){
       readLogic(a.translation + mockWord)
-    } else {
+    } else if (languageCode == response['outputLanguage2']){
       readLogic(a.translation2 + mockWord) 
     }
     
@@ -455,6 +495,18 @@ const mockObject = {
   "uid": null
 }
 
+const mockObject2 = {
+  "id":59,"timestamp":"2025-01-29T04:36:36.4389888","roomName":"rocket","description":"","isActivelyStreaming":true,
+  "transcript":" What happened to this. So, let's see if the translation gets removed from this text, where is the value? Why is this not working? Let's go on and continue. Is this translation showing nothing. Yes, it is not showing anything. What is actually going on here? I have no idea.",
+  "translation":"¿Qué pasó con esto? Entonces, veamos si la traducción se elimina de este texto, ¿dónde está el valor? ¿Por qué esto no funciona? Sigamos adelante y continuemos. ¿Esta traducción no muestra nada? Sí, no está mostrando nada. ¿Qué está pasando aquí? No tengo ni idea.",
+  "translation2":"","inputLanguage":"en-US","outputLanguage":"es","outputLanguage2":"","isPremiumCustomer":false,"blockStorage":false,"uid":null
+}
+const mockObject3 = {
+  "id":59,"timestamp":"2025-01-29T04:36:36.4389888","roomName":"rocket","description":"","isActivelyStreaming":true,
+  "transcript":" What happened to this. So, let's see if the translation gets removed from this text, where is the value? Why is this not working? Let's go on and continue. Is this translation showing nothing. Yes, it is not showing anything. What is actually going on here? I have no idea.",
+  "translation":"حدث التسميات التوضيحية الحية",
+  "translation2":"","inputLanguage":"en-US","outputLanguage":"ar","outputLanguage2":"","isPremiumCustomer":false,"blockStorage":false,"uid":null
+}
 const languageData = {
   'en': {
     "caption-header":"Captions & Translations",
