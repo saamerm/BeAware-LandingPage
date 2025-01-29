@@ -149,14 +149,13 @@ input:focus {
 .live-caption{
     max-height: 370px;
     overflow-y: scroll;
-    font-size: large;
+    font-size: x-large;
     padding: 10px;
 }
 #footer {
     bottom: 0;
     width: 100%;
     position: absolute;
-    height: $height-footer;
     background-color: #f5f5f5;
     margin: 0px 0;
   }
@@ -216,5 +215,5 @@ a.active {
 }
 
 .customPadding{
-  padding:20px;
+  padding:5px;
 }

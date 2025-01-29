@@ -18,12 +18,12 @@
       }
 
       h1 {
-        color: #4a90e2;
+        color: #6AA936;
         margin-bottom: 20px;
       }
 
       button {
-        background-color: #4a90e2;
+        background-color: #6AA936;
         color: white;
         border: none;
         padding: 10px 20px;
@@ -128,13 +128,13 @@
       const sendTranscript = async (transcript) => {
         const data = {
           timestamp: new Date().toISOString(),
-          roomName: "wetech", // Updated roomName
-          description: "WeTech Accessibility Stream",
+          roomName: "{{SmallNamePlaceHolder}}", // Updated roomName
+          description: "{{NamePlaceHolder}} Accessibility Stream",
           transcript: transcript,
           isActivelyStreaming: true,
           translation: "",
           inputLanguage: "en",
-          outputLanguage: "es",
+          outputLanguage: "ar",
           isPremiumCustomer: true,
         };
 

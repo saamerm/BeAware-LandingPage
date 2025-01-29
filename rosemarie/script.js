@@ -1,23 +1,6 @@
-// Configuration and Initialization
-const response = {
-  input: "",
-  inputLanguage: "en",
-  output1: "",
-  outputLanguage: "fr",
-  output2: "",
-  outputLanguage2: "es",
-};
-
-let languageCode = response.inputLanguage; // Initial value
-let voiceChoice = window.speechSynthesis.getVoices().find((voice) => voice.lang.slice(0, 2) === languageCode);
-let isStreamingCaptions = false;
-let isPlayingSpeech = false;
-let transcript = "";
-let readText = "";
-let isTesting = true; // TODO: Change to false before publishing
-let counter = 0; // Debug counter
-
-const layover = `
+// --- Constants and Variables ---
+const API_URL = "https://api.deafassistant.com/stream/LiteGetStream?streamName=rosemarie";
+const LAYOVER_HTML = `
   <div class="inner-div">
     <div id="holder2" class="holder2" style="height: 100px; border: #EEEEEE; border-style: solid;">
       <div id="live-caption-empty2" class="scroller2 scroller-empty">Transcription will display here</div>
@@ -25,48 +8,74 @@ const layover = `
     </div>
   </div>
 `;
+const DEFAULT_LANGUAGE = "en";
 
-// DOM Ready
-$(document).ready(() => {
-  isStreamingCaptions = false;
-  getValueFromUrlParams();
-  checkLanguage();
-  try {
-    loadLang(response.inputLanguage);
-  } catch (error) {
-    console.error(error);
-  }
-
-  // Event Listeners
-  $("#output1").click(() => translate(response.outputLanguage));
-  $("#output2").click(() => translate(response.outputLanguage2));
-  $("#input").click(() => translate(response.inputLanguage));
-  $("#get-live-caption, #live-caption-empty2, #live-caption2").on("click", toggleStreaming);
-  $("#mute").on("click", muteButtonTapped);
-  $("#unmute").on("click", unmuteButtonTapped);
-  $('#mute').hide();
-
-  // Initial Setup
-  setInterval(recurringFunction, 1000);
-});
-
-// URL Parameter Handling
+let response = {
+  input: "",
+  inputLanguage: DEFAULT_LANGUAGE,
+  output1: "",
+  outputLanguage: "fr",
+  output2: "",
+  outputLanguage2: "es",
+};
+let languageCode = DEFAULT_LANGUAGE; // Initial value
+let voiceChoice;
+let isStreamingCaptions = false;
+let isPlayingSpeech = false;
+let readText = "";
+let transcript = "";
+let isTesting = false; // TODO: Before publishing, Change this to false
+let counter = 0; // Only used for debug
+let synth = window.speechSynthesis; // Initialize speech synthesis here
+let currentUtterance = null; // Keep track of the current speech utterance
+let speechQueue = [];
 let forVideoParam = false;
 let autoRetrieveParam = false;
 let videoTextColorParam = "";
 let chromaParam = "";
 
+// --- DOM Ready Handler ---
+$(document).ready(function () {
+  isStreamingCaptions = false; // Ensure initial state
+  getValueFromUrlParams();
+  checkLanguage();
+
+  try {
+    loadLang(response.inputLanguage);
+  } catch (error) {
+    console.error("Error loading language:", error);
+  }
+
+  // Event listeners for translation
+  $("#output1").on("click", () => translate(response.outputLanguage));
+  $("#output2").on("click", () => translate(response.outputLanguage2));
+  $("#input").on("click", () => translate(response.inputLanguage));
+
+  // Event listeners for live captions and mute/unmute
+  $("#get-live-caption, #live-caption-empty2, #live-caption2").on("click", buttonTapped);
+  $("#mute").on("click", muteButtonTapped);
+  $("#unmute").on("click", unmuteButtonTapped);
+  $("#mute").hide();
+
+  // Start recurring function (for fetching data)
+  setInterval(recurringFunction, 1000);
+  // callUserViewedAPI("rosemarie"); // Automatically converted during replace, to the stream name
+});
+
+// --- Functions ---
+
 function getValueFromUrlParams() {
   const urlParams = new URLSearchParams(window.location.search);
-  forVideoParam = urlParams.get('forVideo');
-  videoTextColorParam = urlParams.get('videoTextColor');
-  autoRetrieveParam = urlParams.get('autoRetrieve');
-  chromaParam = urlParams.get('chroma');
+  forVideoParam = urlParams.get("forVideo");
+  videoTextColorParam = urlParams.get("videoTextColor");
+  autoRetrieveParam = urlParams.get("autoRetrieve");
+  chromaParam = urlParams.get("chroma");
 
   if (forVideoParam) {
-    $('#holder, #header').hide();
+    $("#holder").hide();
+    $("#header").hide();
   } else {
-    $('#outer-div').hide();
+    $("#outer-div").hide();
   }
 
   if (videoTextColorParam) {
@@ -74,32 +83,20 @@ function getValueFromUrlParams() {
   }
 
   if (autoRetrieveParam) {
-    toggleStreaming();
+    buttonTapped();
   }
 
   if (chromaParam) {
     document.body.style.backgroundColor = `#${chromaParam}`;
   }
 
-  $("#outer-div").html(layover);
+  $("#outer-div").html(LAYOVER_HTML);
 }
 
-// Streaming and Caption Logic
-function toggleStreaming() {
+
+function buttonTapped() {
+  isStreamingCaptions ? stopTimer() : startTimer();
   isStreamingCaptions = !isStreamingCaptions;
-  if (isStreamingCaptions) {
-    startTimer();
-  } else {
-    stopTimer();
-  }
-}
-
-function startTimer() {
-  $("#get-live-caption").html(languageData[languageCode]['get-live-caption-stop']);
-}
-
-function stopTimer() {
-  $("#get-live-caption").html(languageData[languageCode]['get-live-caption']);
 }
 
 function muteButtonTapped() {
@@ -119,26 +116,27 @@ function unmuteButtonTapped() {
   }
 }
 
+
+function iOSSpeakerFix() {
+    // Create a new utterance with the latest text and language code
+    const utterance = new SpeechSynthesisUtterance("");
+    synth.speak(utterance);
+}
+
+
 function mute() {
   isPlayingSpeech = false;
-  $('#unmute').show();
-  $('#mute').hide();
+  $("#unmute").show();
+  $("#mute").hide();
 }
 
 function unmute() {
   isPlayingSpeech = true;
-  $('#mute').show();
-  $('#unmute').hide();
+  $("#mute").show();
+  $("#unmute").hide();
 }
 
-function iOSSpeakerFix() {
-  const utterance = new SpeechSynthesisUtterance("");
-  synth.speak(utterance);
-}
-
-// Transcript Display Logic
 function showRightTranscript() {
-  let transcript;
   if (languageCode === response.inputLanguage) {
     transcript = response.input;
   } else if (languageCode === response.outputLanguage) {
@@ -147,40 +145,44 @@ function showRightTranscript() {
     transcript = response.output2;
   }
 
-  if ($("#live-caption").text() !== transcript) {
-    $("#live-caption").html(transcript);
+  const liveCaption = $("#live-caption");
+  const liveCaption2 = $("#live-caption2");
+
+  if (liveCaption.text() !== transcript) {
+    liveCaption.html(transcript);
   }
-  if ($("#live-caption2").text() !== transcript) {
-    $("#live-caption2").html(transcript);
+  if (liveCaption2.text() !== transcript) {
+    liveCaption2.html(transcript);
   }
 }
 
-// Language Handling
 function loadLang(lang) {
-  readText = ""; // Reset reading logic
-  $("#caption-header").html(languageData[lang]['caption-header']);
-  $("#live-caption-empty, #live-caption-empty2").html(languageData[lang]['live-caption-empty']);
-  $("#hotmail").html(languageData[lang]['hotmail']);
-  $("#input").html(languageData[response.inputLanguage]['name']);
+  readText = ""; // Reset read logic
+  const langData = languageData[lang];
+  $("#caption-header").html(langData["caption-header"]);
+  $("#live-caption-empty").html(langData["live-caption-empty"]);
+  $("#live-caption-empty2").html(langData["live-caption-empty"]); // For video
+  $("#hotmail").html(langData["hotmail"]);
+  $("#input").html(languageData[response.inputLanguage]["name"]);
 
+  // Conditionally set the language names
   if (response.outputLanguage) {
-    $("#output1").html(languageData[response.outputLanguage]['name']);
+    $("#output1").html(languageData[response.outputLanguage]["name"]);
   }
   if (response.outputLanguage2) {
-    $("#output2").html(languageData[response.outputLanguage2]['name']);
+    $("#output2").html(languageData[response.outputLanguage2]["name"]);
   }
-
-  $("#get-live-caption").html(
-    isStreamingCaptions ? languageData[lang]['get-live-caption-stop'] : languageData[lang]['get-live-caption']
-  );
+  
+  // Set button text based on streaming state
+  const buttonText = isStreamingCaptions ? "get-live-caption-stop" : "get-live-caption";
+  $("#get-live-caption").html(langData[buttonText]);
 }
 
-// Recurring Function for Caption Updates
 function recurringFunction() {
-  if (response.input === "") {
-    $('#live-caption-empty, #live-caption-empty2').show();
+  if (!response.input) {
+    $("#live-caption-empty2").show();
   } else {
-    $('#live-caption-empty, #live-caption-empty2').hide();
+    $("#live-caption-empty, #live-caption-empty2").hide();
     showRightTranscript();
   }
 
@@ -189,92 +191,143 @@ function recurringFunction() {
   }
 }
 
-// API and Mock Data Handling
+function startTimer() {
+    $("#get-live-caption").html(languageData[languageCode]['get-live-caption-stop'])
+}
+  
+function stopTimer() {
+    $("#get-live-caption").html(languageData[languageCode]['get-live-caption'])
+}
+
 function getTranscript() {
-  const url = "https://api.deafassistant.com/stream/LiteGetStream?streamName=rosemarie";
-  $.getJSON(url, (data) => {
-    if (data?.transcript) {
-      updateResponse(data);
-      readLogic(data.transcript);
+  $.support.cors = true;
+
+  $.getJSON(API_URL, function (data) {
+    if (data && data.transcript) {
+      updateResponseData(data);
+      
+      // Audio enhancement
+      let textToRead;
+      if (languageCode === response.inputLanguage){
+          textToRead = data.transcript;
+      } else if (languageCode === response.outputLanguage){
+          textToRead = data.translation;
+      } else if (languageCode === response.outputLanguage2){
+        textToRead = data.translation2;
+      }
+
+      if (textToRead) {
+        readLogic(textToRead)
+      }
       if (!data.isActivelyStreaming) {
-        toggleStreaming();
+        buttonTapped(); // Auto stop if not actively streaming
       }
     }
   });
 }
-
-function checkLanguage() {
-  if (isTesting) {
-    checkMockLanguage();
-    return;
-  }
-  const url = "https://api.deafassistant.com/stream/LiteGetStream?streamName=rosemarie";
-  $.getJSON(url, (data) => {
-    if (data?.transcript) {
-      updateResponse(data);
-      translate(response.inputLanguage);
-      updateLanguageOptions();
-    }
-  });
+function updateResponseData(data) {
+    response.input = data.transcript;
+    response.inputLanguage = data.inputLanguage.substring(0, 2);
+    response.output1 = data.translation;
+    response.outputLanguage = data.outputLanguage.substring(0, 2);
+    response.output2 = data.translation2;
+    response.outputLanguage2 = data.outputLanguage2.substring(0, 2);
 }
 
-function updateResponse(data) {
-  response.input = data.transcript;
+function checkLanguage() {
+    if (isTesting) {
+        checkMockLanguage();
+        return;
+    }
+    $.support.cors = true;
+    $.getJSON(API_URL, function(data) {
+        if (data && data.transcript) {
+            updateResponseLanguages(data);
+            translate(response.inputLanguage);
+            $("#input").html(languageData[response.inputLanguage].name);
+    
+            if (response.outputLanguage) {
+              $("#output1").html(languageData[response.outputLanguage].name);
+            } else {
+                $("#output1").hide();
+            }
+    
+            if (response.outputLanguage2) {
+              $("#output2").html(languageData[response.outputLanguage2].name);
+            } else {
+              $("#output2").hide();
+            }
+        }
+    });
+}
+
+function updateResponseLanguages(data) {
   response.inputLanguage = data.inputLanguage.substring(0, 2);
-  response.output1 = data.translation;
   response.outputLanguage = data.outputLanguage.substring(0, 2);
-  response.output2 = data.translation2;
   response.outputLanguage2 = data.outputLanguage2.substring(0, 2);
 }
 
-function updateLanguageOptions() {
-  $("#input").html(languageData[response.inputLanguage]['name']);
-  if (response.outputLanguage) {
-    $("#output1").html(languageData[response.outputLanguage]['name']);
-  }
-  if (response.outputLanguage2) {
-    $("#output2").html(languageData[response.outputLanguage2]['name']);
-  } else {
-    $("#output2").hide();
-  }
+function readLogic(message) {
+    if (!readText) {
+        readText = message;
+    } else {
+        const newWordCount = getNumberOfWords(message);
+        const oldWordCount = getNumberOfWords(readText);
+        
+        if (newWordCount > oldWordCount){
+            const unreadText = removeWords(message, oldWordCount);
+            if(isPlayingSpeech) {
+                speakText(unreadText, languageCode)
+            }
+        }
+        readText = message;
+    }
 }
 
-// Speech Synthesis Logic
-let synth = window.speechSynthesis;
-let currentUtterance = null;
-let speechQueue = [];
-
 function speakText(newText, langCode) {
-  if (!newText.trim() || !synth) {
-    console.warn("No text provided or SpeechSynthesis not supported.");
+  if (!synth) {
+    console.error("SpeechSynthesis API is not supported in this browser.");
+    return;
+  }
+  if (!newText.trim()) {
+    console.warn("No text provided for speech synthesis.");
     return;
   }
 
   speechQueue.push({ text: newText, lang: langCode });
+
   if (!currentUtterance) {
     processQueue();
   }
 }
 
 function processQueue() {
-  if (speechQueue.length === 0) return;
+  if (speechQueue.length === 0) {
+    return;
+  }
 
   const { text, lang } = speechQueue.shift();
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.voice = voiceChoice || (() => {
-    alert("This language is not available for playback on your device.");
-    muteButtonTapped();
-    return null;
-  })();
+  voiceChoice = window.speechSynthesis.getVoices().find((voice) => voice.lang.slice(0, 2) === languageCode);
+    
+  if (voiceChoice) {
+    utterance.voice = voiceChoice;
+  } else {
+      alert("This language is not available for playback on your device. Please try another device");
+      muteButtonTapped()
+      return
+  }
+  
   utterance.lang = lang;
 
+
+  currentUtterance = utterance;
   utterance.onend = () => {
     currentUtterance = null;
     processQueue();
   };
-
   utterance.onerror = (event) => {
-    console.error("Speech synthesis error:", event.error);
+    console.error("An error occurred during speech synthesis:", event.error);
     currentUtterance = null;
     processQueue();
   };
@@ -284,65 +337,124 @@ function processQueue() {
   }
 }
 
-// Utility Functions
+function translate(language) {
+    languageCode = language;
+    loadLang(language);
+    // voiceChoice is now being set in `processQueue` to ensure it is always in scope
+}
+
 function getNumberOfWords(inputString) {
-  return inputString.trim() ? inputString.split(/\s+/).length : 0;
+  return inputString ? inputString.trim().split(/\s+/).length : 0;
 }
 
 function removeWords(inputString, numberOfWordsToRemove) {
-  if (!inputString.trim()) return "";
+  if (!inputString || !inputString.trim()) {
+    return "";
+  }
+
   const wordsArray = inputString.split(/\s+/);
-  return wordsArray.slice(numberOfWordsToRemove).join(' ');
+  const newWordsArray = wordsArray.slice(numberOfWordsToRemove);
+  return newWordsArray.join(" ");
 }
 
-function removeWordsRTL(inputString, numberOfWordsToRemove) {
-  if (!inputString.trim()) return "";
-  const wordsArray = inputString.split(/\s+/);
-  return wordsArray.slice(0, wordsArray.length - numberOfWordsToRemove).join(' ');
+function callUserViewedAPI(streamName) {
+  const apiUrl = `http://api.deafassistant.com/api/v1/stream/view-counter`;
+  fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(streamName),
+  })
+    .then(response => {
+      if (response.ok) {
+        console.log('API call successful');
+      } else {
+        console.error('API call failed');
+      }
+    })
+    .catch(error => {
+      console.error('API call failed with an exception:', error);
+    });
 }
-
-// Mock Data and Testing
-let mockWord = "";
 
 function checkMockLanguage() {
-  const data = mockObject3;
-  if (data?.transcript) {
-    updateResponse(data);
+  const mockData = mockObject;
+  if (mockData && mockData.transcript) {
+    updateResponseLanguages(mockData);
     translate(response.inputLanguage);
-    updateLanguageOptions();
-  }
-}
-
-function getMockTranscript() {
-  mockWord += " .سيبدأ الحدث. ";
-  $("#live-caption").html(`${transcript} ${counter++} ${mockWord}`);
-  const data = mockObject3;
-  if (data?.transcript) {
-    updateResponse(data);
-    readLogic(`${data.transcript} ${mockWord}`);
-    if (!data.isActivelyStreaming) {
-      toggleStreaming();
+    $("#input").html(languageData[response.inputLanguage].name);
+    if (response.outputLanguage) {
+        $("#output1").html(languageData[response.outputLanguage].name);
+    } else {
+        $("#output1").hide();
+    }
+    if (response.outputLanguage2) {
+        $("#output2").html(languageData[response.outputLanguage2].name);
+    } else {
+        $("#output2").hide();
     }
   }
 }
 
-const mockObject3 = {
-  id: 59,
-  timestamp: "2025-01-29T04:36:36.4389888",
-  roomName: "rosemarie",
-  description: "",
-  isActivelyStreaming: true,
-  transcript: "What happened to this. So, let's see if the translation gets removed from this text, where is the value? Why is this not working? Let's go on and continue. Is this translation showing nothing. Yes, it is not showing anything. What is actually going on here? I have no idea.",
-  translation: "حدث التسميات التوضيحية الحية",
-  translation2: "",
-  inputLanguage: "en-US",
-  outputLanguage: "ar",
-  outputLanguage2: "",
-  isPremiumCustomer: false,
-  blockStorage: false,
-  uid: null,
-};
+let mockWord = "";
 
+function getMockTranscript() {
+  // mockWord += " سيبدأ الحدث";
+    mockWord = mockWord + " Donde esta el baño."; // mock spanish data
+    $("#live-caption").html(transcript+ " " + counter++ + mockWord);
+  const mockData = mockObject;
+  if (mockData && mockData.transcript) {
+      updateResponseData(mockData)
+      
+       // Audio enhancement
+       let textToRead;
+       if (languageCode === response.inputLanguage){
+            textToRead = mockData.transcript;
+        } else if (languageCode === response.outputLanguage){
+            textToRead = mockData.translation;
+        } else if (languageCode === response.outputLanguage2){
+            textToRead = mockData.translation2;
+        }
+        
+       if (textToRead) {
+         readLogic(textToRead + mockWord)
+       }
+     
+      if (!mockData.isActivelyStreaming) {
+        buttonTapped(); // Auto stop if not actively streaming
+      }
+  }
+}
+
+const mockObject = {
+  "timestamp": "2024-12-10T20:56:50.4571326",
+  "roomName": "rosemarie",
+  "description": "",
+  "transcript": "The event will start shortly.",
+  "isActivelyStreaming": true,
+  "translation": "El evento comenzará en breve",
+  "translation2": "سيبدأ الحدث قريبا",
+  "inputLanguage": "en-US",
+  "outputLanguage": "es",
+  "outputLanguage2": "ar-001",
+  "isPremiumCustomer": false,
+  "blockStorage": false,
+  "uid": null
+}
+
+const mockObject2 = {
+  "id":59,"timestamp":"2025-01-29T04:36:36.4389888","roomName":"rosemarie","description":"","isActivelyStreaming":true,
+  "transcript":" What happened to this. So, let's see if the translation gets removed from this text, where is the value? Why is this not working? Let's go on and continue. Is this translation showing nothing. Yes, it is not showing anything. What is actually going on here? I have no idea.",
+  "translation":"¿Qué pasó con esto? Entonces, veamos si la traducción se elimina de este texto, ¿dónde está el valor? ¿Por qué esto no funciona? Sigamos adelante y continuemos. ¿Esta traducción no muestra nada? Sí, no está mostrando nada. ¿Qué está pasando aquí? No tengo ni idea.",
+  "translation2":"","inputLanguage":"en-US","outputLanguage":"es","outputLanguage2":"","isPremiumCustomer":false,"blockStorage":false,"uid":null
+}
+const mockObject3 = {
+  "id":59,"timestamp":"2025-01-29T04:36:36.4389888","roomName":"rosemarie","description":"","isActivelyStreaming":true,
+  "transcript":" What happened to this. So, let's see if the translation gets removed from this text, where is the value? Why is this not working? Let's go on and continue. Is this translation showing nothing. Yes, it is not showing anything. What is actually going on here? I have no idea.",
+  "translation":"حدث التسميات التوضيحية الحية",
+  "translation2":"","inputLanguage":"en-US","outputLanguage":"ar","outputLanguage2":"","isPremiumCustomer":false,"blockStorage":false,"uid":null
+}
 const languageData = {
   'en': {
     "caption-header":"Captions & Translations",

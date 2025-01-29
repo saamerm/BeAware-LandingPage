@@ -1,7 +1,32 @@
-.holder {
-  font-family: sans-serif;
+
+/* Used by the video view */
+.scroller2 {
+  max-height: 100%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column-reverse;
+  margin: auto;
+  text-align: center;
+}    
+
+.overlay2 {
+  background-color: rgba(0, 0, 0, 0.35); /* Semi-transparent grey */
+  color: white;
+  text-align: center;
+  min-width: none;
+  min-height: none;
+  /* padding: 10px; */
+  /* position:absolute; */
+  display: flex;
+  justify-content: center;
+
+}
+
+.holder2 {
+	font-family:"SF Pro Text","SF Pro Icons","Helvetica Neue",Helvetica,Verdana,Arial,sans-serif;
   font-size: 2em;
-  text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 42px #0fa, 0 0 82px #0fa,0 0 92px #0fa;
+  color: #fff;
+  text-shadow: 0.5px 0.5px 1px #111, 0 0 5px #111, 0 0 2px #111;
   line-height: 1.75;
   margin: auto;
   width: 100%;
@@ -19,6 +44,15 @@
   height: 100px;
   border-radius: 3px;
 }
+/* Continuation of older CSS code   */
+.holder {
+	font-family:"SF Pro Text","SF Pro Icons","Helvetica Neue",Helvetica,Verdana,Arial,sans-serif;
+  font-size: 1.5em;
+  line-height: 1.75;
+  margin: auto;
+  padding: 20px 20px;
+}
+
 img {
   width: 100%;
 }
@@ -106,15 +140,28 @@ input:focus {
 .ios-button-text{
   color: var(--neutrals-white, #FFF);
   text-align: center;
-  font-family: Roboto;
+	font-family:"SF Pro Text","SF Pro Icons","Helvetica Neue",Helvetica,Verdana,Arial,sans-serif;
   font-size: 18px;
   font-style: normal;
   font-weight: 600;
   line-height: normal;
 }
-      
+.live-caption{
+    max-height: 370px;
+    overflow-y: scroll;
+    font-size: x-large;
+    padding: 10px;
+}
+#footer {
+    bottom: 0;
+    width: 100%;
+    position: absolute;
+    background-color: #f5f5f5;
+    margin: 0px 0;
+  }
+
 .scroller {
-  max-height: 100%;
+  max-height: 87%;
   overflow: auto;
   display: flex;
   flex-direction: column-reverse;
@@ -127,7 +174,7 @@ input:focus {
 #header
 {
 	background-color:#1d3b78;
-	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-family:"SF Pro Text","SF Pro Icons","Helvetica Neue",Helvetica,Verdana,Arial,sans-serif;
 	display:block;
   width: 100%;
 }
@@ -137,7 +184,7 @@ input:focus {
 	font-weight:normal;
 	padding-top:20px;
 	margin-left:10px;
-	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-family:"SF Pro Text","SF Pro Icons","Helvetica Neue",Helvetica,Verdana,Arial,sans-serif;
 	margin-top:0;
 	margin-bottom:0;
   color: white;
@@ -149,7 +196,7 @@ input:focus {
 	font-weight:normal;
 	font-size:14px;
 	padding:5px 0 20px 80px;
-	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-family:"SF Pro Text","SF Pro Icons","Helvetica Neue",Helvetica,Verdana,Arial,sans-serif;
 	margin-top:0;
 	margin-bottom:0;
   color: white;
@@ -168,5 +215,5 @@ a.active {
 }
 
 .customPadding{
-  padding:20px;
+  padding:5px;
 }

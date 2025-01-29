@@ -25,7 +25,8 @@
 .holder2 {
 	font-family:"SF Pro Text","SF Pro Icons","Helvetica Neue",Helvetica,Verdana,Arial,sans-serif;
   font-size: 2em;
-  text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 42px #0fa, 0 0 82px #0fa,0 0 92px #0fa;
+  color: #fff;
+  text-shadow: 0.5px 0.5px 1px #111, 0 0 5px #111, 0 0 2px #111;
   line-height: 1.75;
   margin: auto;
   width: 100%;
@@ -148,14 +149,13 @@ input:focus {
 .live-caption{
     max-height: 370px;
     overflow-y: scroll;
-    font-size: large;
+    font-size: x-large;
     padding: 10px;
 }
 #footer {
     bottom: 0;
     width: 100%;
     position: absolute;
-    height: $height-footer;
     background-color: #f5f5f5;
     margin: 0px 0;
   }
@@ -215,5 +215,5 @@ a.active {
 }
 
 .customPadding{
-  padding:20px;
+  padding:5px;
 }
