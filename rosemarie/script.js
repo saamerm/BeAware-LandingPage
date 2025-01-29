@@ -1,92 +1,109 @@
-$(document).ready(function() {
-  // Needs to be here because of autoRetrieve = true
-  isStreamingCaptions = false
+// Configuration and Initialization
+const response = {
+  input: "",
+  inputLanguage: "en",
+  output1: "",
+  outputLanguage: "fr",
+  output2: "",
+  outputLanguage2: "es",
+};
 
+let languageCode = response.inputLanguage; // Initial value
+let voiceChoice = window.speechSynthesis.getVoices().find((voice) => voice.lang.slice(0, 2) === languageCode);
+let isStreamingCaptions = false;
+let isPlayingSpeech = false;
+let transcript = "";
+let readText = "";
+let isTesting = true; // TODO: Change to false before publishing
+let counter = 0; // Debug counter
+
+const layover = `
+  <div class="inner-div">
+    <div id="holder2" class="holder2" style="height: 100px; border: #EEEEEE; border-style: solid;">
+      <div id="live-caption-empty2" class="scroller2 scroller-empty">Transcription will display here</div>
+      <div class="scroller2"><div id="live-caption2" class="overlay2"></div></div>
+    </div>
+  </div>
+`;
+
+// DOM Ready
+$(document).ready(() => {
+  isStreamingCaptions = false;
   getValueFromUrlParams();
-
+  checkLanguage();
   try {
-    loadLang(response['inputLanguage'])
+    loadLang(response.inputLanguage);
   } catch (error) {
     console.error(error);
   }
 
-  $("#output1").click(function () {
-    translate(response['outputLanguage']);
-  });
-  $("#output2").click(function () {
-    translate(response['outputLanguage2']);
-  });
-  $("#input").click(function () {
-    translate(response['inputLanguage']);
-  });
-
-  // Loads quotes as user wishes on clicking the button
-  $("#get-live-caption").on("click", buttonTapped);
-  $("#live-caption-empty2").on("click", buttonTapped);
-  $("#live-caption2").on("click", buttonTapped);
+  // Event Listeners
+  $("#output1").click(() => translate(response.outputLanguage));
+  $("#output2").click(() => translate(response.outputLanguage2));
+  $("#input").click(() => translate(response.inputLanguage));
+  $("#get-live-caption, #live-caption-empty2, #live-caption2").on("click", toggleStreaming);
   $("#mute").on("click", muteButtonTapped);
   $("#unmute").on("click", unmuteButtonTapped);
   $('#mute').hide();
 
-  //$("#arabic").on("click", function() { translate("arabic"); });
-  // Loads the initial quote - without pressing the button
-  const unusedVariable = setInterval(recurringFunction, 1000);  
-  
-  // callUserViewedAPI("rosemarie"); // automatically converted during replace, to the stream name
-  checkLanguage();	
+  // Initial Setup
+  setInterval(recurringFunction, 1000);
 });
 
-var forVideoParam = false
-var autoRetrieveParam = false
-var videoTextColorParam = ""
-var chromaParam = ""
+// URL Parameter Handling
+let forVideoParam = false;
+let autoRetrieveParam = false;
+let videoTextColorParam = "";
+let chromaParam = "";
+
 function getValueFromUrlParams() {
-  var urlParams = new URLSearchParams(window.location.search);
+  const urlParams = new URLSearchParams(window.location.search);
   forVideoParam = urlParams.get('forVideo');
   videoTextColorParam = urlParams.get('videoTextColor');
   autoRetrieveParam = urlParams.get('autoRetrieve');
   chromaParam = urlParams.get('chroma');
 
-  if (forVideoParam){
-    $('#holder').hide();
-    $('#header').hide();
+  if (forVideoParam) {
+    $('#holder, #header').hide();
   } else {
     $('#outer-div').hide();
   }
-  if (videoTextColorParam != ""){
-    // $("#myParagraph").css({"backgroundColor": "black", "color": "white"});
-    $("#holder2").css({ "color": "#" + videoTextColorParam });    
+
+  if (videoTextColorParam) {
+    $("#holder2").css({ color: `#${videoTextColorParam}` });
   }
-  if (autoRetrieveParam){
-    buttonTapped()
+
+  if (autoRetrieveParam) {
+    toggleStreaming();
   }
-  // If a chroma parameter is passed, update the background color
-  if (chromaParam != "") {
+
+  if (chromaParam) {
     document.body.style.backgroundColor = `#${chromaParam}`;
+  }
+
+  $("#outer-div").html(layover);
+}
+
+// Streaming and Caption Logic
+function toggleStreaming() {
+  isStreamingCaptions = !isStreamingCaptions;
+  if (isStreamingCaptions) {
+    startTimer();
+  } else {
+    stopTimer();
   }
 }
 
-// Transcript or translation
-var response =  {
-  input: "",
-  outputLanguage: "fr",
-  output2: "",
-  outputLanguage2: "es"
-};
+function startTimer() {
+  $("#get-live-caption").html(languageData[languageCode]['get-live-caption-stop']);
+}
 
-var isStreamingCaptions = false; 
-function buttonTapped() {
-  if (isStreamingCaptions){
-    // If streaming captions and the button is tapped, stop
-    stopTimer() 
-  } else{ 
-    startTimer();
-  }
-  isStreamingCaptions = !isStreamingCaptions;
+function stopTimer() {
+  $("#get-live-caption").html(languageData[languageCode]['get-live-caption']);
 }
 
 function muteButtonTapped() {
-  if (isStreamingCaptions){
+  if (isStreamingCaptions) {
     mute();
   } else {
     alert("Captions are not streaming");
@@ -94,7 +111,7 @@ function muteButtonTapped() {
 }
 
 function unmuteButtonTapped() {
-  if (isStreamingCaptions){
+  if (isStreamingCaptions) {
     iOSSpeakerFix();
     unmute();
   } else {
@@ -102,275 +119,229 @@ function unmuteButtonTapped() {
   }
 }
 
-function iOSSpeakerFix() {
-  // Create a new utterance with the latest text and language code
-  const utterance = new SpeechSynthesisUtterance("");
-  synth.speak(utterance);
-}
-
-var isPlayingSpeech = false
-function mute(){
-  isPlayingSpeech = false
+function mute() {
+  isPlayingSpeech = false;
   $('#unmute').show();
   $('#mute').hide();
 }
 
-function unmute(){
-  isPlayingSpeech = true
+function unmute() {
+  isPlayingSpeech = true;
   $('#mute').show();
   $('#unmute').hide();
 }
 
-function showRightTranscript(){
-  if (languageCode === response['inputLanguage']){
-    transcript = response['input']
-  } else if (languageCode === response['outputLanguage']) {
-    transcript = response['output1']
+function iOSSpeakerFix() {
+  const utterance = new SpeechSynthesisUtterance("");
+  synth.speak(utterance);
+}
+
+// Transcript Display Logic
+function showRightTranscript() {
+  let transcript;
+  if (languageCode === response.inputLanguage) {
+    transcript = response.input;
+  } else if (languageCode === response.outputLanguage) {
+    transcript = response.output1;
   } else {
-    transcript = response['output2']
+    transcript = response.output2;
   }
-  // Only update DOM if needed, not with every API call
-  if ($("#live-caption").text() !== transcript){
+
+  if ($("#live-caption").text() !== transcript) {
     $("#live-caption").html(transcript);
   }
-  if ($("#live-caption2").text() !== transcript){
+  if ($("#live-caption2").text() !== transcript) {
     $("#live-caption2").html(transcript);
   }
 }
 
-var localization = ""
-var languageCode = response['inputLanguage'] // Initial value
-function loadLang(lang){
-  readText = "" // Reset the reading logic
+// Language Handling
+function loadLang(lang) {
+  readText = ""; // Reset reading logic
   $("#caption-header").html(languageData[lang]['caption-header']);
-  $("#live-caption-empty").html(languageData[lang]['live-caption-empty']);
-  $("#live-caption-empty2").html(languageData[lang]['live-caption-empty']); // For video
+  $("#live-caption-empty, #live-caption-empty2").html(languageData[lang]['live-caption-empty']);
   $("#hotmail").html(languageData[lang]['hotmail']);
-  $("#input").html(languageData[response['inputLanguage']]['name']);
-  $("#output1").html(languageData[response['outputLanguage']]['name']);
-  $("#output2").html(languageData[response['outputLanguage2']]['name']);
-  if (isStreamingCaptions){
-    $("#get-live-caption").html(languageData[lang]['get-live-caption-stop'])
-  } else {
-    $("#get-live-caption").html(languageData[lang]['get-live-caption'])
+  $("#input").html(languageData[response.inputLanguage]['name']);
+
+  if (response.outputLanguage) {
+    $("#output1").html(languageData[response.outputLanguage]['name']);
   }
-}
-
-var transcript = "";
-var isTesting = false; //TODO: Before publishing, Change this to false
-var counter = 0; // Only used for debug
-function recurringFunction() {
-  if (response['input'] == ""){ //if transcript is empty, show/hide the placeholder
-    if (forVideoParam){
-      $('#live-caption-empty2').show();
-    } else {
-      $('#live-caption-empty2').show();
-    }
+  if (response.outputLanguage2) {
+    $("#output2").html(languageData[response.outputLanguage2]['name']);
   }
-  else {
-    $('#live-caption-empty').hide();
-    $('#live-caption-empty2').hide();
-    showRightTranscript()
-  }
-  if (isStreamingCaptions) {
-    if (isTesting) {
-      transcript = transcript + transcript;
-      $("#live-caption").html(transcript+counter++);
-    } else {
-      getTranscript();
-    }
-  }
-}
 
-function startTimer() {
-  // If the user taps on the Start streaming button, then show the Stop Streaming message
-  $("#get-live-caption").html(languageData[languageCode]['get-live-caption-stop'])
-}
-
-function stopTimer() {
-  // If the user taps on the Stop streaming button, then show the Start Streaming message
-  $("#get-live-caption").html(languageData[languageCode]['get-live-caption'])
-}
-
-var readText = ""
-function getTranscript() {
-  $.support.cors = true;           
-  var url="https://api.deafassistant.com/stream/LiteGetStream?streamName=rosemarie";
-  
-  // To avoid using JQuery, you can use this https://stackoverflow.com/questions/3229823/how-can-i-pass-request-headers-with-jquerys-getjson-method
-  $.getJSON(
-    url,
-    function (a) {
-      var json = JSON.stringify(a);
-      // console.log(json)
-      if (a && a.transcript && a.transcript != "") {
-        response['input'] = a.transcript
-        response['inputLanguage'] = a.inputLanguage.substring(0, 2);
-        response['output1'] = a.translation
-        response['outputLanguage'] = a.outputLanguage.substring(0, 2);
-
-        // This is for audio enhancement        
-        if (languageCode == response['inputLanguage']){
-          readLogic(a.transcript)
-        } else {
-          readLogic(a.translation)
-        }    
-        
-        if (!a.isActivelyStreaming){
-          buttonTapped(); // Automatically stop streaming if event is not live
-        }
-      }
-        //Your code
-    }
+  $("#get-live-caption").html(
+    isStreamingCaptions ? languageData[lang]['get-live-caption-stop'] : languageData[lang]['get-live-caption']
   );
+}
+
+// Recurring Function for Caption Updates
+function recurringFunction() {
+  if (response.input === "") {
+    $('#live-caption-empty, #live-caption-empty2').show();
+  } else {
+    $('#live-caption-empty, #live-caption-empty2').hide();
+    showRightTranscript();
+  }
+
+  if (isStreamingCaptions) {
+    isTesting ? getMockTranscript() : getTranscript();
+  }
+}
+
+// API and Mock Data Handling
+function getTranscript() {
+  const url = "https://api.deafassistant.com/stream/LiteGetStream?streamName=rosemarie";
+  $.getJSON(url, (data) => {
+    if (data?.transcript) {
+      updateResponse(data);
+      readLogic(data.transcript);
+      if (!data.isActivelyStreaming) {
+        toggleStreaming();
+      }
+    }
+  });
 }
 
 function checkLanguage() {
-  $.support.cors = true;           
-  var url="https://api.deafassistant.com/stream/LiteGetStream?streamName=rosemarie";
-  
-  // To avoid using JQuery, you can use this https://stackoverflow.com/questions/3229823/how-can-i-pass-request-headers-with-jquerys-getjson-method
-  $.getJSON(
-    url,
-    function (a) {
-      var json = JSON.stringify(a);
-      // console.log(json)
-      if (a && a.transcript && a.transcript != "") {
-        // transcript = a.Transcript;
-        response['inputLanguage'] = a.inputLanguage.substring(0, 2);
-        response['outputLanguage'] = a.outputLanguage.substring(0, 2);
-        response['outputLanguage2'] = a.outputLanguage2.substring(0, 2);
-        // Translate the page to the input language
-        translate(response['inputLanguage']);
-        // Change the language options at the bottom of the page
-        $("#input").html(languageData[response['inputLanguage']]['name']);
-        $("#output1").html(languageData[response['outputLanguage']]['name']);      
-        if (response['outputLanguage2'] && response['outputLanguage2'] != ""){      
-          $("#output2").html(languageData[response['outputLanguage2']]['name']);      
-        } 
-        // TODO: Remove these 3 lines to force the 3rd language to be there
-        else {
-          $("#output2").hide();
-        }
-      }
+  if (isTesting) {
+    checkMockLanguage();
+    return;
+  }
+  const url = "https://api.deafassistant.com/stream/LiteGetStream?streamName=rosemarie";
+  $.getJSON(url, (data) => {
+    if (data?.transcript) {
+      updateResponse(data);
+      translate(response.inputLanguage);
+      updateLanguageOptions();
     }
-  );
+  });
 }
 
-// Audio enhancement
-function readLogic(message){
-  // The first time don't read, else it will start reading from the beginning  
-  if (readText == ""){
-      readText = message          
+function updateResponse(data) {
+  response.input = data.transcript;
+  response.inputLanguage = data.inputLanguage.substring(0, 2);
+  response.output1 = data.translation;
+  response.outputLanguage = data.outputLanguage.substring(0, 2);
+  response.output2 = data.translation2;
+  response.outputLanguage2 = data.outputLanguage2.substring(0, 2);
+}
+
+function updateLanguageOptions() {
+  $("#input").html(languageData[response.inputLanguage]['name']);
+  if (response.outputLanguage) {
+    $("#output1").html(languageData[response.outputLanguage]['name']);
+  }
+  if (response.outputLanguage2) {
+    $("#output2").html(languageData[response.outputLanguage2]['name']);
   } else {
-    var a = getNumberOfWords(message)
-    var b = getNumberOfWords(readText)
-    console.log(a-b)
-    // If there are any words that are unread, then read    
-    if (a > b){
-      readText = removeWords(message, b)
-      console.log(readText)
-      if (isPlayingSpeech){
-        console.log("ReadText")
-        speakText(readText, languageCode)
-      }    
-    }
-    readText = message
+    $("#output2").hide();
   }
 }
 
-// Initialize the speech synthesis
-const synth = window.speechSynthesis;
-
-// Keep track of the current speech utterance
+// Speech Synthesis Logic
+let synth = window.speechSynthesis;
 let currentUtterance = null;
+let speechQueue = [];
+
 function speakText(newText, langCode) {
-  // Clear the previous utterance if it exists
-  if (currentUtterance) {
-    synth.cancel();
+  if (!newText.trim() || !synth) {
+    console.warn("No text provided or SpeechSynthesis not supported.");
+    return;
   }
 
-  // Remove the old text from the new text if it exists
-  if (currentUtterance && newText.includes(currentUtterance.text)) {
-    newText = newText.replace(currentUtterance.text, "");
+  speechQueue.push({ text: newText, lang: langCode });
+  if (!currentUtterance) {
+    processQueue();
   }
+}
 
-  // Create a new utterance with the latest text and language code
-  const utterance = new SpeechSynthesisUtterance(newText);
-  utterance.lang = langCode;
+function processQueue() {
+  if (speechQueue.length === 0) return;
 
-  // Set the new utterance as the current utterance
-  currentUtterance = utterance;
+  const { text, lang } = speechQueue.shift();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.voice = voiceChoice || (() => {
+    alert("This language is not available for playback on your device.");
+    muteButtonTapped();
+    return null;
+  })();
+  utterance.lang = lang;
 
-  // Event handler to play the next utterance after the current one ends
-  utterance.onend = function () {
-    // You can perform additional actions after the utterance ends if needed
-    console.log("Current utterance ended. Playing the next utterance.");
+  utterance.onend = () => {
+    currentUtterance = null;
+    processQueue();
   };
 
-  // Speak the latest text
-  synth.speak(utterance);
-}
+  utterance.onerror = (event) => {
+    console.error("Speech synthesis error:", event.error);
+    currentUtterance = null;
+    processQueue();
+  };
 
-function translate(language){
-  languageCode = language
-  loadLang(language)
-}
-
-function getNumberOfWords(inputString){
-  if (inputString.trim() !== '') {
-    // Split the string into an array of words
-    const wordsArray = inputString.split(/\s+/);
-
-    // Get the number of words
-    return wordsArray.length;
+  if (isStreamingCaptions) {
+    synth.speak(utterance);
   }
+}
+
+// Utility Functions
+function getNumberOfWords(inputString) {
+  return inputString.trim() ? inputString.split(/\s+/).length : 0;
 }
 
 function removeWords(inputString, numberOfWordsToRemove) {
-  // Check if the input string is not empty
-  if (inputString && inputString.trim() !== '') {
-    const wordsArray = inputString.split(/\s+/);
-
-    // Remove the specified number of words from the beginning
-    const newWordsArray = wordsArray.slice(numberOfWordsToRemove);
-
-    // Join the remaining words to form the new string
-    const newString = newWordsArray.join(' ');
-
-    // Return the modified string
-    return newString;
-  } else {
-    // Return an empty string if the input is empty
-    return '';
-  }
-};
-
-function callUserViewedAPI(streamName) {
-  const apiUrl = `http://api.deafassistant.com/api/v1/stream/view-counter`;
-  const requestData = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(streamName),
-  };
-
-  fetch(apiUrl, requestData)
-    .then((response) => {
-      if (response.ok) {
-        // Request was successful (HTTP 200 OK)
-        console.log('API call successful');
-      } else {
-        // Handle errors or non-200 responses here
-        console.error('API call failed');
-      }
-    })
-    .catch((error) => {
-      // Handle network or other errors here
-      console.error('API call failed with an exception:', error);
-    });    
+  if (!inputString.trim()) return "";
+  const wordsArray = inputString.split(/\s+/);
+  return wordsArray.slice(numberOfWordsToRemove).join(' ');
 }
+
+function removeWordsRTL(inputString, numberOfWordsToRemove) {
+  if (!inputString.trim()) return "";
+  const wordsArray = inputString.split(/\s+/);
+  return wordsArray.slice(0, wordsArray.length - numberOfWordsToRemove).join(' ');
+}
+
+// Mock Data and Testing
+let mockWord = "";
+
+function checkMockLanguage() {
+  const data = mockObject3;
+  if (data?.transcript) {
+    updateResponse(data);
+    translate(response.inputLanguage);
+    updateLanguageOptions();
+  }
+}
+
+function getMockTranscript() {
+  mockWord += " .سيبدأ الحدث. ";
+  $("#live-caption").html(`${transcript} ${counter++} ${mockWord}`);
+  const data = mockObject3;
+  if (data?.transcript) {
+    updateResponse(data);
+    readLogic(`${data.transcript} ${mockWord}`);
+    if (!data.isActivelyStreaming) {
+      toggleStreaming();
+    }
+  }
+}
+
+const mockObject3 = {
+  id: 59,
+  timestamp: "2025-01-29T04:36:36.4389888",
+  roomName: "rosemarie",
+  description: "",
+  isActivelyStreaming: true,
+  transcript: "What happened to this. So, let's see if the translation gets removed from this text, where is the value? Why is this not working? Let's go on and continue. Is this translation showing nothing. Yes, it is not showing anything. What is actually going on here? I have no idea.",
+  translation: "حدث التسميات التوضيحية الحية",
+  translation2: "",
+  inputLanguage: "en-US",
+  outputLanguage: "ar",
+  outputLanguage2: "",
+  isPremiumCustomer: false,
+  blockStorage: false,
+  uid: null,
+};
 
 const languageData = {
   'en': {

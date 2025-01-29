@@ -359,7 +359,9 @@ function processQueue(langCode) {
   };
 
   // Speak the text
-  synth.speak(utterance);
+  if (isStreamingCaptions){
+    synth.speak(utterance);
+  }
 }
 
 // Translate the page to this language
@@ -397,6 +399,24 @@ function removeWords(inputString, numberOfWordsToRemove) {
     return '';
   }
 };
+
+function removeWordsRTL(inputString, numberOfWordsToRemove) {
+  // Check if the input string is not empty
+  if (inputString && inputString.trim() !== '') {
+    const wordsArray = inputString.split(/\s+/);
+
+    // Remove the specified number of words from the end
+    // slice(start, end?)
+    const newWordsArray4 = wordsArray.slice(numberOfWordsToRemove - 1);
+    // Join the remaining words to form the new string
+    const newString = newWordsArray4.join(' ');
+    // Return the modified string
+    return newString;
+  } else {
+    // Return an empty string if the input is empty
+    return '';
+  }
+}
 
 function callUserViewedAPI(streamName) {
   const apiUrl = `http://api.deafassistant.com/api/v1/stream/view-counter`;
