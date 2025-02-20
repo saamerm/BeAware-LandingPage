@@ -33,7 +33,7 @@ let forVideoParam = false;
 let autoRetrieveParam = false;
 let videoTextColorParam = "";
 let chromaParam = "";
-var interval = 1000
+var interval = 500
 // --- DOM Ready Handler ---
 $(document).ready(function () {
   isStreamingCaptions = false; // Ensure initial state
