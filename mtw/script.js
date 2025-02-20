@@ -33,7 +33,7 @@ let forVideoParam = false;
 let autoRetrieveParam = false;
 let videoTextColorParam = "";
 let chromaParam = "";
-
+var interval = 1000
 // --- DOM Ready Handler ---
 $(document).ready(function () {
   isStreamingCaptions = false; // Ensure initial state
@@ -58,7 +58,7 @@ $(document).ready(function () {
   $("#mute").hide();
 
   // Start recurring function (for fetching data)
-  setInterval(recurringFunction, 1000);
+  setInterval(recurringFunction, interval);
   // callUserViewedAPI("mtw"); // Automatically converted during replace, to the stream name
 });
 
