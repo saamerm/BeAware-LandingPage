@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>LaunchDTW Detroit Upcoming Startup Events Calendar</title>
+    <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detroit Upcoming Startup Community Events</title><link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<header>
+  <h1>Detroit Upcoming Startup Events Calendar</h1>
+</header>
+
+<div id="loader" class="loader"></div>
+
+<main id="events-container" class="events-container"></main>
+
+<footer style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; text-align: center; font-size: 14px; color: #333; border-top: 1px solid #ddd;">
+  Built by <strong>Saamer Mansoor</strong>.
+  Want to contribute or add your community event?
+  Reach out at <a href="mailto:saamer@thefirstprototype.com" style="color: #007bff; text-decoration: none;">saamer@thefirstprototype.com</a>.
+
+  <div style="margin-top: 15px;">
+    <p style="margin-bottom: 5px;">📩 Subscribe for updates on local events, grants, and startups:</p>
+    <input type="email" id="subscriberEmail" placeholder="Enter your email" style="padding: 8px; width: 250px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px;">
+    <button onclick="subscribe()" style="padding: 8px 12px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px;">
+      Subscribe
+    </button>
+  </div>
+
+  <p id="subscriptionMessage" style="font-size: 13px; margin-top: 10px;"></p>
+</footer>
+
+<script>
+  function subscribe() {
+    var email = document.getElementById("subscriberEmail").value;
+    var message = document.getElementById("subscriptionMessage");
+    if (!email.includes("@") || !email.includes(".")) {
+      message.innerHTML = "❌ Please enter a valid email address.";
+      message.style.color = "red";
+      return;
+    }
+    var requestBody = {
+      "Name": "DTW",
+      "Email": email,
+      "Message": document.referrer
+    };
+    fetch("https://script.google.com/macros/s/AKfycbz42xFl_59V36k5VJgldCLFRBv9Gw1n2Z6XapMt1V9d_G-deUaoaOYbkqHddM3HnzA/exec", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        mode: 'no-cors',
+        body: JSON.stringify(requestBody)
+      })
+      .then(data => {
+        console.log(data)
+        // if (data.success) {
+        message.innerHTML = "✅ Thank you! You have been subscribed.";
+        message.style.color = "green";
+        document.getElementById("subscriberEmail").value = ""; // Clear input
+        // } else {
+        //     message.innerHTML = "⚠️ Something went wrong. Please try again.";
+        //     message.style.color = "red";
+        // }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        message.innerHTML = "⚠️ Error: Unable to subscribe at the moment.";
+        message.style.color = "red";
+      });
+  }
+</script>
+<!-- partial -->
+  <script  src="./script.js"></script>
+
+</body>
+</html>
