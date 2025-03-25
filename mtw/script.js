@@ -17,6 +17,10 @@ let response = {
   outputLanguage: "fr",
   output2: "",
   outputLanguage2: "es",
+  output3: "",
+  outputLanguage3: "de",
+  output4: "",
+  outputLanguage4: "ar",
 };
 let languageCode = DEFAULT_LANGUAGE; // Initial value
 let voiceChoice;
@@ -49,6 +53,8 @@ $(document).ready(function () {
   // Event listeners for translation
   $("#output1").on("click", () => translate(response.outputLanguage));
   $("#output2").on("click", () => translate(response.outputLanguage2));
+  $("#output3").on("click", () => translate(response.outputLanguage3));
+  $("#output4").on("click", () => translate(response.outputLanguage4));
   $("#input").on("click", () => translate(response.inputLanguage));
 
   // Event listeners for live captions and mute/unmute
@@ -141,8 +147,12 @@ function showRightTranscript() {
     transcript = response.input;
   } else if (languageCode === response.outputLanguage) {
     transcript = response.output1;
-  } else {
+  } else if (languageCode === response.outputLanguage2) {
     transcript = response.output2;
+  } else if (languageCode === response.outputLanguage3) {
+    transcript = response.output3;
+  } else if (languageCode === response.outputLanguage4) {
+    transcript = response.output4;
   }
 
   const liveCaption = $("#live-caption");
@@ -171,6 +181,12 @@ function loadLang(lang) {
   }
   if (response.outputLanguage2) {
     $("#output2").html(languageData[response.outputLanguage2]["name"]);
+  }
+  if (response.outputLanguage3) {
+    $("#output3").html(languageData[response.outputLanguage3]["name"]);
+  }
+  if (response.outputLanguage4) {
+    $("#output4").html(languageData[response.outputLanguage4]["name"]);
   }
   
   // Set button text based on streaming state
@@ -214,6 +230,10 @@ function getTranscript() {
           textToRead = data.translation;
       } else if (languageCode === response.outputLanguage2){
         textToRead = data.translation2;
+      } else if (languageCode === response.outputLanguage3){
+        textToRead = data.translation3;
+      } else if (languageCode === response.outputLanguage4){
+        textToRead = data.translation4;
       }
 
       if (textToRead) {
@@ -232,6 +252,10 @@ function updateResponseData(data) {
     response.outputLanguage = data.outputLanguage.substring(0, 2);
     response.output2 = data.translation2;
     response.outputLanguage2 = data.outputLanguage2.substring(0, 2);
+    response.output3 = data.translation3;
+    response.outputLanguage3 = data.outputLanguage3.substring(0, 2);
+    response.output4 = data.translation4;
+    response.outputLanguage4 = data.outputLanguage4.substring(0, 2);
 }
 
 function checkLanguage() {
@@ -257,6 +281,16 @@ function checkLanguage() {
             } else {
               $("#output2").hide();
             }
+            if (response.outputLanguage3) {
+              $("#output3").html(languageData[response.outputLanguage3].name);
+            } else {
+              $("#output3").hide();
+            }
+            if (response.outputLanguage4) {
+              $("#output4").html(languageData[response.outputLanguage4].name);
+            } else {
+              $("#output4").hide();
+            }
         }
     });
 }
@@ -265,6 +299,8 @@ function updateResponseLanguages(data) {
   response.inputLanguage = data.inputLanguage.substring(0, 2);
   response.outputLanguage = data.outputLanguage.substring(0, 2);
   response.outputLanguage2 = data.outputLanguage2.substring(0, 2);
+  response.outputLanguage3 = data.outputLanguage3.substring(0, 2);
+  response.outputLanguage4 = data.outputLanguage4.substring(0, 2);
 }
 
 function readLogic(message) {
@@ -394,6 +430,16 @@ function checkMockLanguage() {
     } else {
         $("#output2").hide();
     }
+    if (response.outputLanguage3) {
+      $("#output3").html(languageData[response.outputLanguage3].name);
+    } else {
+      $("#output3").hide();
+    }
+    if (response.outputLanguage4) {
+      $("#output4").html(languageData[response.outputLanguage4].name);
+    } else {
+      $("#output4").hide();
+    }
   }
 }
 
@@ -414,7 +460,11 @@ function getMockTranscript() {
         } else if (languageCode === response.outputLanguage){
             textToRead = mockData.translation;
         } else if (languageCode === response.outputLanguage2){
-            textToRead = mockData.translation2;
+          textToRead = mockData.translation2;
+        } else if (languageCode === response.outputLanguage3){
+          textToRead = mockData.translation3;
+        } else if (languageCode === response.outputLanguage4){
+          textToRead = mockData.translation4;
         }
         
        if (textToRead) {
@@ -435,9 +485,13 @@ const mockObject = {
   "isActivelyStreaming": true,
   "translation": "El evento comenzará en breve",
   "translation2": "سيبدأ الحدث قريبا",
+  "translation3": "Iche liebe diche!",
+  "translation4": "Comment ça va?",
   "inputLanguage": "en-US",
   "outputLanguage": "es",
   "outputLanguage2": "ar-001",
+  "outputLanguage3": "de",
+  "outputLanguage4": "fr",
   "isPremiumCustomer": false,
   "blockStorage": false,
   "uid": null
@@ -460,8 +514,6 @@ const languageData = {
     "caption-header":"Captions & Translations",
     "get-live-caption":"Get Live Captions",
     "get-live-caption-stop":"Stop Streaming",
-    "english-language":"English",
-    "french-language":"Français",
     "live-caption-empty":"Transcription will display here",
     "hotmail":"PS: I love you. Get free event subtitles & translations",
     "name":"English"
@@ -490,15 +542,64 @@ const languageData = {
     "hotmail":"PS: 我爱你。在这里获取免费的现场活动转录: ",
     "name":"中文"
   },
-  'ar': {
-    "caption-header":"التسمية التوضيحية المباشرة للحدث",
-    "get-live-caption":"احصل على تسميات توضيحية مباشرة",
-    "get-live-caption-stop":"إيقاف البث",
-    "live-caption-empty":"سيتم عرض النص هنا",
-    "hotmail":"ملاحظة: أنا أحبك. احصل على نسخة مجانية من الحدث المباشر على ",
-    "name":"العربية"
-  },
-  'es': {
+  const languageData = {
+    'en': {
+      "caption-header": "Captions & Translations",
+      "get-live-caption": "Get Live Captions",
+      "get-live-caption-stop": "Stop Streaming",
+      "live-caption-empty": "Transcription will display here",
+      "hotmail": "PS: I love you. Get free event subtitles & translations",
+      "name": "English"
+    },
+    'fr': {
+      "caption-header": "Sous-titrage en direct",
+      "get-live-caption": "Obtenir des sous-titres en direct",
+      "get-live-caption-stop": "Arrêter le streaming",
+      "live-caption-empty": "La transcription s'affichera ici",
+      "hotmail": "PS je t'aime. Obtenez votre transcription gratuite de l'événement en direct sur",
+      "name": "Français"
+    },
+    'my': {
+      "caption-header": "စာတန်းထိုး & ဘာသာပြန်",
+      "get-live-caption": "တိုက်ရိုက်စာတန်းထိုးရယူပါ",
+      "get-live-caption-stop": "စတင်ထုတ်လွှင့်မှုကို ရပ်ပါ",
+      "live-caption-empty": "စာသားပြန်ဆိုမှုသည် ဤနေရာတွင် ပြသမည်",
+      "hotmail": "PS: မင်းကို ချစ်တယ်။ အခမဲ့ အခမ်းအနားစာတန်းထိုးနှင့် ဘာသာပြန်ရယူပါ",
+      "name": "မြန်မာ"
+    },
+    'zh': {
+      "caption-header": "字幕与翻译",
+      "get-live-caption": "获取实时字幕",
+      "get-live-caption-stop": "停止直播",
+      "live-caption-empty": "转录内容将在此显示",
+      "hotmail": "PS: 我爱你。免费获取活动字幕和翻译",
+      "name": "简体中文"
+    },
+    'id': {
+      "caption-header": "Teks & Terjemahan",
+      "get-live-caption": "Dapatkan Teks Langsung",
+      "get-live-caption-stop": "Hentikan Streaming",
+      "live-caption-empty": "Transkripsi akan ditampilkan di sini",
+      "hotmail": "PS: Aku mencintaimu. Dapatkan subtitle & terjemahan acara gratis",
+      "name": "Bahasa"
+    },
+    'th': {
+      "caption-header": "คำบรรยาย & การแปล",
+      "get-live-caption": "รับคำบรรยายสด",
+      "get-live-caption-stop": "หยุดการสตรีม",
+      "live-caption-empty": "ข้อความที่ถอดความจะแสดงที่นี่",
+      "hotmail": "PS: ฉันรักคุณ รับคำบรรยายและการแปลเหตุการณ์ฟรี",
+      "name": "ไทย"
+    },  
+    'ar': {
+      "caption-header":"التسمية التوضيحية المباشرة للحدث",
+      "get-live-caption":"احصل على تسميات توضيحية مباشرة",
+      "get-live-caption-stop":"إيقاف البث",
+      "live-caption-empty":"سيتم عرض النص هنا",
+      "hotmail":"ملاحظة: أنا أحبك. احصل على نسخة مجانية من الحدث المباشر على ",
+      "name":"العربية"
+    },
+    'es': {
     "caption-header":"Subtítulos en vivo de eventos",
     "get-live-caption":"Obtener subtítulos en vivo",
     "get-live-caption-stop":"Dejar de transmitir",
@@ -514,7 +615,6 @@ const languageData = {
     'hi': {	"caption-header":"इवेंट लाइव कैप्शनिंग",	"get-live-caption":"लाइव कैप्शन प्राप्त करें",	"get-live-caption-stop":"स्ट्रीमिंग बंद करो",	"live-caption-empty":"प्रतिलेखन यहां प्रदर्शित होगा",	"hotmail":"पीएस मैं तुमसे प्यार करता हूँ। अपना निःशुल्क लाइव-इवेंट ट्रांसक्रिप्शन प्राप्त करें",	"name":"हिंदी"	},
     'ur': {	"caption-header":"ایونٹ لائیو کیپشننگ",	"get-live-caption":"لائیو کیپشن حاصل کریں۔",	"get-live-caption-stop":"سلسلہ بندی بند کریں۔",	"live-caption-empty":"نقل یہاں ظاہر ہوگی۔",	"hotmail":"PS: میں تم سے پیار کرتا ہوں۔ اپنے لائیو ایونٹ کی مفت نقل حاصل کریں۔",	"name":"اردو"	},
     'yo': {	"caption-header":"Ifiweranṣẹ Live Iṣẹlẹ",	"get-live-caption":"Gba Awọn akọle Live",	"get-live-caption-stop":"Duro ṣiṣanwọle",	"live-caption-empty":"Transcription yoo han nibi",	"hotmail":"PS: Mo nifẹ rẹ. Gba transcription-iṣẹlẹ laaye ọfẹ rẹ",	"name":"Yoruba"	},
-    'id': {	"caption-header":"Teks Langsung Acara",	"get-live-caption":"Dapatkan Teks Langsung",	"get-live-caption-stop":"Hentikan Streaming",	"live-caption-empty":"Transkripsi akan ditampilkan di sini",	"hotmail":"PS Aku mencintaimu. Dapatkan transkripsi acara langsung gratis Anda",	"name":"Bahasa"	},
     'it': {	"caption-header":"Sottotitoli in tempo reale per eventi",	"get-live-caption":"Ottieni sottotitoli in tempo reale",	"get-live-caption-stop":"Interrompi lo streaming",	"live-caption-empty":"La trascrizione verrà visualizzata qui",	"hotmail":"PS Ti amo. Ottieni la trascrizione gratuita degli eventi dal vivo",	"name":"Italiano"	},
     'ja': {	"caption-header":"イベントのライブキャプション",	"get-live-caption":"ライブキャプションを取得する",	"get-live-caption-stop":"ストリーミングを停止する",	"live-caption-empty":"ここに文字起こしが表示されます",	"hotmail":"PS: 愛しています。無料のライブイベントの文字起こしを入手",	"name":"日本語"	},
     'sw': {	"caption-header":"Manukuu ya Tukio Papo Hapo",	"get-live-caption":"Pata Manukuu Papo Hapo",	"get-live-caption-stop":"Acha Kutiririsha",	"live-caption-empty":"Unukuzi utaonyeshwa hapa",	"hotmail":"PS: Ninakupenda. Pata manukuu yako ya tukio la moja kwa moja bila malipo",	"name":"kiswahili"	},
@@ -522,7 +622,6 @@ const languageData = {
     'vi': {	"caption-header":"Chú thích trực tiếp sự kiện",	"get-live-caption":"Nhận phụ đề trực tiếp",	"get-live-caption-stop":"Dừng phát trực tuyến",	"live-caption-empty":"Phiên âm sẽ hiển thị ở đây",	"hotmail":"Tái bút: Anh yêu em. Nhận bản ghi sự kiện trực tiếp miễn phí của bạn",	"name":"Tiếng Việt"	},
     'ro': {	"caption-header":"Subtitrare în direct la eveniment",	"get-live-caption":"Obțineți subtitrări live",	"get-live-caption-stop":"Opriți redarea în flux",	"live-caption-empty":"Transcrierea se va afișa aici",	"hotmail":"PS Te iubesc. Obțineți transcrierea gratuită a evenimentului live",	"name":"Română"	},
     'zh-hant': {	"caption-header":"事件即時字幕",	"get-live-caption":"取得即時字幕",	"get-live-caption-stop":"停止串流",	"live-caption-empty":"轉錄將顯示在這裡",	"hotmail":"附註：我愛你。獲取免費的現場活動轉錄",	"name":"中國傳統的"	},
-    'zh': {	"caption-header":"事件实时字幕",	"get-live-caption":"获取实时字幕",	"get-live-caption-stop":"停止串流",	"live-caption-empty":"转录将显示在这里",	"hotmail":"附言：我爱你。获取免费的现场活动转录",	"name":"简体中文"	},
     'hr': {	"caption-header":"Titliranje događaja uživo",	"get-live-caption":"Nabavite titlove uživo",	"get-live-caption-stop":"Zaustavi strujanje",	"live-caption-empty":"Ovdje će se prikazati transkripcija",	"hotmail":"PS Volim te. Dobijte besplatnu transkripciju događaja uživo",	"name":"Hrvatski"	},
     'fa': {	"caption-header":"زیرنویس زنده رویداد",	"get-live-caption":"زیرنویس‌های زنده دریافت کنید",	"get-live-caption-stop":"توقف جریان",	"live-caption-empty":"رونویسی در اینجا نمایش داده می شود",	"hotmail":"در ضمن من عاشقتم. رونویسی رایگان رویداد زنده خود را دریافت کنید",	"name":"فارسی"	},
     'nl': {	"caption-header":"Live ondertiteling van evenementen",	"get-live-caption":"Ontvang live ondertiteling",	"get-live-caption-stop":"Stop met streamen",	"live-caption-empty":"De transcriptie wordt hier weergegeven",	"hotmail":"PS ik hou van je. Ontvang uw gratis transcriptie van live-evenementen",	"name":"Nederlands"	},
