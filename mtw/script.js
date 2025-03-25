@@ -510,54 +510,29 @@ const mockObject3 = {
   "translation2":"","inputLanguage":"en-US","outputLanguage":"ar","outputLanguage2":"","isPremiumCustomer":false,"blockStorage":false,"uid":null
 }
 const languageData = {
-  'en': {
-    "caption-header":"Captions & Translations",
-    "get-live-caption":"Get Live Captions",
-    "get-live-caption-stop":"Stop Streaming",
-    "live-caption-empty":"Transcription will display here",
-    "hotmail":"PS: I love you. Get free event subtitles & translations",
-    "name":"English"
-  },
-  'fr': {
-    "caption-header":"Sous-titrage en direct",
-    "get-live-caption":"Obtenir des sous-titres en direct",
-    "get-live-caption-stop":"Arrêter le streaming",
-    "live-caption-empty":"La transcription s'affichera ici",
-    "hotmail":"PS je t'aime. Obtenez votre transcription gratuite de l'événement en direct sur ",
-    "name":"Français"
-  },
-  'de': {
-    "caption-header":"Live-Untertitel für Ereignisse",
-    "get-live-caption":"Live-Untertitel abrufen",
-    "get-live-caption-stop":"Streaming beenden",
-    "live-caption-empty":"Transkript wird hier angezeigt",
-    "hotmail":"PS: Ich liebe dich. Holen Sie sich Ihre kostenlose Live-Event-Transkription unter ",
-    "name":"Deutsche"
-  },
-  'zh': {
-    "caption-header":"事件实时字幕",
-    "get-live-caption":"获取实时字幕",
-    "get-live-caption-stop":"停止直播",
-    "live-caption-empty":"转录内容将显示在此处",
-    "hotmail":"PS: 我爱你。在这里获取免费的现场活动转录: ",
-    "name":"中文"
-  },
-  const languageData = {
     'en': {
-      "caption-header": "Captions & Translations",
-      "get-live-caption": "Get Live Captions",
-      "get-live-caption-stop": "Stop Streaming",
-      "live-caption-empty": "Transcription will display here",
-      "hotmail": "PS: I love you. Get free event subtitles & translations",
-      "name": "English"
+      "caption-header":"Captions & Translations",
+      "get-live-caption":"Get Live Captions",
+      "get-live-caption-stop":"Stop Streaming",
+      "live-caption-empty":"Transcription will display here",
+      "hotmail":"PS: I love you. Get free event subtitles & translations",
+      "name":"English"
     },
     'fr': {
-      "caption-header": "Sous-titrage en direct",
-      "get-live-caption": "Obtenir des sous-titres en direct",
-      "get-live-caption-stop": "Arrêter le streaming",
-      "live-caption-empty": "La transcription s'affichera ici",
-      "hotmail": "PS je t'aime. Obtenez votre transcription gratuite de l'événement en direct sur",
-      "name": "Français"
+      "caption-header":"Sous-titrage en direct",
+      "get-live-caption":"Obtenir des sous-titres en direct",
+      "get-live-caption-stop":"Arrêter le streaming",
+      "live-caption-empty":"La transcription s'affichera ici",
+      "hotmail":"PS je t'aime. Obtenez votre transcription gratuite de l'événement en direct sur ",
+      "name":"Français"
+    },
+    'de': {
+      "caption-header":"Live-Untertitel für Ereignisse",
+      "get-live-caption":"Live-Untertitel abrufen",
+      "get-live-caption-stop":"Streaming beenden",
+      "live-caption-empty":"Transkript wird hier angezeigt",
+      "hotmail":"PS: Ich liebe dich. Holen Sie sich Ihre kostenlose Live-Event-Transkription unter ",
+      "name":"Deutsche"
     },
     'my': {
       "caption-header": "စာတန်းထိုး & ဘာသာပြန်",
@@ -600,12 +575,12 @@ const languageData = {
       "name":"العربية"
     },
     'es': {
-    "caption-header":"Subtítulos en vivo de eventos",
-    "get-live-caption":"Obtener subtítulos en vivo",
-    "get-live-caption-stop":"Dejar de transmitir",
-    "live-caption-empty":"La transcripción se mostrará aquí.",
-    "hotmail":"PD Te amo. Obtenga su transcripción gratuita de eventos en vivo",
-    "name":"Español"
+      "caption-header":"Subtítulos en vivo de eventos",
+      "get-live-caption":"Obtener subtítulos en vivo",
+      "get-live-caption-stop":"Dejar de transmitir",
+      "live-caption-empty":"La transcripción se mostrará aquí.",
+      "hotmail":"PD Te amo. Obtenga su transcripción gratuita de eventos en vivo",
+      "name":"Español"
     },
     'pt': {	"caption-header":"Legendas ao vivo de eventos",	"get-live-caption":"Obtenha legendas ao vivo",	"get-live-caption-stop":"Pare de transmitir",	"live-caption-empty":"A transcrição será exibida aqui",	"hotmail":"PS Eu Te Amo. Obtenha sua transcrição gratuita de evento ao vivo",	"name":"Português"	},
     'ar': {	"caption-header":"حدث التسميات التوضيحية الحية",	"get-live-caption":"احصل على التسميات التوضيحية المباشرة",	"get-live-caption-stop":"توقف عن البث",	"live-caption-empty":"سيتم عرض النسخ هنا",	"hotmail":"ملاحظة: أنا أحبك. احصل على النسخ المجاني للحدث المباشر",	"name":"عربي"	},
