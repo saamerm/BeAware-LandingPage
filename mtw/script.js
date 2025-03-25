@@ -247,15 +247,25 @@ function getTranscript() {
 }
 function updateResponseData(data) {
     response.input = data.transcript;
-    response.inputLanguage = data.inputLanguage.substring(0, 2);
+    if (data.inputLanguage) {
+      response.inputLanguage = data.inputLanguage.substring(0, 2);
+    }
     response.output1 = data.translation;
-    response.outputLanguage = data.outputLanguage.substring(0, 2);
+    if (data.outputLanguage) {
+      response.outputLanguage = data.outputLanguage.substring(0, 2);
+    }
     response.output2 = data.translation2;
-    response.outputLanguage2 = data.outputLanguage2.substring(0, 2);
+    if (data.outputLanguage2) {
+      response.outputLanguage2 = data.outputLanguage2.substring(0, 2);
+    }
     response.output3 = data.translation3;
-    response.outputLanguage3 = data.outputLanguage3.substring(0, 2);
+    if (data.outputLanguage3) {
+      response.outputLanguage3 = data.outputLanguage3.substring(0, 2);
+    }
     response.output4 = data.translation4;
-    response.outputLanguage4 = data.outputLanguage4.substring(0, 2);
+    if (data.outputLanguage4) {
+      response.outputLanguage4 = data.outputLanguage4.substring(0, 2);
+    }
 }
 
 function checkLanguage() {
@@ -301,6 +311,22 @@ function updateResponseLanguages(data) {
   response.outputLanguage2 = data.outputLanguage2.substring(0, 2);
   response.outputLanguage3 = data.outputLanguage3.substring(0, 2);
   response.outputLanguage4 = data.outputLanguage4.substring(0, 2);
+  if (data.inputLanguage) {
+    response.inputLanguage = data.inputLanguage.substring(0, 2);
+  }
+  if (data.outputLanguage) {
+    response.outputLanguage = data.outputLanguage.substring(0, 2);
+  }
+  if (data.outputLanguage2) {
+    response.outputLanguage2 = data.outputLanguage2.substring(0, 2);
+  }
+  if (data.outputLanguage3) {
+    response.outputLanguage3 = data.outputLanguage3.substring(0, 2);
+  }
+  if (data.outputLanguage4) {
+    response.outputLanguage4 = data.outputLanguage4.substring(0, 2);
+  }
+
 }
 
 function readLogic(message) {
