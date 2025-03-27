@@ -181,19 +181,25 @@ function loadLang(lang) {
   $("#input").html(languageData[response.inputLanguage]["name"]);
 
   // Conditionally set the language names
-  if (response.outputLanguage) {
+  if (languageData[response.inputLanguage]) {
+    $("#input").html(languageData[response.inputLanguage]["name"]);
+  }
+
+  if (languageData[response.outputLanguage]) {
     $("#output1").html(languageData[response.outputLanguage]["name"]);
   }
-  if (response.outputLanguage2) {
+
+  if (languageData[response.outputLanguage2]) {
     $("#output2").html(languageData[response.outputLanguage2]["name"]);
   }
-  if (response.outputLanguage3) {
+
+  if (languageData[response.outputLanguage3]) {
     $("#output3").html(languageData[response.outputLanguage3]["name"]);
   }
-  if (response.outputLanguage4) {
+
+  if (languageData[response.outputLanguage4]) {
     $("#output4").html(languageData[response.outputLanguage4]["name"]);
-  }
-  
+  }  
   // Set button text based on streaming state
   const buttonText = isStreamingCaptions ? "get-live-caption-stop" : "get-live-caption";
   $("#get-live-caption").html(langData[buttonText]);
