@@ -76,7 +76,12 @@ function getValueFromUrlParams() {
   videoTextColorParam = urlParams.get("videoTextColor");
   autoRetrieveParam = urlParams.get("autoRetrieve");
   chromaParam = urlParams.get("chroma");
-
+  heightParam = urlParams.get("height");
+  if (heightParam) {
+    $("#live-caption").css({ 
+      maxHeight: `${heightParam}%`,
+    });
+  }
   if (forVideoParam) {
     $("#holder").hide();
     $("#header").hide();
