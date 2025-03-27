@@ -291,23 +291,23 @@ function checkLanguage() {
             translate(response.inputLanguage);
             $("#input").html(languageData[response.inputLanguage].name);
     
-            if (response.outputLanguage) {
+            if (response.outputLanguage && languageData[response.outputLanguage]) {
               $("#output1").html(languageData[response.outputLanguage].name);
             } else {
                 $("#output1").hide();
             }
     
-            if (response.outputLanguage2) {
+            if (response.outputLanguage2 && languageData[response.outputLanguage2]) {
               $("#output2").html(languageData[response.outputLanguage2].name);
             } else {
               $("#output2").hide();
             }
-            if (response.outputLanguage3) {
+            if (response.outputLanguage3 && languageData[response.outputLanguage3]) {
               $("#output3").html(languageData[response.outputLanguage3].name);
             } else {
               $("#output3").hide();
             }
-            if (response.outputLanguage4) {
+            if (response.outputLanguage4 && languageData[response.outputLanguage4]) {
               $("#output4").html(languageData[response.outputLanguage4].name);
             } else {
               $("#output4").hide();
