@@ -62,14 +62,22 @@
       <button id="get-live-caption" style="background-color:#141414;" class="center ios-button ios-button-text">Get Live Captions</button>
     </div>
     <div style="height: 400px; border: #141414; border-style: solid;">
-      <div id="live-caption-empty" class="scroller scroller-empty">Transcription will display here</div>
+      <div id="live-caption-empty" style="font-size: 1.5em;" class="scroller scroller-empty">Transcription will display here</div>
       <div id="live-caption" aria-live="assertive" class="scroller live-caption"></div>
       <div style="display: flex; justify-content: center;">
         <i id="#arrow" class="fa-solid fa-arrow-down fa-fade center"></i>
       </div>
     </div>
-    <div style="display: flex; justify-content: center; padding:20px">
-      <i class="fa fa-language" aria-hidden="true" style="padding: 0px 10px 0px 10px; color:#141414;"></i>
+    <div style="display: flex; justify-content: center; padding:20px">      
+      <div>
+        <input type="checkbox" class="checkbox" id="checkbox">
+        <label for="checkbox" class="checkbox-label">
+          <i class="fas fa-moon"></i>
+          <i class="fas fa-sun"></i>
+          <span class="ball"></span>
+        </label>
+      </div>
+      <i class="fa fa-language" aria-hidden="true" style="padding: 0px 10px 0px 10px; font-size: 1.5em; color:#141414;"></i>
       <a href="#live-caption"><div id="input" style="font-size: 18px; padding: 0px 5px 0px 5px;" class="active">English</div></a>
       <a href="#live-caption"><div id="output1" style="font-size: 18px; padding: 0px 5px 0px 5px;" class="disabled">Français</div></a>
       <a href="#live-caption"><div id="output2" style="font-size: 18px; padding: 0px 5px 0px 5px;" class="disabled">Español</div></a>

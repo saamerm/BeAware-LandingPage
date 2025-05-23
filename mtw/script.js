@@ -425,6 +425,37 @@ function removeWords(inputString, numberOfWordsToRemove) {
   return newWordsArray.join(" ");
 }
 
+const checkbox = document.getElementById("checkbox")
+checkbox.addEventListener("change", () => {
+  // document.body.classList.toggle("dark")
+  invertColors()
+})
+function invertColors() { 
+  // the css we are going to inject
+  var css = 'html {-webkit-filter: invert(100%);' +
+      '-moz-filter: invert(100%);' + 
+      '-o-filter: invert(100%);' + 
+      '-ms-filter: invert(100%); }',
+  
+  head = document.getElementsByTagName('head')[0],
+  style = document.createElement('style');
+  
+  // a hack, so you can "invert back" clicking the bookmarklet again
+  if (!window.counter) { window.counter = 1;} else  { window.counter ++;
+  if (window.counter % 2 == 0) { var css ='html {-webkit-filter: invert(0%); -moz-filter:    invert(0%); -o-filter: invert(0%); -ms-filter: invert(0%); }'}
+   };
+  
+  style.type = 'text/css';
+  if (style.styleSheet){
+  style.styleSheet.cssText = css;
+  } else {
+  style.appendChild(document.createTextNode(css));
+  }
+  
+  //injecting the css to the head
+  head.appendChild(style);
+}
+
 function callUserViewedAPI(streamName) {
   const apiUrl = `http://api.deafassistant.com/api/v1/stream/view-counter`;
   fetch(apiUrl, {
