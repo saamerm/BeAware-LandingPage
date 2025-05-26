@@ -54,7 +54,9 @@
    postCall(url, myJSObject);
  }
  
+ var isTesting = false
  function postCall(url, myJSObject) {
+  if (isTesting) return;
      $.ajax({
      type: "POST",
      url: url,
