@@ -75,17 +75,26 @@ $(document).ready(function () {
   const closeMenuBtn = $('#close-menu-btn');
   const sidebar = $('#sidebar-menu');
   const body = $('body');
+  const mainContent = $('#main-content'); // For inert attribute
 
   function openSidebar() {
-      sidebar.addClass('open');
+      sidebar.addClass('open').attr('aria-hidden', 'false');
       menuToggleBtn.attr('aria-expanded', 'true');
-      sidebar.attr('aria-hidden', 'false');
+      mainContent.attr('inert', 'true'); // Make main content non-interactive
+      sidebar.focus(); // Focus the sidebar itself or the first interactive element
+      // Set focus to the first radio button in the first group that is checked, or just the first radio.
+      const firstActiveOption = sidebar.find('.menu-option[aria-checked="true"]').first();
+      if (firstActiveOption.length) {
+          firstActiveOption.focus();
+      } else {
+          sidebar.find('.menu-option[role="radio"]').first().focus();
+      }
   }
 
   function closeSidebar() {
-      sidebar.removeClass('open');
-      menuToggleBtn.attr('aria-expanded', 'false');
-      sidebar.attr('aria-hidden', 'true');
+      sidebar.removeClass('open').attr('aria-hidden', 'true');
+      menuToggleBtn.attr('aria-expanded', 'false').focus(); // Return focus to toggle button
+      mainContent.removeAttr('inert');
   }
 
   menuToggleBtn.on('click', function() {
@@ -101,16 +110,50 @@ $(document).ready(function () {
           closeSidebar();
       }
   });
+  
+  // Keyboard navigation for sidebar (radiogroups)
+  sidebar.on('keydown', '.menu-option[role="radio"]', function(e) {
+    const $this = $(this);
+    const $group = $this.closest('[role="radiogroup"]');
+    const $options = $group.find('.menu-option[role="radio"]');
+    let currentIndex = $options.index($this);
 
-  // Attach click listener to a static parent for dynamically added options
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        currentIndex = (currentIndex + 1) % $options.length;
+        $options.eq(currentIndex).focus();
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        currentIndex = (currentIndex - 1 + $options.length) % $options.length;
+        $options.eq(currentIndex).focus();
+    } else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        $this.click(); // Trigger the existing click handler
+    } else if (e.key === 'Escape') {
+        closeSidebar();
+    }
+  });
+
+
   $('#sidebar-menu').on('click', '.menu-option', function() {
       const $this = $(this);
       const action = $this.data('action');
       const value = $this.data('value');
+      
+      // Update ARIA states within the group
+      $this.closest('[role="radiogroup"]').find('.menu-option[role="radio"]').attr({
+          'aria-checked': 'false',
+          'tabindex': -1
+      });
+      $this.attr({'aria-checked': 'true', 'tabindex': 0 });
+
 
       switch(action) {
+          // ... (your existing switch cases for stream, theme, language, audio) ...
+          // No change needed here if they call functions that update the state
+          // and then updateSidebarActiveStates() is called.
           case 'stream':
-              buttonTapped(); // It's a toggle
+              buttonTapped();
               break;
           case 'theme':
               if (value === 'dark') {
@@ -132,93 +175,93 @@ $(document).ready(function () {
               }
               break;
       }
-      updateSidebarActiveStates();
+      updateSidebarActiveStates(); // This will re-apply tabindex and aria-checked based on global state
       // Optional: closeSidebar();
   });
 
-  const legacyCheckbox = $("#checkbox"); // Use jQuery selector
+  const legacyCheckbox = $("#checkbox");
   if (legacyCheckbox.length) {
-    legacyCheckbox.on("change", () => { // Use jQuery .on()
+    legacyCheckbox.on("change", () => {
         $('body').toggleClass('dark-mode');
-        updateSidebarActiveStates();
+        updateSidebarActiveStates(); // This will update the sidebar's display options
     });
   }
-  
-  // updateSidebarActiveStates(); // Will be called by checkLanguage after setup
 });
 
-// --- Function to update sidebar active states ---
+// --- Function to update sidebar active states (with ARIA) ---
 function updateSidebarActiveStates() {
     // Stream state
-    $('#stream-section .menu-option').removeClass('active-option');
-    if (isStreamingCaptions) {
-        $('#stream-section .menu-option[data-value="on"]').addClass('active-option');
-    } else {
-        $('#stream-section .menu-option[data-value="off"]').addClass('active-option');
-    }
+    const streamSection = $('#stream-section');
+    streamSection.find('.menu-option').attr({'aria-checked': 'false', 'tabindex': -1});
+    const activeStreamOption = isStreamingCaptions ? 
+        streamSection.find('.menu-option[data-value="on"]') : 
+        streamSection.find('.menu-option[data-value="off"]');
+    activeStreamOption.addClass('active-option').attr({'aria-checked': 'true', 'tabindex': 0});
+    streamSection.find('.menu-option').not(activeStreamOption).removeClass('active-option');
+
 
     // Theme state
-    $('#display-section .menu-option').removeClass('active-option');
-    if ($('body').hasClass('dark-mode')) {
-        $('#display-section .menu-option[data-value="dark"]').addClass('active-option');
-        $('#checkbox').prop('checked', true);
-    } else {
-        $('#display-section .menu-option[data-value="light"]').addClass('active-option');
-        $('#checkbox').prop('checked', false);
+    const displaySection = $('#display-section');
+    displaySection.find('.menu-option').attr({'aria-checked': 'false', 'tabindex': -1});
+    const activeThemeOption = $('body').hasClass('dark-mode') ?
+        displaySection.find('.menu-option[data-value="dark"]') :
+        displaySection.find('.menu-option[data-value="light"]');
+    activeThemeOption.addClass('active-option').attr({'aria-checked': 'true', 'tabindex': 0});
+    displaySection.find('.menu-option').not(activeThemeOption).removeClass('active-option');
+    $('#checkbox').prop('checked', $('body').hasClass('dark-mode'));
+
+
+    // Language state
+    const langSection = $('#language-section');
+    langSection.find('.menu-option').attr({'aria-checked': 'false', 'tabindex': -1}).removeClass('active-option');
+    const activeLangOption = langSection.find(`.menu-option[data-value="${languageCode}"]`);
+    if (activeLangOption.length) {
+        activeLangOption.addClass('active-option').attr({'aria-checked': 'true', 'tabindex': 0});
     }
 
-    // Language state (works with dynamically generated options)
-    $('#language-section .menu-option').removeClass('active-option');
-    $(`#language-section .menu-option[data-value="${languageCode}"]`).addClass('active-option');
 
     // Audio state
-    $('#audio-section .menu-option').removeClass('active-option');
-    if (isPlayingSpeech) { // true if unmuted
-        $('#audio-section .menu-option[data-value="unmute"]').addClass('active-option');
-    } else { // false if muted
-        $('#audio-section .menu-option[data-value="mute"]').addClass('active-option');
-    }
+    const audioSection = $('#audio-section');
+    audioSection.find('.menu-option').attr({'aria-checked': 'false', 'tabindex': -1});
+    const activeAudioOption = isPlayingSpeech ?
+        audioSection.find('.menu-option[data-value="unmute"]') :
+        audioSection.find('.menu-option[data-value="mute"]');
+    activeAudioOption.addClass('active-option').attr({'aria-checked': 'true', 'tabindex': 0});
+    audioSection.find('.menu-option').not(activeAudioOption).removeClass('active-option');
 }
 
-// --- Function to populate language menu in sidebar ---
+// --- Function to populate language menu in sidebar (with ARIA) ---
 function populateLanguageMenu() {
     const langSection = $('#language-section');
-    langSection.find('.menu-option').remove(); // Remove only options, keep heading
+    // Clear only menu options, not the heading
+    langSection.find('.menu-option[role="radio"]').remove();
 
-    const availableLanguages = new Set(); // Use a Set to store unique language codes
-
-    if (response.inputLanguage && languageData[response.inputLanguage]) {
-        availableLanguages.add(response.inputLanguage);
-    }
-    if (response.outputLanguage && languageData[response.outputLanguage]) {
-        availableLanguages.add(response.outputLanguage);
-    }
-    if (response.outputLanguage2 && languageData[response.outputLanguage2]) {
-        availableLanguages.add(response.outputLanguage2);
-    }
-    if (response.outputLanguage3 && languageData[response.outputLanguage3]) {
-        availableLanguages.add(response.outputLanguage3);
-    }
-    if (response.outputLanguage4 && languageData[response.outputLanguage4]) {
-        availableLanguages.add(response.outputLanguage4);
-    }
+    const availableLanguages = new Set();
+    if (response.inputLanguage && languageData[response.inputLanguage]) availableLanguages.add(response.inputLanguage);
+    if (response.outputLanguage && languageData[response.outputLanguage]) availableLanguages.add(response.outputLanguage);
+    if (response.outputLanguage2 && languageData[response.outputLanguage2]) availableLanguages.add(response.outputLanguage2);
+    if (response.outputLanguage3 && languageData[response.outputLanguage3]) availableLanguages.add(response.outputLanguage3);
+    if (response.outputLanguage4 && languageData[response.outputLanguage4]) availableLanguages.add(response.outputLanguage4);
     
-    if (availableLanguages.size === 0 && languageData[DEFAULT_LANGUAGE]) { // Fallback if API yields no known langs
+    if (availableLanguages.size === 0 && languageData[DEFAULT_LANGUAGE]) {
         availableLanguages.add(DEFAULT_LANGUAGE);
     }
 
-
     availableLanguages.forEach(langCode => {
+        const optionText = languageData[langCode] ? languageData[langCode].name : langCode; // Fallback to code if name missing
         const option = $('<div></div>')
             .addClass('menu-option')
+            .attr('role', 'radio') // Add role
             .attr('data-action', 'language')
             .attr('data-value', langCode)
-            .text(languageData[langCode].name);
+            .attr('tabindex', -1) // Initially not in tab order
+            .attr('aria-checked', 'false') // Initially not checked
+            .text(optionText);
         langSection.append(option);
     });
+    // After populating, update ARIA states based on current languageCode
+    updateSidebarActiveStates();
 }
-
-
 // --- Your Existing Functions (Modified where necessary) ---
 
 function getValueFromUrlParams() {
@@ -267,18 +310,35 @@ function getValueFromUrlParams() {
 function buttonTapped() {
   // startTimer/stopTimer update button text based on languageCode
   // which should be set by translate() before this can be reliably called.
-  if (isStreamingCaptions) {
-      stopTimer();
-  } else {
-      iOSSpeakerFix(); // Good to have it here to ensure audio context
-      startTimer();
-  }
+
   isStreamingCaptions = !isStreamingCaptions;
-  updateSidebarActiveStates();
-  if (languageData[languageCode]) { // Update button text after state change
-      loadLang(languageCode);
+    // Update button text and ARIA live region for announcements
+  const liveCaptionButton = $("#get-live-caption");
+  if (isStreamingCaptions) {
+      if (languageData[languageCode]) liveCaptionButton.text(languageData[languageCode]['get-live-caption-stop']);
+      else liveCaptionButton.text("Stop Streaming");
+      liveCaptionButton.attr("aria-pressed", "true"); // Announce it's active
+      // You might want an aria-live region to announce "Streaming started"
+  } else {
+      if (languageData[languageCode]) liveCaptionButton.text(languageData[languageCode]['get-live-caption']);
+      else liveCaptionButton.text("Get Live Captions");
+      liveCaptionButton.attr("aria-pressed", "false"); // Announce it's inactive
+      // Announce "Streaming stopped"
   }
+  
+  if (isStreamingCaptions) {
+    iOSSpeakerFix();
+    startTimer(); // Original function for button text based on lang
+  } else {
+    stopTimer(); // Original function
+  }
+  updateSidebarActiveStates(); // Sync sidebar
+  // loadLang(languageCode); // This is now part of start/stopTimer effectively
 }
+
+// ... (muteButtonTapped, unmuteButtonTapped - ensure they update isPlayingSpeech correctly) ...
+// ... (iOSSpeakerFix, mute, unmute - no direct ARIA, but support state changes) ...
+// ... (showRightTranscript - ensure #live-caption aria-live works as expected) ...
 
 function muteButtonTapped() {
   // No alert needed, sidebar shows state
@@ -386,8 +446,12 @@ function loadLang(lang) {
       }
   });
   
+    // Update the main "Get Live Captions" button text based on current streaming state
   const buttonTextKey = isStreamingCaptions ? "get-live-caption-stop" : "get-live-caption";
-  $("#get-live-caption").html(langData[buttonTextKey]);
+  const langDataForButton = languageData[lang] || languageData[DEFAULT_LANGUAGE]; // Fallback for button text
+  if (langDataForButton) {
+      $("#get-live-caption").text(langDataForButton[buttonTextKey]);
+  }
 }
 
 function recurringFunction() {
