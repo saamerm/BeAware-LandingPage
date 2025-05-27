@@ -12,13 +12,17 @@ const DEFAULT_LANGUAGE = "en";
 
 let response = {
   input: "",
-  inputLanguage: DEFAULT_LANGUAGE,
+  inputLanguage: DEFAULT_LANGUAGE, // Fallback
   output1: "",
-  outputLanguage: "fr",
+  outputLanguage: "", // Initialize as empty, API will populate
   output2: "",
-  outputLanguage2: "es",
+  outputLanguage2: "",
+  output3: "",
+  outputLanguage3: "",
+  output4: "",
+  outputLanguage4: "",
 };
-let languageCode = DEFAULT_LANGUAGE; // Initial value
+let languageCode = DEFAULT_LANGUAGE;
 let voiceChoice;
 let isStreamingCaptions = false;
 let isPlayingSpeech = false;
@@ -33,162 +37,377 @@ let forVideoParam = false;
 let autoRetrieveParam = false;
 let videoTextColorParam = "";
 let chromaParam = "";
+let heightParam = "";
+var interval = 1000; // Your interval
 
 // --- DOM Ready Handler ---
 $(document).ready(function () {
   isStreamingCaptions = false; // Ensure initial state
-  getValueFromUrlParams();
-  checkLanguage();
+  isPlayingSpeech = false; // Default to muted
 
-  try {
-    loadLang(response.inputLanguage);
-  } catch (error) {
-    console.error("Error loading language:", error);
+  getValueFromUrlParams();
+  checkLanguage(); // This will fetch languages, populate menu, and then translate
+
+  // Initial language load is now handled by checkLanguage -> populateLanguageMenu -> translate
+  // try {
+  //   loadLang(response.inputLanguage); // This might be redundant or premature
+  // } catch (error) {
+  //   console.error("Error loading language initially:", error);
+  // }
+
+  // Remove legacy click listeners for translation links, sidebar handles it
+  // $("#output1").on("click", () => translate(response.outputLanguage));
+  // ...
+
+  $("#get-live-caption, #live-caption-empty2, #live-caption2").on("click", buttonTapped);
+  // Mute/Unmute logic is triggered by sidebar, but original buttons can remain hidden
+  // $("#mute").on("click", muteButtonTapped);
+  // $("#unmute").on("click", unmuteButtonTapped);
+  $("#mute").hide();
+  $("#unmute").show(); // Show X-mark initially (muted state)
+
+
+  setInterval(recurringFunction, interval);
+  // callUserViewedAPI("mtw");
+
+  // --- Sidebar Menu Logic ---
+  const menuToggleBtn = $('#menu-toggle');
+  const closeMenuBtn = $('#close-menu-btn');
+  const sidebar = $('#sidebar-menu');
+  const body = $('body');
+
+  function openSidebar() {
+      sidebar.addClass('open');
+      menuToggleBtn.attr('aria-expanded', 'true');
+      sidebar.attr('aria-hidden', 'false');
   }
 
-  // Event listeners for translation
-  $("#output1").on("click", () => translate(response.outputLanguage));
-  $("#output2").on("click", () => translate(response.outputLanguage2));
-  $("#input").on("click", () => translate(response.inputLanguage));
+  function closeSidebar() {
+      sidebar.removeClass('open');
+      menuToggleBtn.attr('aria-expanded', 'false');
+      sidebar.attr('aria-hidden', 'true');
+  }
 
-  // Event listeners for live captions and mute/unmute
-  $("#get-live-caption, #live-caption-empty2, #live-caption2").on("click", buttonTapped);
-  $("#mute").on("click", muteButtonTapped);
-  $("#unmute").on("click", unmuteButtonTapped);
-  $("#mute").hide();
+  menuToggleBtn.on('click', function() {
+      sidebar.hasClass('open') ? closeSidebar() : openSidebar();
+  });
 
-  // Start recurring function (for fetching data)
-  setInterval(recurringFunction, 1000);
-  // callUserViewedAPI("stream72662"); // Automatically converted during replace, to the stream name
+  closeMenuBtn.on('click', closeSidebar);
+
+  $(document).on('click', function(event) {
+      if (sidebar.hasClass('open') &&
+          !$(event.target).closest('#sidebar-menu').length &&
+          !$(event.target).closest('#menu-toggle').length) {
+          closeSidebar();
+      }
+  });
+
+  // Attach click listener to a static parent for dynamically added options
+  $('#sidebar-menu').on('click', '.menu-option', function() {
+      const $this = $(this);
+      const action = $this.data('action');
+      const value = $this.data('value');
+
+      switch(action) {
+          case 'stream':
+              buttonTapped(); // It's a toggle
+              break;
+          case 'theme':
+              if (value === 'dark') {
+                  body.addClass('dark-mode');
+                  $('#checkbox').prop('checked', true);
+              } else {
+                  body.removeClass('dark-mode');
+                  $('#checkbox').prop('checked', false);
+              }
+              break;
+          case 'language':
+              translate(value);
+              break;
+          case 'audio':
+              if (value === 'mute') {
+                  muteButtonTapped();
+              } else {
+                  unmuteButtonTapped();
+              }
+              break;
+      }
+      updateSidebarActiveStates();
+      // Optional: closeSidebar();
+  });
+
+  const legacyCheckbox = $("#checkbox"); // Use jQuery selector
+  if (legacyCheckbox.length) {
+    legacyCheckbox.on("change", () => { // Use jQuery .on()
+        $('body').toggleClass('dark-mode');
+        updateSidebarActiveStates();
+    });
+  }
+  
+  // updateSidebarActiveStates(); // Will be called by checkLanguage after setup
 });
 
-// --- Functions ---
+// --- Function to update sidebar active states ---
+function updateSidebarActiveStates() {
+    // Stream state
+    $('#stream-section .menu-option').removeClass('active-option');
+    if (isStreamingCaptions) {
+        $('#stream-section .menu-option[data-value="on"]').addClass('active-option');
+    } else {
+        $('#stream-section .menu-option[data-value="off"]').addClass('active-option');
+    }
+
+    // Theme state
+    $('#display-section .menu-option').removeClass('active-option');
+    if ($('body').hasClass('dark-mode')) {
+        $('#display-section .menu-option[data-value="dark"]').addClass('active-option');
+        $('#checkbox').prop('checked', true);
+    } else {
+        $('#display-section .menu-option[data-value="light"]').addClass('active-option');
+        $('#checkbox').prop('checked', false);
+    }
+
+    // Language state (works with dynamically generated options)
+    $('#language-section .menu-option').removeClass('active-option');
+    $(`#language-section .menu-option[data-value="${languageCode}"]`).addClass('active-option');
+
+    // Audio state
+    $('#audio-section .menu-option').removeClass('active-option');
+    if (isPlayingSpeech) { // true if unmuted
+        $('#audio-section .menu-option[data-value="unmute"]').addClass('active-option');
+    } else { // false if muted
+        $('#audio-section .menu-option[data-value="mute"]').addClass('active-option');
+    }
+}
+
+// --- Function to populate language menu in sidebar ---
+function populateLanguageMenu() {
+    const langSection = $('#language-section');
+    langSection.find('.menu-option').remove(); // Remove only options, keep heading
+
+    const availableLanguages = new Set(); // Use a Set to store unique language codes
+
+    if (response.inputLanguage && languageData[response.inputLanguage]) {
+        availableLanguages.add(response.inputLanguage);
+    }
+    if (response.outputLanguage && languageData[response.outputLanguage]) {
+        availableLanguages.add(response.outputLanguage);
+    }
+    if (response.outputLanguage2 && languageData[response.outputLanguage2]) {
+        availableLanguages.add(response.outputLanguage2);
+    }
+    if (response.outputLanguage3 && languageData[response.outputLanguage3]) {
+        availableLanguages.add(response.outputLanguage3);
+    }
+    if (response.outputLanguage4 && languageData[response.outputLanguage4]) {
+        availableLanguages.add(response.outputLanguage4);
+    }
+    
+    if (availableLanguages.size === 0 && languageData[DEFAULT_LANGUAGE]) { // Fallback if API yields no known langs
+        availableLanguages.add(DEFAULT_LANGUAGE);
+    }
+
+
+    availableLanguages.forEach(langCode => {
+        const option = $('<div></div>')
+            .addClass('menu-option')
+            .attr('data-action', 'language')
+            .attr('data-value', langCode)
+            .text(languageData[langCode].name);
+        langSection.append(option);
+    });
+}
+
+
+// --- Your Existing Functions (Modified where necessary) ---
 
 function getValueFromUrlParams() {
   const urlParams = new URLSearchParams(window.location.search);
-  forVideoParam = urlParams.get("forVideo");
+  forVideoParam = urlParams.get("forVideo") === 'true';
   videoTextColorParam = urlParams.get("videoTextColor");
-  autoRetrieveParam = urlParams.get("autoRetrieve");
+  autoRetrieveParam = urlParams.get("autoRetrieve") === 'true';
   chromaParam = urlParams.get("chroma");
   heightParam = urlParams.get("height");
-  if (heightParam) {
-    $("#live-caption").css({ 
-      maxHeight: `${heightParam}%`,
-    });
-  }
 
+  if (heightParam) {
+    $("#live-caption").css({ maxHeight: `${heightParam}%` });
+  }
   if (forVideoParam) {
     $("#holder").hide();
     $("#header").hide();
+    $("#outer-div").show().html(LAYOVER_HTML);
   } else {
     $("#outer-div").hide();
   }
 
   if (videoTextColorParam) {
-    $("#holder2").css({ color: `#${videoTextColorParam}` });
-  }
-
-  if (autoRetrieveParam) {
-    buttonTapped();
+     if ($("#holder2").length) { // Check if holder2 exists already
+        $("#holder2").css({ color: `#${videoTextColorParam}` });
+    } else { // If not, wait for it to be inserted (common with LAYOVER_HTML)
+        $(document).one('DOMNodeInserted', '#outer-div', function(e) {
+            // Check if the inserted content contains holder2
+            if ($(e.target).find('#holder2').length || $(e.target).is('#holder2')) {
+                 $("#holder2").css({ color: `#${videoTextColorParam}` });
+            }
+        });
+    }
   }
 
   if (chromaParam) {
     document.body.style.backgroundColor = `#${chromaParam}`;
   }
-
-  $("#outer-div").html(LAYOVER_HTML);
+  
+  if (autoRetrieveParam) {
+    // Delay slightly to ensure other initializations (like language) might complete
+    setTimeout(buttonTapped, 100); 
+  }
 }
 
 
 function buttonTapped() {
-  isStreamingCaptions ? stopTimer() : startTimer();
+  // startTimer/stopTimer update button text based on languageCode
+  // which should be set by translate() before this can be reliably called.
+  if (isStreamingCaptions) {
+      stopTimer();
+  } else {
+      iOSSpeakerFix(); // Good to have it here to ensure audio context
+      startTimer();
+  }
   isStreamingCaptions = !isStreamingCaptions;
+  updateSidebarActiveStates();
+  if (languageData[languageCode]) { // Update button text after state change
+      loadLang(languageCode);
+  }
 }
 
 function muteButtonTapped() {
-  if (isStreamingCaptions) {
-    mute();
-  } else {
-    alert("Captions are not streaming");
-  }
+  // No alert needed, sidebar shows state
+  mute();
+  updateSidebarActiveStates();
 }
 
 function unmuteButtonTapped() {
-  if (isStreamingCaptions) {
-    iOSSpeakerFix();
-    unmute();
-  } else {
-    alert("Captions are not streaming");
-  }
+  iOSSpeakerFix();
+  unmute();
+  updateSidebarActiveStates();
 }
-
 
 function iOSSpeakerFix() {
-    // Create a new utterance with the latest text and language code
-    const utterance = new SpeechSynthesisUtterance("");
-    synth.speak(utterance);
+  if (!synth) return;
+  if (synth.state === 'suspended') { // Attempt to resume if suspended (common on mobile)
+    synth.resume();
+  }
+  const utterance = new SpeechSynthesisUtterance("");
+  utterance.volume = 0; // Play silently to activate audio context
+  synth.speak(utterance);
 }
-
 
 function mute() {
   isPlayingSpeech = false;
   $("#unmute").show();
   $("#mute").hide();
+  if (currentUtterance) {
+      synth.cancel();
+      speechQueue = [];
+      currentUtterance = null;
+  }
 }
 
 function unmute() {
   isPlayingSpeech = true;
   $("#mute").show();
   $("#unmute").hide();
+  processQueue(); // Attempt to process queue if items were added while muted
 }
 
 function showRightTranscript() {
+  let currentTranscriptText = ""; // Use a local var
   if (languageCode === response.inputLanguage) {
-    transcript = response.input;
+    currentTranscriptText = response.input;
   } else if (languageCode === response.outputLanguage) {
-    transcript = response.output1;
+    currentTranscriptText = response.output1;
+  } else if (languageCode === response.outputLanguage2) {
+    currentTranscriptText = response.output2;
+  } else if (languageCode === response.outputLanguage3) {
+    currentTranscriptText = response.output3;
+  } else if (languageCode === response.outputLanguage4) {
+    currentTranscriptText = response.output4;
   } else {
-    transcript = response.output2;
+    currentTranscriptText = response.input; // Default to input
   }
 
   const liveCaption = $("#live-caption");
-  const liveCaption2 = $("#live-caption2");
+  const liveCaption2 = $("#live-caption2"); // For video overlay
 
-  if (liveCaption.text() !== transcript) {
-    liveCaption.html(transcript);
+  if (liveCaption.length && liveCaption.html() !== currentTranscriptText) {
+    liveCaption.html(currentTranscriptText);
+    liveCaption.scrollTop(liveCaption[0].scrollHeight);
   }
-  if (liveCaption2.text() !== transcript) {
-    liveCaption2.html(transcript);
+  // For video overlay, ensure elements exist
+  if (liveCaption2.length && liveCaption2.html() !== currentTranscriptText) {
+    liveCaption2.html(currentTranscriptText);
+    // Potentially scroll liveCaption2 as well if it's scrollable
   }
 }
 
 function loadLang(lang) {
-  readText = ""; // Reset read logic
+  if (!languageData[lang]) {
+    console.warn("Language data missing for:", lang, "Using default:", DEFAULT_LANGUAGE);
+    lang = DEFAULT_LANGUAGE; // Fallback to default if selected lang data is missing
+    if (!languageData[lang]) { // If default is also missing, critical error
+        console.error("Default language data missing. UI text will not update.");
+        // Display a generic message or leave as is
+        $("#caption-header").text("Live Captioning");
+        $("#live-caption-empty").text("Transcription will appear here.");
+        // ... set other texts to generic defaults
+        return;
+    }
+  }
+  readText = ""; 
   const langData = languageData[lang];
   $("#caption-header").html(langData["caption-header"]);
   $("#live-caption-empty").html(langData["live-caption-empty"]);
-  $("#live-caption-empty2").html(langData["live-caption-empty"]); // For video
+  if ($("#live-caption-empty2").length) { // Check if overlay element exists
+      $("#live-caption-empty2").html(langData["live-caption-empty"]);
+  }
   $("#hotmail").html(langData["hotmail"]);
-  $("#input").html(languageData[response.inputLanguage]["name"]);
 
-  // Conditionally set the language names
-  if (response.outputLanguage) {
-    $("#output1").html(languageData[response.outputLanguage]["name"]);
-  }
-  if (response.outputLanguage2) {
-    $("#output2").html(languageData[response.outputLanguage2]["name"]);
-  }
+  // Update legacy link texts (they are hidden but good for consistency)
+  if (languageData[response.inputLanguage]) $("#input").html(languageData[response.inputLanguage]["name"]);
+  else $("#input").html("Input");
+
+  const outputs = [response.outputLanguage, response.outputLanguage2, response.outputLanguage3, response.outputLanguage4];
+  outputs.forEach((outputLang, index) => {
+      const outputEl = $(`#output${index + 1}`);
+      if (outputLang && languageData[outputLang]) {
+          outputEl.html(languageData[outputLang]["name"]).show();
+      } else {
+          outputEl.html(`Output ${index + 1}`).hide(); // Hide if no lang or no data
+      }
+  });
   
-  // Set button text based on streaming state
-  const buttonText = isStreamingCaptions ? "get-live-caption-stop" : "get-live-caption";
-  $("#get-live-caption").html(langData[buttonText]);
+  const buttonTextKey = isStreamingCaptions ? "get-live-caption-stop" : "get-live-caption";
+  $("#get-live-caption").html(langData[buttonTextKey]);
 }
 
 function recurringFunction() {
-  if (!response.input) {
-    $("#live-caption-empty2").show();
+  const mainCaptionEmpty = $("#live-caption-empty");
+  const overlayCaptionEmpty = $("#live-caption-empty2");
+
+  if (!response.input || response.input.trim() === "") {
+    mainCaptionEmpty.show();
+    $("#live-caption").hide();
+    if (overlayCaptionEmpty.length) {
+        overlayCaptionEmpty.show();
+        if ($("#live-caption2").length) $("#live-caption2").parent().hide(); // Hide parent scroller
+    }
   } else {
-    $("#live-caption-empty, #live-caption-empty2").hide();
+    mainCaptionEmpty.hide();
+    $("#live-caption").show();
+    if (overlayCaptionEmpty.length) {
+        overlayCaptionEmpty.hide();
+        if ($("#live-caption2").length) $("#live-caption2").parent().show();
+    }
     showRightTranscript();
   }
 
@@ -198,287 +417,271 @@ function recurringFunction() {
 }
 
 function startTimer() {
-    $("#get-live-caption").html(languageData[languageCode]['get-live-caption-stop'])
+    if (languageData[languageCode]) {
+      $("#get-live-caption").html(languageData[languageCode]['get-live-caption-stop']);
+    }
 }
   
 function stopTimer() {
-    $("#get-live-caption").html(languageData[languageCode]['get-live-caption'])
+    if (languageData[languageCode]) {
+      $("#get-live-caption").html(languageData[languageCode]['get-live-caption']);
+    }
 }
 
 function getTranscript() {
   $.support.cors = true;
-
   $.getJSON(API_URL, function (data) {
-    if (data && data.transcript) {
-      updateResponseData(data);
-      
-      // Audio enhancement
-      let textToRead;
-      if (languageCode === response.inputLanguage){
-          textToRead = data.transcript;
-      } else if (languageCode === response.outputLanguage){
-          textToRead = data.translation;
-      } else if (languageCode === response.outputLanguage2){
-        textToRead = data.translation2;
-      }
+    if (data) {
+      // updateResponseLanguages(data); // API might also update available langs dynamically, if so, re-populate
+      // populateLanguageMenu(); // And update menu
 
-      if (textToRead) {
-        readLogic(textToRead)
+      if (data.transcript !== undefined) {
+        updateResponseData(data); // This updates transcript text and also the language codes in `response`
+      
+        let textToRead = "";
+        if (languageCode === response.inputLanguage) textToRead = data.transcript;
+        else if (languageCode === response.outputLanguage) textToRead = data.translation;
+        else if (languageCode === response.outputLanguage2) textToRead = data.translation2;
+        else if (languageCode === response.outputLanguage3) textToRead = data.translation3;
+        else if (languageCode === response.outputLanguage4) textToRead = data.translation4;
+
+        if (textToRead) {
+          readLogic(textToRead);
+        }
       }
-      if (!data.isActivelyStreaming) {
-        buttonTapped(); // Auto stop if not actively streaming
+      if (data.isActivelyStreaming === false && isStreamingCaptions) {
+        buttonTapped();
       }
     }
+  }).fail(function(jqXHR, textStatus, errorThrown) {
+      console.error("Error fetching transcript:", textStatus, errorThrown);
   });
 }
-function updateResponseData(data) {
-    response.input = data.transcript;
-    response.inputLanguage = data.inputLanguage.substring(0, 2);
-    response.output1 = data.translation;
-    response.outputLanguage = data.outputLanguage.substring(0, 2);
-    response.output2 = data.translation2;
-    response.outputLanguage2 = data.outputLanguage2.substring(0, 2);
+
+function updateResponseData(data) { // Primarily for transcript text and associated language codes
+    response.input = data.transcript || "";
+    if (data.inputLanguage) response.inputLanguage = data.inputLanguage.substring(0, 2);
+    
+    response.output1 = data.translation || "";
+    if (data.outputLanguage) response.outputLanguage = data.outputLanguage.substring(0, 2);
+    
+    response.output2 = data.translation2 || "";
+    if (data.outputLanguage2) response.outputLanguage2 = data.outputLanguage2.substring(0, 2);
+
+    response.output3 = data.translation3 || "";
+    if (data.outputLanguage3) response.outputLanguage3 = data.outputLanguage3.substring(0, 2);
+
+    response.output4 = data.translation4 || "";
+    if (data.outputLanguage4) response.outputLanguage4 = data.outputLanguage4.substring(0, 2);
 }
 
-function checkLanguage() {
+function checkLanguage() { // Called ONCE on load to get available languages for the menu
     if (isTesting) {
-        checkMockLanguage();
+        checkMockLanguage(); // This will call populateLanguageMenu and translate
         return;
     }
     $.support.cors = true;
-    $.getJSON(API_URL, function(data) {
-        if (data && data.transcript) {
-            updateResponseLanguages(data);
-            translate(response.inputLanguage);
-            $("#input").html(languageData[response.inputLanguage].name);
-    
-            if (response.outputLanguage) {
-              $("#output1").html(languageData[response.outputLanguage].name);
-            } else {
-                $("#output1").hide();
-            }
-    
-            if (response.outputLanguage2) {
-              $("#output2").html(languageData[response.outputLanguage2].name);
-            } else {
-              $("#output2").hide();
-            }
+    // This initial call is to get the stream's language configuration
+    $.getJSON(API_URL, function(data) { 
+        if (data) {
+            updateResponseLanguages(data); // Set up response.xxxLanguage based on stream config
+            populateLanguageMenu();      // Build the sidebar menu with these languages
+            
+            // Set initial language: try API's input, then default
+            languageCode = (response.inputLanguage && languageData[response.inputLanguage]) ? response.inputLanguage : DEFAULT_LANGUAGE;
+            translate(languageCode);       // Load initial language and update UI
+        } else {
+            console.warn("Initial language check: No data received. Using defaults.");
+            populateLanguageMenu(); // Populate with defaults if any
+            translate(DEFAULT_LANGUAGE);
         }
+    }).fail(function() {
+        console.error("Failed to fetch initial language settings from API. Using defaults.");
+        // In case of API failure, response.xxxLanguage might be empty or default
+        // populateLanguageMenu will use these (potentially just DEFAULT_LANGUAGE)
+        populateLanguageMenu(); 
+        translate(DEFAULT_LANGUAGE);
     });
 }
 
-function updateResponseLanguages(data) {
-  response.inputLanguage = data.inputLanguage.substring(0, 2);
-  response.outputLanguage = data.outputLanguage.substring(0, 2);
-  response.outputLanguage2 = data.outputLanguage2.substring(0, 2);
+function updateResponseLanguages(data) { // Called by checkLanguage (once) or if API can change available langs
+  // This function defines WHICH languages are available for selection
+  response.inputLanguage = (data.inputLanguage) ? data.inputLanguage.substring(0, 2) : DEFAULT_LANGUAGE;
+  response.outputLanguage = (data.outputLanguage) ? data.outputLanguage.substring(0, 2) : "";
+  response.outputLanguage2 = (data.outputLanguage2) ? data.outputLanguage2.substring(0, 2) : "";
+  response.outputLanguage3 = (data.outputLanguage3) ? data.outputLanguage3.substring(0, 2) : "";
+  response.outputLanguage4 = (data.outputLanguage4) ? data.outputLanguage4.substring(0, 2) : "";
 }
 
 function readLogic(message) {
-    if (!readText) {
-        readText = message;
+    if (!isPlayingSpeech || !isStreamingCaptions) return; // Don't process if muted or not streaming
+
+    if (!readText || message.startsWith(readText.substring(0, Math.min(10, readText.length))) === false ) {
+        // If readText is empty OR new message doesn't start like old one (language change or jump)
+        // Then speak the whole new message.
+        speechQueue = []; // Clear queue for new full message
+        if (currentUtterance) synth.cancel(); // Cancel ongoing if any
+        speakText(message, languageCode);
+        readText = message; // Set readText to the full new message
     } else {
         const newWordCount = getNumberOfWords(message);
         const oldWordCount = getNumberOfWords(readText);
         
         if (newWordCount > oldWordCount){
             const unreadText = removeWords(message, oldWordCount);
-            if(isPlayingSpeech) {
-                speakText(unreadText, languageCode)
-            }
+            speakText(unreadText, languageCode); // Add incremental text to queue
         }
-        readText = message;
+        // Always update readText to the latest full message received from API
+        // This ensures 'oldWordCount' is correct for the next comparison.
+        readText = message; 
     }
 }
 
 function speakText(newText, langCode) {
-  if (!synth) {
-    console.error("SpeechSynthesis API is not supported in this browser.");
-    return;
-  }
-  if (!newText.trim()) {
-    console.warn("No text provided for speech synthesis.");
-    return;
-  }
+  if (!synth || !newText || !newText.trim()) return;
 
   speechQueue.push({ text: newText, lang: langCode });
-
-  if (!currentUtterance) {
+  if (!synth.speaking) { // Only call processQueue if not already speaking
     processQueue();
   }
 }
 
 function processQueue() {
-  if (speechQueue.length === 0) {
-    return;
+  if (speechQueue.length === 0 || !isPlayingSpeech || !isStreamingCaptions || synth.speaking) {
+    return; // Don't process if queue empty, muted, not streaming, or already speaking
   }
 
   const { text, lang } = speechQueue.shift();
   const utterance = new SpeechSynthesisUtterance(text);
-  voiceChoice = window.speechSynthesis.getVoices().find((voice) => voice.lang.slice(0, 2) === languageCode);
+  
+  voiceChoice = window.speechSynthesis.getVoices().find(voice => voice.lang.startsWith(lang));
     
   if (voiceChoice) {
     utterance.voice = voiceChoice;
   } else {
-      alert("This language is not available for playback on your device. Please try another device");
-      muteButtonTapped()
-      return
+      // console.warn(`No specific voice for ${lang}. Using default. Or alert & mute.`);
+      alert(`Language ${lang} not available for playback on your device.`);
+      muteButtonTapped(); // This might be too aggressive
+      return; 
   }
-  
   utterance.lang = lang;
 
-
-  currentUtterance = utterance;
+  currentUtterance = utterance; // Set before speaking
+  utterance.onstart = () => { /* currentUtterance is already set */ };
   utterance.onend = () => {
     currentUtterance = null;
     processQueue();
   };
   utterance.onerror = (event) => {
-    console.error("An error occurred during speech synthesis:", event.error);
+    console.error("Speech synthesis error:", event.error, "Text:", text);
     currentUtterance = null;
     processQueue();
   };
-
-  if (isStreamingCaptions) {
-    synth.speak(utterance);
-  }
+  synth.speak(utterance);
 }
 
-function translate(language) {
-    languageCode = language;
-    loadLang(language);
-    // voiceChoice is now being set in `processQueue` to ensure it is always in scope
+function translate(selectedLang) {
+    if (!languageData[selectedLang]) {
+        console.warn("Attempted to translate to unsupported or unknown language:", selectedLang);
+        // Optionally fall back to default or do nothing
+        // selectedLang = DEFAULT_LANGUAGE; 
+        return; // Or handle error more gracefully
+    }
+    languageCode = selectedLang;
+    loadLang(languageCode); // Update UI texts for the new language
+    
+    // Reset speech for new language
+    readText = ""; // So the new language transcript is read from the beginning
+    if (currentUtterance) {
+        synth.cancel(); // Stop any ongoing speech
+        currentUtterance = null;
+    }
+    speechQueue = []; // Clear the speech queue
+
+    updateSidebarActiveStates(); // Update active selection in sidebar
 }
 
 function getNumberOfWords(inputString) {
-  return inputString ? inputString.trim().split(/\s+/).length : 0;
+  return inputString ? inputString.trim().split(/\s+/).filter(Boolean).length : 0;
 }
 
 function removeWords(inputString, numberOfWordsToRemove) {
-  if (!inputString || !inputString.trim()) {
-    return "";
-  }
-
-  const wordsArray = inputString.split(/\s+/);
+  if (!inputString || !inputString.trim()) return "";
+  const wordsArray = inputString.trim().split(/\s+/);
   const newWordsArray = wordsArray.slice(numberOfWordsToRemove);
   return newWordsArray.join(" ");
 }
 
-const checkbox = document.getElementById("checkbox")
-checkbox.addEventListener("change", () => {
-  // document.body.classList.toggle("dark")
-  invertColors()
-})
-function invertColors() { 
-  // the css we are going to inject
-  var css = 'html {-webkit-filter: invert(100%);' +
-      '-moz-filter: invert(100%);' + 
-      '-o-filter: invert(100%);' + 
-      '-ms-filter: invert(100%); }',
-  
-  head = document.getElementsByTagName('head')[0],
-  style = document.createElement('style');
-  
-  // a hack, so you can "invert back" clicking the bookmarklet again
-  if (!window.counter) { window.counter = 1;} else  { window.counter ++;
-  if (window.counter % 2 == 0) { var css ='html {-webkit-filter: invert(0%); -moz-filter:    invert(0%); -o-filter: invert(0%); -ms-filter: invert(0%); }'}
-   };
-  
-  style.type = 'text/css';
-  if (style.styleSheet){
-  style.styleSheet.cssText = css;
-  } else {
-  style.appendChild(document.createTextNode(css));
-  }
-  
-  //injecting the css to the head
-  head.appendChild(style);
-}
+// Dark Mode (Class-based, invertColors() is replaced by body.dark-mode toggling)
+// The legacy checkbox listener is already set up to toggle 'dark-mode' class
 
-function callUserViewedAPI(streamName) {
-  const apiUrl = `http://api.deafassistant.com/api/v1/stream/view-counter`;
-  fetch(apiUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(streamName),
-  })
-    .then(response => {
-      if (response.ok) {
-        console.log('API call successful');
-      } else {
-        console.error('API call failed');
-      }
-    })
-    .catch(error => {
-      console.error('API call failed with an exception:', error);
-    });
-}
-
+// --- Mock Data Functions ---
 function checkMockLanguage() {
-  const mockData = mockObject;
-  if (mockData && mockData.transcript) {
-    updateResponseLanguages(mockData);
-    translate(response.inputLanguage);
-    $("#input").html(languageData[response.inputLanguage].name);
-    if (response.outputLanguage) {
-        $("#output1").html(languageData[response.outputLanguage].name);
-    } else {
-        $("#output1").hide();
-    }
-    if (response.outputLanguage2) {
-        $("#output2").html(languageData[response.outputLanguage2].name);
-    } else {
-        $("#output2").hide();
-    }
+  const mockData = mockObject; // Use your primary mock object
+  if (mockData) { // No need to check mockData.transcript here, just for language config
+    updateResponseLanguages(mockData); // Sets response.xxxLanguage
+    populateLanguageMenu();          // Builds sidebar menu from response.xxxLanguage
+
+    // Set initial language for testing
+    languageCode = (response.inputLanguage && languageData[response.inputLanguage]) ? response.inputLanguage : DEFAULT_LANGUAGE;
+    translate(languageCode);           // Loads this language
+  } else {
+      console.error("Mock object is undefined. Cannot check mock language.");
+      populateLanguageMenu(); // Populate with defaults
+      translate(DEFAULT_LANGUAGE);
   }
 }
 
-let mockWord = "";
+let mockWord = ""; // Keep this for getMockTranscript
 
 function getMockTranscript() {
-  // mockWord += " سيبدأ الحدث";
-    mockWord = mockWord + " Donde esta el baño."; // mock spanish data
-    $("#live-caption").html(transcript+ " " + counter++ + mockWord);
-  const mockData = mockObject;
-  if (mockData && mockData.transcript) {
-      updateResponseData(mockData)
+  // mockWord += " سيبدأ الحدث"; // Example Arabic
+  mockWord += " Donde esta el baño."; // Example Spanish
+  
+  const mockDataToUse = mockObject; // Choose which mock object to get transcript text from
+
+  // Simulate that the current transcript is appended with mockWord
+  // This logic is a bit different from just using mockDataToUse.transcript directly.
+  // For testing 'readLogic', we need to simulate an evolving transcript.
+  
+  // Let's simulate the API response structure for updateResponseData
+  let simulatedApiData = { ...mockDataToUse }; // Clone
+  simulatedApiData.transcript = (simulatedApiData.transcript || "") + " " + counter + mockWord;
+  // If you want to simulate translations also evolving:
+  simulatedApiData.translation = (simulatedApiData.translation || "") + " " + counter + mockWord; // Adjust if translation differs
+  simulatedApiData.translation2 = (simulatedApiData.translation2 || "") + " " + counter + mockWord;
+  // etc. for translation3 and translation4
+
+  updateResponseData(simulatedApiData); // This updates response.input, response.output1 etc.
+  counter++;
       
-       // Audio enhancement
-       let textToRead;
-       if (languageCode === response.inputLanguage){
-            textToRead = mockData.transcript;
-        } else if (languageCode === response.outputLanguage){
-            textToRead = mockData.translation;
-        } else if (languageCode === response.outputLanguage2){
-            textToRead = mockData.translation2;
-        }
-        
-       if (textToRead) {
-         readLogic(textToRead + mockWord)
-       }
-     
-      if (!mockData.isActivelyStreaming) {
-        buttonTapped(); // Auto stop if not actively streaming
-      }
+  let textToRead;
+  if (languageCode === response.inputLanguage) textToRead = response.input; // Use the updated response.input
+  else if (languageCode === response.outputLanguage) textToRead = response.output1;
+  else if (languageCode === response.outputLanguage2) textToRead = response.output2;
+  else if (languageCode === response.outputLanguage3) textToRead = response.output3;
+  else if (languageCode === response.outputLanguage4) textToRead = response.output4;
+  
+  if (textToRead) {
+    readLogic(textToRead);
+  }
+ 
+  if (!simulatedApiData.isActivelyStreaming && isStreamingCaptions) {
+    buttonTapped();
   }
 }
 
+// Your existing mockObject, mockObject2, mockObject3
 const mockObject = {
-  "timestamp": "2024-12-10T20:56:50.4571326",
-  "roomName": "stream72662",
-  "description": "",
-  "transcript": "The event will start shortly.",
-  "isActivelyStreaming": true,
-  "translation": "El evento comenzará en breve",
-  "translation2": "سيبدأ الحدث قريبا",
-  "inputLanguage": "en-US",
-  "outputLanguage": "es",
-  "outputLanguage2": "ar-001",
-  "isPremiumCustomer": false,
-  "blockStorage": false,
-  "uid": null
-}
+  "timestamp": "2024-12-10T20:56:50.4571326", "roomName": "72662", "description": "",
+  "transcript": "The event will start shortly.", "isActivelyStreaming": true,
+  "translation": "El evento comenzará en breve", "translation2": "سيبدأ الحدث قريبا",
+  "translation3": "Das Event beginnt in Kürze.", "translation4": "L'événement commencera sous peu",
+  "inputLanguage": "en-US", "outputLanguage": "es-ES", "outputLanguage2": "ar-SA",
+  "outputLanguage3": "de-DE", "outputLanguage4": "fr-FR",
+  "isPremiumCustomer": false, "blockStorage": false, "uid": null
+};
+// ... (other mock objects if needed for specific test cases) ...
 
 const mockObject2 = {
   "id":59,"timestamp":"2025-01-29T04:36:36.4389888","roomName":"stream72662","description":"","isActivelyStreaming":true,
