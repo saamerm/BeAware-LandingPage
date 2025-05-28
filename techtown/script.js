@@ -12,13 +12,17 @@ const DEFAULT_LANGUAGE = "en";
 
 let response = {
   input: "",
-  inputLanguage: DEFAULT_LANGUAGE,
+  inputLanguage: DEFAULT_LANGUAGE, // Fallback
   output1: "",
-  outputLanguage: "fr",
+  outputLanguage: "", // Initialize as empty, API will populate
   output2: "",
-  outputLanguage2: "es",
+  outputLanguage2: "",
+  output3: "",
+  outputLanguage3: "",
+  output4: "",
+  outputLanguage4: "",
 };
-let languageCode = DEFAULT_LANGUAGE; // Initial value
+let languageCode = DEFAULT_LANGUAGE;
 let voiceChoice;
 let isStreamingCaptions = false;
 let isPlayingSpeech = false;
@@ -33,32 +37,37 @@ let forVideoParam = false;
 let autoRetrieveParam = false;
 let videoTextColorParam = "";
 let chromaParam = "";
+let heightParam = "";
+var interval = 1000; // Your interval
 
 // --- DOM Ready Handler ---
 $(document).ready(function () {
   isStreamingCaptions = false; // Ensure initial state
+  isPlayingSpeech = false; // Default to muted
+
   getValueFromUrlParams();
-  checkLanguage();
+  checkLanguage(); // This will fetch languages, populate menu, and then translate
 
-  try {
-    loadLang(response.inputLanguage);
-  } catch (error) {
-    console.error("Error loading language:", error);
-  }
+  // Initial language load is now handled by checkLanguage -> populateLanguageMenu -> translate
+  // try {
+  //   loadLang(response.inputLanguage); // This might be redundant or premature
+  // } catch (error) {
+  //   console.error("Error loading language initially:", error);
+  // }
 
-  // Event listeners for translation
-  $("#output1").on("click", () => translate(response.outputLanguage));
-  $("#output2").on("click", () => translate(response.outputLanguage2));
-  $("#input").on("click", () => translate(response.inputLanguage));
+  // Remove legacy click listeners for translation links, sidebar handles it
+  // $("#output1").on("click", () => translate(response.outputLanguage));
+  // ...
 
-  // Event listeners for live captions and mute/unmute
   $("#get-live-caption, #live-caption-empty2, #live-caption2").on("click", buttonTapped);
-  $("#mute").on("click", muteButtonTapped);
-  $("#unmute").on("click", unmuteButtonTapped);
+  // Mute/Unmute logic is triggered by sidebar, but original buttons can remain hidden
+  // $("#mute").on("click", muteButtonTapped);
+  // $("#unmute").on("click", unmuteButtonTapped);
   $("#mute").hide();
+  $("#unmute").show(); // Show X-mark initially (muted state)
 
-  // Start recurring function (for fetching data)
-  setInterval(recurringFunction, 1000);
+
+  setInterval(recurringFunction, interval);
   // callUserViewedAPI("techtown");
 
   // --- Sidebar Menu Logic ---
