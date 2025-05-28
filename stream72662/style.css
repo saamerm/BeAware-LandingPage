@@ -363,21 +363,8 @@ body.dark-mode a.disabled { /* Legacy disabled link */
 }
 /* Ensure legacy language icon also uses theme color */
 #legacy-controls .fa-language {
-  color: #110b41;
+    color: #110b41;
 }
 body.dark-mode #legacy-controls .fa-language {
-  color: #6254b7; /* Lighter version for dark mode */
-}
-
-/* Visually Hidden Class for accessible text not meant to be seen */
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+    color: #6254b7; /* Lighter version for dark mode */
 }
