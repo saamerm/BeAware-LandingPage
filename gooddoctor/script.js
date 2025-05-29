@@ -384,13 +384,13 @@ function unmute() {
 
 function showRightTranscript() {
   let currentTranscriptText = ""; // Use a local var
-  if (translationNumberParam === 1) {
+  if (translationNumberParam == 1) {
     languageCode = response.outputLanguage; // Use output1 for translationNumber 1
-  } else if (translationNumberParam === 2) {
+  } else if (translationNumberParam == 2) {
     languageCode = response.outputLanguage2; // Use output2 for translationNumber 2
-  } else if (translationNumberParam === 3) {
+  } else if (translationNumberParam == 3) {
     languageCode = response.outputLanguage3; // Use output3 for translationNumber 3
-  } else if (translationNumberParam === 4) {
+  } else if (translationNumberParam == 4) {
     languageCode = response.outputLanguage4; // Use output4 for translationNumber 4
   } else {
     languageCode = response.inputLanguage; // Default to input language
