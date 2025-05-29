@@ -100,7 +100,7 @@ input:focus {
   align-items: center;
   gap: 10px;
   border-radius: 24px;
-  background: #1d3b78;
+  background: #FF6801;
   border: none;
   cursor: pointer;
 }
@@ -133,7 +133,7 @@ input:focus {
 }
 
 #header {
-  background-color: #1d3b78; /* Your original color */
+  background-color: #FF6801; /* Your original color */
   font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Verdana, Arial, sans-serif;
   display: flex; /* Changed for menu toggle */
   justify-content: space-between; /* Changed for menu toggle */
@@ -300,7 +300,7 @@ a.active {
 }
 
 #live-caption-container {
-  border: 1px solid #1d3b78; /* from your HTML */
+  border: 1px solid #FF6801; /* from your HTML */
 }
 
 /* --- DARK MODE STYLES (Class-based) --- */
