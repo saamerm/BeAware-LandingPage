@@ -82,15 +82,12 @@ $(document).ready(function () {
       menuToggleBtn.attr('aria-expanded', 'true');
       mainContent.attr('inert', 'true'); // Make main content non-interactive
       sidebar.focus(); // Focus the sidebar itself or the first interactive element
-      // Option 2: Focus the first active/selected option, or the first option overall
-      let focusedElement = sidebar.find('.menu-option[role="radio"][aria-checked="true"]').first();
-      if (!focusedElement.length) { // If no active option found
-          focusedElement = sidebar.find('.menu-option[role="radio"]').first();
-      }
-      if (focusedElement.length) {
-          focusedElement.focus();
+      // Set focus to the first radio button in the first group that is checked, or just the first radio.
+      const firstActiveOption = sidebar.find('.menu-option[aria-checked="true"]').first();
+      if (firstActiveOption.length) {
+          firstActiveOption.focus();
       } else {
-          closeMenuBtn.focus(); // Fallback to close button if no options (should not happen)
+          sidebar.find('.menu-option[role="radio"]').first().focus();
       }
   }
 
@@ -215,15 +212,13 @@ function updateSidebarActiveStates() {
 
 
     // Language state
-    const langSection = $('#language-section');    
-    // First, reset all language options in the section
-    langSection.find('.menu-option[role="radio"]').attr({'aria-checked': 'false', 'tabindex': -1}).removeClass('active-option');
-
-    // Then, find the currently active one based on languageCode and set it
-    const activeLangOption = langSection.find(`.menu-option[role="radio"][data-value="${languageCode}"]`);
+    const langSection = $('#language-section');
+    langSection.find('.menu-option').attr({'aria-checked': 'false', 'tabindex': -1}).removeClass('active-option');
+    const activeLangOption = langSection.find(`.menu-option[data-value="${languageCode}"]`);
     if (activeLangOption.length) {
         activeLangOption.addClass('active-option').attr({'aria-checked': 'true', 'tabindex': 0});
     }
+
 
     // Audio state
     const audioSection = $('#audio-section');
@@ -386,54 +381,33 @@ function unmute() {
 }
 
 function showRightTranscript() {
-  let currentFullTranscriptText = ""; // This is the LATEST full transcript for the current language
+  let currentTranscriptText = ""; // Use a local var
   if (languageCode === response.inputLanguage) {
-    currentFullTranscriptText = response.input;
+    currentTranscriptText = response.input;
   } else if (languageCode === response.outputLanguage) {
-    currentFullTranscriptText = response.output1;
+    currentTranscriptText = response.output1;
   } else if (languageCode === response.outputLanguage2) {
-    currentFullTranscriptText = response.output2;
+    currentTranscriptText = response.output2;
   } else if (languageCode === response.outputLanguage3) {
-    currentFullTranscriptText = response.output3;
+    currentTranscriptText = response.output3;
   } else if (languageCode === response.outputLanguage4) {
-    currentFullTranscriptText = response.output4;
+    currentTranscriptText = response.output4;
   } else {
-    currentFullTranscriptText = response.input; // Default
+    currentTranscriptText = response.input; // Default to input
   }
 
-  const liveCaptionDiv = $("#live-caption");
-  const liveCaption2Div = $("#live-caption2"); // For video overlay
+  const liveCaption = $("#live-caption");
+  const liveCaption2 = $("#live-caption2"); // For video overlay
 
-  // Get only the newly appended text
-  const newAppendedText = getNewAppendedText(lastDisplayedFullTranscript, currentFullTranscriptText);
-
-  if (newAppendedText) { // Only append if there's new content
-    // If the new text is considered a "fresh start" by getNewAppendedText (meaning it returned the full currentFullTranscriptText)
-    // because it didn't start with old, clear the display first.
-    if (newAppendedText === currentFullTranscriptText.trim() && !currentFullTranscriptText.trim().startsWith(lastDisplayedFullTranscript.trim())) {
-        liveCaptionDiv.html(""); // Clear previous content for a fresh start
-        if (liveCaption2Div.length) {
-            liveCaption2Div.html("");
-        }
-    }
-
-    // Create a new element for the appended text. Using <p> or <span> is good.
-    // Using a block element like <p> can help screen readers delineate segments.
-    const newCaptionElement = $("<p></p>").text(newAppendedText); 
-    liveCaptionDiv.append(newCaptionElement);
-    liveCaptionDiv.scrollTop(liveCaptionDiv[0].scrollHeight); // Auto-scroll
-
-    if (liveCaption2Div.length) {
-      const newCaptionElement2 = $("<p></p>").text(newAppendedText);
-      liveCaption2Div.append(newCaptionElement2);
-      // Assuming liveCaption2Div is also a scroller that might need this:
-      // liveCaption2Div.scrollTop(liveCaption2Div[0].scrollHeight); 
-    }
+  if (liveCaption.length && liveCaption.html() !== currentTranscriptText) {
+    liveCaption.html(currentTranscriptText);
+    liveCaption.scrollTop(liveCaption[0].scrollHeight);
   }
-  
-  // Update the tracker for the next comparison
-  lastDisplayedFullTranscript = currentFullTranscriptText; 
-  // if (liveCaption2Div.length) { /* update a separate tracker for liveCaption2 if its source can differ */ }
+  // For video overlay, ensure elements exist
+  if (liveCaption2.length && liveCaption2.html() !== currentTranscriptText) {
+    liveCaption2.html(currentTranscriptText);
+    // Potentially scroll liveCaption2 as well if it's scrollable
+  }
 }
 
 function loadLang(lang) {
@@ -700,52 +674,6 @@ function removeWords(inputString, numberOfWordsToRemove) {
   const wordsArray = inputString.trim().split(/\s+/);
   const newWordsArray = wordsArray.slice(numberOfWordsToRemove);
   return newWordsArray.join(" ");
-}
-
-/**
- * Compares an old text string with a new text string and returns the portion of 
- * the new text that appears to be appended to the old text.
- * 
- * @param {string} oldText The previous version of the text.
- * @param {string} newText The current, updated version of the text.
- * @returns {string} The newly appended text, or the full newText if oldText is empty 
- *                   or if newText doesn't start with oldText. Returns an empty string 
- *                   if newText is shorter than or same as oldText and starts with it.
- */
-function getNewAppendedText(oldText, newText) {
-  if (typeof oldText !== 'string' || typeof newText !== 'string') {
-      // console.warn("getNewAppendedText: Inputs must be strings.");
-      return newText || ""; // Return newText if oldText is invalid, or "" if newText is also invalid
-  }
-
-  const oldT = oldText.trim();
-  const newT = newText.trim();
-
-  if (!oldT) {
-      return newT; // If no old text, the entire new text is "new"
-  }
-
-  // Check if the new text starts with the old text
-  if (newT.startsWith(oldT)) {
-      // Extract the part of newText that comes after oldText
-      let appended = newT.substring(oldT.length).trim();
-      
-      // Sometimes, due to minor corrections or normalizations, the API might send
-      // the exact same text or a slightly shorter version that still starts with the old.
-      // In such cases, we don't want to append anything or append an empty string.
-      if (appended === "" && newT.length <= oldT.length) {
-          return ""; // No actual new content was appended
-      }
-      return appended;
-  } else {
-      // If newText does not start with oldText, it implies a significant change
-      // or a completely new segment (e.g., after a long pause or language switch).
-      // In this scenario, consider the entire newText as "new" for appending,
-      // and you might want to clear the existing #live-caption content before appending.
-      // For simplicity here, we'll just return the full newText.
-      // console.log("Transcript diverged or reset. Treating newText as a fresh start.");
-      return newT;
-  }
 }
 
 // Dark Mode (Class-based, invertColors() is replaced by body.dark-mode toggling)
