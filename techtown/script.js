@@ -2,7 +2,7 @@
 const API_URL = "https://api.deafassistant.com/stream/LiteGetStream?streamName=techtown";
 const LAYOVER_HTML = `
   <div class="inner-div">
-    <div id="holder2" class="holder2" style="height: 100px; border: #EEEEEE; border-style: solid;">
+    <div id="holder2" class="holder2" style="height: 100px; border: #fafafa; border-style: solid;">
       <div id="live-caption-empty2" class="scroller2 scroller-empty">Transcription will display here</div>
       <div class="scroller2"><div id="live-caption2" class="overlay2"></div></div>
     </div>
@@ -406,6 +406,7 @@ function showRightTranscript() {
   // For video overlay, ensure elements exist
   if (liveCaption2.length && liveCaption2.html() !== currentTranscriptText) {
     liveCaption2.html(currentTranscriptText);
+    liveCaption2.scrollTop(liveCaption2[0].scrollHeight);
     // Potentially scroll liveCaption2 as well if it's scrollable
   }
 }
