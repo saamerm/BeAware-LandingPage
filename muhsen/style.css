@@ -23,16 +23,32 @@ body {
 }    
 
 .overlay2 {
-  background-color: rgba(0, 0, 0, 0.35); /* Semi-transparent grey */
-  color: white;
-  text-align: center;
-  min-width: none;
-  min-height: none;
-  /* padding: 10px; */
-  /* position:absolute; */
-  display: flex;
-  justify-content: center;
-
+    min-width: none;
+    min-height: none;
+    position: absolute;
+    bottom: 5%;
+    min-width: none;
+    min-height: none;
+    justify-content: center;
+    max-width: 100%;
+    display: inline-block;
+    left: 20%;
+    transform: translateX(-10%);
+    text-align: center;
+    color: white;
+    text-shadow: 2px 2px 4px #000;
+    padding: 0.1em 0.1em;
+    box-sizing: border-box;
+    font-family: 'Helvetica Neue', sans-serif;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    line-height: 1.4em;
+    max-height: 3em;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
 }
 
 .holder2 {

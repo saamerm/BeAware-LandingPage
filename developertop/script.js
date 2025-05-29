@@ -2,7 +2,7 @@
 const API_URL = "https://api.deafassistant.com/stream/LiteGetStream?streamName=developertop";
 const LAYOVER_HTML = `
   <div class="inner-div">
-    <div id="holder2" class="holder2" style="height: 100px; border: #EEEEEE; border-style: solid;">
+    <div id="holder2" class="holder2" style="height: 100px; border: #fafafa; border-style: solid;">
       <div id="live-caption-empty2" class="scroller2 scroller-empty">Transcription will display here</div>
       <div class="scroller2"><div id="live-caption2" class="overlay2"></div></div>
     </div>
