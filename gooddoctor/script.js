@@ -34,6 +34,7 @@ let synth = window.speechSynthesis; // Initialize speech synthesis here
 let currentUtterance = null; // Keep track of the current speech utterance
 let speechQueue = [];
 let forVideoParam = false;
+let translationNumberParam = 0;
 let autoRetrieveParam = false;
 let videoTextColorParam = "";
 let chromaParam = "";
@@ -267,6 +268,7 @@ function populateLanguageMenu() {
 function getValueFromUrlParams() {
   const urlParams = new URLSearchParams(window.location.search);
   forVideoParam = urlParams.get("forVideo") === 'true';
+  translationNumberParam = urlParams.get("translationNumber");
   videoTextColorParam = urlParams.get("videoTextColor");
   autoRetrieveParam = urlParams.get("autoRetrieve") === 'true';
   chromaParam = urlParams.get("chroma");
@@ -382,6 +384,17 @@ function unmute() {
 
 function showRightTranscript() {
   let currentTranscriptText = ""; // Use a local var
+  if (translationNumberParam === 1) {
+    languageCode = response.outputLanguage; // Use output1 for translationNumber 1
+  } else if (translationNumberParam === 2) {
+    languageCode = response.outputLanguage2; // Use output2 for translationNumber 2
+  } else if (translationNumberParam === 3) {
+    languageCode = response.outputLanguage3; // Use output3 for translationNumber 3
+  } else if (translationNumberParam === 4) {
+    languageCode = response.outputLanguage4; // Use output4 for translationNumber 4
+  } else {
+    languageCode = response.inputLanguage; // Default to input language
+  }
   if (languageCode === response.inputLanguage) {
     currentTranscriptText = response.input;
   } else if (languageCode === response.outputLanguage) {
