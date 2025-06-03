@@ -164,7 +164,7 @@ input:focus {
 .live-caption{
     max-height: 370px;
     overflow-y: scroll;
-    font-size: x-large;
+    font-size: xxx-large;
     padding: 10px;
 }
 #footer {
