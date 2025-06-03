@@ -392,8 +392,10 @@ function showRightTranscript() {
     languageCode = response.outputLanguage3; // Use output3 for translationNumber 3
   } else if (translationNumberParam == 4) {
     languageCode = response.outputLanguage4; // Use output4 for translationNumber 4
-  } else {
+  } else if (translationNumberParam == 0) {
     languageCode = response.inputLanguage; // Default to input language
+  } else{
+    // Don't do anything
   }
   if (languageCode === response.inputLanguage) {
     currentTranscriptText = response.input;
