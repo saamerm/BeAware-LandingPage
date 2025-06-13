@@ -853,6 +853,16 @@ const languageData = {
     "hotmail":"PD Te amo. Obtenga su transcripción gratuita de eventos en vivo",
     "name":"Español"
   },
+  'bn': {
+    "caption-header":"ক্যাপশন ও অনুবাদ",
+    "get-live-caption":"লাইভ ক্যাপশন পান",
+    "get-live-caption-stop":"স্ট্রিমিং বন্ধ করুন",
+    "english-language":"ইংরেজি",
+    "french-language":"ফরাসি",
+    "live-caption-empty":"ট্রান্সক্রিপশন এখানে প্রদর্শিত হবে",
+    "hotmail":"পিএস: আমি তোমাকে ভালোবাসি। বিনামূল্যে ইভেন্ট সাবটাইটেল এবং অনুবাদ পান",
+    "name":"বাংলা"
+  },  
   'pt': {	"caption-header":"Legendas ao vivo de eventos",	"get-live-caption":"Obtenha legendas ao vivo",	"get-live-caption-stop":"Pare de transmitir",	"live-caption-empty":"A transcrição será exibida aqui",	"hotmail":"PS Eu Te Amo. Obtenha sua transcrição gratuita de evento ao vivo",	"name":"Português"	},
   'ar': {	"caption-header":"حدث التسميات التوضيحية الحية",	"get-live-caption":"احصل على التسميات التوضيحية المباشرة",	"get-live-caption-stop":"توقف عن البث",	"live-caption-empty":"سيتم عرض النسخ هنا",	"hotmail":"ملاحظة: أنا أحبك. احصل على النسخ المجاني للحدث المباشر",	"name":"عربي"	},
   'ru': {	"caption-header":"Прямые субтитры к событиям",	"get-live-caption":"Получить живые субтитры",	"get-live-caption-stop":"Остановить трансляцию",	"live-caption-empty":"Транскрипция будет отображаться здесь",	"hotmail":"PS я тебя люблю. Получите бесплатную транскрипцию живого мероприятия",	"name":"Русский"	},
