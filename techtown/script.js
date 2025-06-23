@@ -28,7 +28,6 @@ let isStreamingCaptions = false;
 let isPlayingSpeech = false;
 let readText = "";
 let transcript = "";
-let isTesting = false; // TODO: Before publishing, Change this to false
 let counter = 0; // Only used for debug
 let synth = window.speechSynthesis; // Initialize speech synthesis here
 let currentUtterance = null; // Keep track of the current speech utterance
@@ -492,7 +491,7 @@ function recurringFunction() {
   }
 
   if (isStreamingCaptions) {
-    isTesting ? getMockTranscript() : getTranscript();
+    getTranscript();
   }
 }
 
@@ -556,10 +555,6 @@ function updateResponseData(data) { // Primarily for transcript text and associa
 }
 
 function checkLanguage() { // Called ONCE on load to get available languages for the menu
-    if (isTesting) {
-        checkMockLanguage(); // This will call populateLanguageMenu and translate
-        return;
-    }
     $.support.cors = true;
     // This initial call is to get the stream's language configuration
     $.getJSON(API_URL, function(data) { 
