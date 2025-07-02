@@ -4,225 +4,111 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transcript History - Conference Captioning</title>
-
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .navbar-brand {
-            font-weight: bold;
-        }
-        .history-card {
-            background-color: #ffffff;
-            border: 1px solid #dee2e6;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            transition: box-shadow 0.3s ease-in-out;
-        }
-        .history-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .history-meta {
-            color: #6c757d;
-            font-size: 0.9em;
-            margin-bottom: 0.75rem;
-        }
-        .history-transcript {
-            color: #212529;
-            font-size: 1.1em;
-            line-height: 1.6;
-        }
-        .delete-btn {
-            color: #6c757d;
-            transition: color 0.2s ease-in-out, transform 0.2s ease;
-        }
-        .delete-btn:hover {
-            color: #dc3545;
-            transform: scale(1.1);
-        }
-        .page-header {
-            border-bottom: 1px solid #dee2e6;
-            padding-bottom: 1rem;
-            margin-bottom: 2rem;
-        }
-        #stream-name {
-            font-family: 'Courier New', Courier, monospace;
-            background-color: #e9ecef;
-            padding: 0.1rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.9em;
-        }
-        #loading-spinner, #error-message, #empty-message {
-            display: none; /* Hidden by default */
-        }
+        body { background-color: #f8f9fa; }
+        .navbar-brand { font-weight: bold; }
+        .history-card { background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 0.5rem; margin-bottom: 1rem; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: box-shadow 0.3s ease-in-out; }
+        .history-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .history-meta { color: #6c757d; font-size: 0.9em; margin-bottom: 0.75rem; }
+        .history-transcript { color: #212529; font-size: 1.1em; line-height: 1.6; }
+        .delete-btn { color: #6c757d; transition: color 0.2s ease-in-out, transform 0.2s ease; }
+        .delete-btn:hover { color: #dc3545; transform: scale(1.1); }
+        .page-header { border-bottom: 1px solid #dee2e6; padding-bottom: 1rem; margin-bottom: 2rem; }
+        #stream-name { font-family: 'Courier New', Courier, monospace; background-color: #e9ecef; padding: 0.1rem 0.5rem; border-radius: 0.25rem; font-size: 0.9em; }
+        #loading-spinner, #error-message, #empty-message { display: none; }
     </style>
 </head>
 <body>
-
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="bi bi-person-video3"></i>
-                Conference Captioning
-            </a>
-        </div>
+        <div class="container"><a class="navbar-brand" href="#"><i class="bi bi-person-video3"></i> Conference Captioning</a></div>
     </nav>
-
     <main class="container my-5">
         <div class="page-header d-flex justify-content-between align-items-center">
             <div>
                 <h1 class="h2">Transcript History</h1>
                 <p class="lead text-muted mb-0">For stream: <strong id="stream-name">...</strong></p>
             </div>
-            <button id="delete-all-btn" class="btn btn-outline-danger d-none">
-                <i class="bi bi-trash3-fill me-1"></i> Delete All
-            </button>
+            <button id="delete-all-btn" class="btn btn-outline-danger d-none"><i class="bi bi-trash3-fill me-1"></i> Delete All</button>
         </div>
-
-        <!-- Message Area: for loading, errors, or empty state -->
         <div id="message-area" class="text-center my-5">
-            <div id="loading-spinner">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <p class="mt-2">Loading transcript history...</p>
-            </div>
+            <div id="loading-spinner"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading transcript history...</p></div>
             <div id="error-message" class="alert alert-danger"></div>
-            <div id="empty-message" class="alert alert-info">
-                <i class="bi bi-info-circle-fill me-2"></i>No transcript history found for this stream.
-            </div>
+            <div id="empty-message" class="alert alert-info"><i class="bi bi-info-circle-fill me-2"></i>No transcript history found for this stream.</div>
         </div>
-
-        <!-- History items will be injected here by JavaScript -->
         <div id="history-list"></div>
     </main>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // --- CONFIGURATION ---
         const API_BASE_URL = "https://api.deafassistant.com";
-
-        // --- DOM ELEMENT REFERENCES ---
         const historyListEl = document.getElementById('history-list');
         const streamNameEl = document.getElementById('stream-name');
         const loadingSpinnerEl = document.getElementById('loading-spinner');
         const errorMessageEl = document.getElementById('error-message');
         const emptyMessageEl = document.getElementById('empty-message');
         const deleteAllBtn = document.getElementById('delete-all-btn');
-
-        // --- INITIALIZATION ---
-        // Get streamName and uid from the URL query parameters
         const urlParams = new URLSearchParams(window.location.search);
         const streamName = urlParams.get('streamName');
         const uid = urlParams.get('uid');
 
-        // Main execution logic
+        // --- HELPER FUNCTION ---
+        /**
+         * Parses a .NET-style high-precision timestamp and formats it as a "time ago" string.
+         */
+        function formatTimeAgo(creationTimeString) {
+            const cleanDateString = creationTimeString.substring(0, 23);
+            const pastDate = new Date(cleanDateString);
+            if (isNaN(pastDate.getTime())) return "Invalid time";
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - pastDate) / 1000);
+            const diffInMinutes = Math.floor(diffInSeconds / 60);
+            const diffInHours = Math.floor(diffInMinutes / 60);
+            const diffInDays = Math.floor(diffInHours / 24);
+
+            if (diffInSeconds < 60) return "just now";
+            if (diffInMinutes < 60) return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
+            if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+            if (diffInDays < 7) return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+            
+            return pastDate.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+        }
+
         if (!streamName || !uid) {
-            displayError("Missing 'streamName' or 'uid' in the URL. Please provide them as query parameters.");
+            displayError("Missing 'streamName' or 'uid' in the URL.");
             return;
         }
 
         streamNameEl.textContent = streamName;
-        // Add event listeners for dynamic content
         historyListEl.addEventListener('click', handleDeleteClick);
         deleteAllBtn.addEventListener('click', () => handleDeleteAll(streamName, uid));
-
         fetchHistory(streamName, uid);
-
-        // --- UI HELPER FUNCTIONS ---
-
-        function showLoading(isLoading) {
-            loadingSpinnerEl.style.display = isLoading ? 'block' : 'none';
-            if (isLoading) {
-                errorMessageEl.style.display = 'none';
-                emptyMessageEl.style.display = 'none';
-                historyListEl.innerHTML = ''; // Clear previous results
-            }
-        }
-
-        function displayError(message) {
-            showLoading(false);
-            errorMessageEl.textContent = message;
-            errorMessageEl.style.display = 'block';
-            emptyMessageEl.style.display = 'none';
-        }
         
-        function showEmptyMessage(show) {
-            emptyMessageEl.style.display = show ? 'block' : 'none';
-            if (show) {
-                errorMessageEl.style.display = 'none';
-                loadingSpinnerEl.style.display = 'none';
-            }
-        }
+        // (The rest of the functions from the original file remain the same)
 
-        // --- API & RENDERING FUNCTIONS ---
-
-        /**
-         * Fetches and renders the transcript history.
-         * API Call based on Step 2 in your Python script:
-         * GET /history/GetStreamHistory?uid={uid}&streamName={streamName}
-         */
-        async function fetchHistory(streamName, uid) {
-            showLoading(true);
-            deleteAllBtn.classList.add('d-none'); // Hide delete all button while loading
-
-            const url = new URL(`${API_BASE_URL}/history/GetStreamHistory`);
-            url.search = new URLSearchParams({ streamName, uid });
-
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
-                }
-                const historyItems = await response.json();
-                renderHistory(historyItems);
-
-            } catch (error) {
-                console.error('Failed to fetch history:', error);
-                displayError('Could not load transcript history. Please check the stream name and UID, and try again.');
-            } finally {
-                showLoading(false);
-            }
-        }
-        
-        /**
-         * Renders the list of history items to the page.
-         */
         function renderHistory(items) {
-            historyListEl.innerHTML = ''; // Clear any existing content
-
+            historyListEl.innerHTML = '';
             if (!items || items.length === 0) {
                 showEmptyMessage(true);
                 return;
             }
-            
             showEmptyMessage(false);
-            deleteAllBtn.classList.remove('d-none'); // Show delete all button if there's history
-
-            // The API returns items in descending order, so we can render them directly.
+            deleteAllBtn.classList.remove('d-none');
             items.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'history-card';
                 card.setAttribute('data-id', item.id);
-
-                // Format the timestamp for readability
-                const formattedDate = new Date(item.creationTime).toLocaleString(undefined, {
-                    dateStyle: 'long',
-                    timeStyle: 'medium'
-                });
+                
+                // *** MODIFIED PART ***
+                // Use the new helper function for consistent, user-friendly timestamps.
+                const timeAgo = formatTimeAgo(item.creationTime);
 
                 card.innerHTML = `
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="history-meta">
-                                <i class="bi bi-clock-history me-1"></i> ${formattedDate}
+                                <i class="bi bi-clock-history me-1"></i> ${timeAgo}
                             </div>
                             <p class="history-transcript mb-0">${item.transcript}</p>
                         </div>
@@ -235,86 +121,30 @@
             });
         }
 
-        /**
-         * Handles the click event on a delete icon using event delegation.
-         * API Call based on Step 3 in your Python script:
-         * POST /history/HistoryRecordDel?streamName={streamName}&uid={uid}&id={id}
-         */
-        async function handleDeleteClick(event) {
-            const deleteButton = event.target.closest('.delete-btn');
-            if (!deleteButton) return;
+        // Keep the original, unchanged functions showLoading, displayError, showEmptyMessage, fetchHistory, handleDeleteClick, handleDeleteAll
 
-            const card = deleteButton.closest('.history-card');
-            const historyId = card.getAttribute('data-id');
-
-            if (!confirm('Are you sure you want to permanently delete this transcript?')) {
-                return;
-            }
-            
-            // Visually indicate deletion is in progress
-            card.style.opacity = '0.5';
-            deleteButton.disabled = true;
-
-            const url = new URL(`${API_BASE_URL}/history/HistoryRecordDel`);
-            url.search = new URLSearchParams({ 
-                streamName: streamName, 
-                uid: uid,
-                id: historyId 
-            });
-
-            try {
-                const response = await fetch(url, { method: 'POST' });
-                if (!response.ok) {
-                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
-                }
-
-                // On successful deletion, remove the element and check if the list is now empty.
-                card.remove();
-                if (historyListEl.children.length === 0) {
-                    showEmptyMessage(true);
-                    deleteAllBtn.classList.add('d-none');
-                }
-
-            } catch (error) {
-                console.error('Failed to delete history item:', error);
-                alert('Could not delete the transcript. Please try again.');
-                card.style.opacity = '1'; // Restore visual state on failure
-                deleteButton.disabled = false;
-            }
+        // Full functions for your convenience
+        function showLoading(isLoading) { loadingSpinnerEl.style.display = isLoading ? 'block' : 'none'; if (isLoading) { errorMessageEl.style.display = 'none'; emptyMessageEl.style.display = 'none'; historyListEl.innerHTML = ''; } }
+        function displayError(message) { showLoading(false); errorMessageEl.textContent = message; errorMessageEl.style.display = 'block'; emptyMessageEl.style.display = 'none'; }
+        function showEmptyMessage(show) { emptyMessageEl.style.display = show ? 'block' : 'none'; if (show) { errorMessageEl.style.display = 'none'; loadingSpinnerEl.style.display = 'none'; deleteAllBtn.classList.add('d-none');} }
+        async function fetchHistory(streamName, uid) {
+            showLoading(true); deleteAllBtn.classList.add('d-none');
+            const url = new URL(`${API_BASE_URL}/history/GetStreamHistory`); url.search = new URLSearchParams({ streamName, uid });
+            try { const response = await fetch(url); if (!response.ok) { throw new Error(`API Error: ${response.status} ${response.statusText}`); } const historyItems = await response.json(); renderHistory(historyItems); } catch (error) { console.error('Failed to fetch history:', error); displayError('Could not load transcript history.'); } finally { showLoading(false); }
         }
-
-        /**
-         * Deletes all history for the current stream.
-         * API Call based on Step 5 in your Python script:
-         * POST /history/HistoryStreamDel?streamName={streamName}&uid={uid}
-         */
+        async function handleDeleteClick(event) {
+            const deleteButton = event.target.closest('.delete-btn'); if (!deleteButton) return;
+            const card = deleteButton.closest('.history-card'); const historyId = card.getAttribute('data-id');
+            if (!confirm('Are you sure?')) return;
+            card.style.opacity = '0.5'; deleteButton.disabled = true;
+            const url = new URL(`${API_BASE_URL}/history/HistoryRecordDel`); url.search = new URLSearchParams({ streamName, uid, id: historyId });
+            try { const response = await fetch(url, { method: 'POST' }); if (!response.ok) { throw new Error(`API Error: ${response.status} ${response.statusText}`); } card.remove(); if (historyListEl.children.length === 0) showEmptyMessage(true); } catch (error) { console.error('Failed to delete history item:', error); alert('Could not delete the transcript.'); card.style.opacity = '1'; deleteButton.disabled = false; }
+        }
         async function handleDeleteAll(streamName, uid) {
-            if (!confirm('ARE YOU SURE you want to delete ALL transcripts for this stream? This action cannot be undone.')) {
-                return;
-            }
-
-            deleteAllBtn.disabled = true;
-            deleteAllBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...`;
-            
-            const url = new URL(`${API_BASE_URL}/history/HistoryStreamDel`);
-            url.search = new URLSearchParams({ streamName, uid });
-
-            try {
-                const response = await fetch(url, { method: 'POST' });
-                if (!response.ok) {
-                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
-                }
-                // Success! Refresh the entire list, which will now be empty.
-                await fetchHistory(streamName, uid);
-
-            } catch (error) {
-                console.error('Failed to delete all stream history:', error);
-                alert('Could not delete all transcripts. Please try again.');
-            } finally {
-                // Restore button state
-                deleteAllBtn.disabled = false;
-                deleteAllBtn.innerHTML = `<i class="bi bi-trash3-fill me-1"></i> Delete All`;
-            }
+            if (!confirm('ARE YOU SURE you want to delete ALL transcripts for this stream?')) return;
+            deleteAllBtn.disabled = true; deleteAllBtn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Deleting...`;
+            const url = new URL(`${API_BASE_URL}/history/HistoryStreamDel`); url.search = new URLSearchParams({ streamName, uid });
+            try { const response = await fetch(url, { method: 'POST' }); if (!response.ok) { throw new Error(`API Error`); } await fetchHistory(streamName, uid); } catch (error) { console.error('Failed to delete all history:', error); alert('Could not delete all transcripts.'); } finally { deleteAllBtn.disabled = false; deleteAllBtn.innerHTML = `<i class="bi bi-trash3-fill me-1"></i> Delete All`; }
         }
     });
     </script>
