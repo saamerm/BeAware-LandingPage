@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // *** MODIFIED PART ***
         // Use the new helper function to get the formatted time string
-        const timeAgo = formatTimeAgo(item.creationTime);
+        const timeAgo = formatTimeAgo(item.createdAt);
 
         card.innerHTML = `
             <div class="d-flex justify-content-between align-items-start">
