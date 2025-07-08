@@ -153,14 +153,16 @@
         </div>
         <div class="modal-body">
           <form id="questionForm" aria-describedby="questionInstructions">
-            <div class="mb-3">
+            <div class="form-floating mb-3">
+              <input type="text" class="form-control" id="name" placeholder="Name (optional)"/>
+              <!-- Only this one matters -->
               <label for="name" class="form-label">Name (optional)</label>
-              <input type="text" class="form-control" id="name" />
             </div>
-            <div class="mb-3">
-              <label for="question" class="form-label">Your Question <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" id="question" placeholder="Ask a question" required aria-required="true" />
-              <div id="questionInstructions" class="form-text">Please enter your question above.</div>
+            <div class="form-floating mb-3">
+              <!-- <div id="questionInstructions" class="form-text">Please enter your question above.</div> -->
+              <input type="text" class="form-control" id="question" placeholder="Your Question" required aria-required="true" />
+              <!-- Only this one matters -->
+              <label for="question" class="form-label" id="questionLabel">Your Question<span class="text-danger">*</span></label>
             </div>
             <div class="d-flex justify-content-end">
               <button type="submit" class="btn btn-primary me-2">Submit</button>

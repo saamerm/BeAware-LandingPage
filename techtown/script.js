@@ -593,7 +593,9 @@ function getTranscript() {
         else if (languageCode === response.outputLanguage4) textToRead = data.translation4;
         if (data.customQuestionPrompt && data.customQuestionPrompt.trim() !== "") {
           $("#openModal").show();
-          $("#openModal").text(data.customQuestionPrompt);
+          $("#openModal a").text(data.customQuestionPrompt);
+          $("#askQuestionModalLabel").text(data.customQuestionPrompt);
+          $("#questionLabel").text(data.customQuestionPrompt);      
         } else {
           $("#openModal").hide();
         }
@@ -641,7 +643,9 @@ function checkLanguage() { // Called ONCE on load to get available languages for
             populateLanguageMenu();      // Build the sidebar menu with these languages
             if (data.customQuestionPrompt && data.customQuestionPrompt.trim() !== "") {
               $("#openModal").show();
-              $("#openModal").text(data.customQuestionPrompt);
+              $("#openModal a").text(data.customQuestionPrompt);
+              $("#askQuestionModalLabel").text(data.customQuestionPrompt);
+              $("#questionLabel").text(data.customQuestionPrompt);          
             } else {
               $("#openModal").hide();
             }    
@@ -822,7 +826,9 @@ function getMockTranscript() {
   else if (languageCode === response.outputLanguage4) textToRead = response.output4;
   if (simulatedApiData.customQuestionPrompt && simulatedApiData.customQuestionPrompt.trim() !== "") {
     $("#openModal").show();
-    $("#openModal").text(simulatedApiData.customQuestionPrompt);
+    $("#openModal a").text(simulatedApiData.customQuestionPrompt);
+    $("#askQuestionModalLabel").text(simulatedApiData.customQuestionPrompt);
+    $("#questionLabel").text(simulatedApiData.customQuestionPrompt);
   } else {
     $("#openModal").hide();
   }    
