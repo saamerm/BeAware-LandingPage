@@ -28,6 +28,7 @@ let isStreamingCaptions = false;
 let isPlayingSpeech = false;
 let readText = "";
 let transcript = "";
+var isTesting = false; // TODO: Before publishing, Change this to false
 let counter = 0; // Only used for debug
 let synth = window.speechSynthesis; // Initialize speech synthesis here
 let currentUtterance = null; // Keep track of the current speech utterance
@@ -42,6 +43,7 @@ var interval = 1000; // Your interval
 
 // --- DOM Ready Handler ---
 $(document).ready(function () {
+  isTesting = false; // isTesting logs as true unless this is set
   isStreamingCaptions = false; // Ensure initial state
   isPlayingSpeech = false; // Default to muted
 
@@ -251,6 +253,7 @@ function modalSetup(){
       }
     });
   }
+  // --- End of Modal Functionality ---
 }
 
 // --- Function to update sidebar active states (with ARIA) ---
@@ -556,7 +559,7 @@ function recurringFunction() {
   }
 
   if (isStreamingCaptions) {
-    getTranscript();
+    isTesting ? getMockTranscript() : getTranscript();
   }
 }
 
@@ -588,7 +591,12 @@ function getTranscript() {
         else if (languageCode === response.outputLanguage2) textToRead = data.translation2;
         else if (languageCode === response.outputLanguage3) textToRead = data.translation3;
         else if (languageCode === response.outputLanguage4) textToRead = data.translation4;
-
+        if (data.customQuestionPrompt && data.customQuestionPrompt.trim() !== "") {
+          $("#openModal").show();
+          $("#openModal").text(data.customQuestionPrompt);
+        } else {
+          $("#openModal").hide();
+        }
         if (textToRead) {
           readLogic(textToRead);
         }
@@ -620,13 +628,23 @@ function updateResponseData(data) { // Primarily for transcript text and associa
 }
 
 function checkLanguage() { // Called ONCE on load to get available languages for the menu
+    if (isTesting) {
+      checkMockLanguage(); // This will call populateLanguageMenu and translate
+      return;
+    }
+
     $.support.cors = true;
     // This initial call is to get the stream's language configuration
     $.getJSON(API_URL, function(data) { 
         if (data) {
             updateResponseLanguages(data); // Set up response.xxxLanguage based on stream config
             populateLanguageMenu();      // Build the sidebar menu with these languages
-            
+            if (data.customQuestionPrompt && data.customQuestionPrompt.trim() !== "") {
+              $("#openModal").show();
+              $("#openModal").text(data.customQuestionPrompt);
+            } else {
+              $("#openModal").hide();
+            }    
             // Set initial language: try API's input, then default
             languageCode = (response.inputLanguage && languageData[response.inputLanguage]) ? response.inputLanguage : DEFAULT_LANGUAGE;
             translate(languageCode);       // Load initial language and update UI
@@ -802,7 +820,12 @@ function getMockTranscript() {
   else if (languageCode === response.outputLanguage2) textToRead = response.output2;
   else if (languageCode === response.outputLanguage3) textToRead = response.output3;
   else if (languageCode === response.outputLanguage4) textToRead = response.output4;
-  
+  if (simulatedApiData.customQuestionPrompt && simulatedApiData.customQuestionPrompt.trim() !== "") {
+    $("#openModal").show();
+    $("#openModal").text(simulatedApiData.customQuestionPrompt);
+  } else {
+    $("#openModal").hide();
+  }    
   if (textToRead) {
     readLogic(textToRead);
   }
@@ -824,6 +847,7 @@ const mockObject = {
   "inputLanguage": "en-US",
   "outputLanguage": "es",
   "outputLanguage2": "ar-001",
+  "customQuestionPrompt": "Ask a question about the event",
   "isPremiumCustomer": false,
   "blockStorage": false,
   "uid": null
