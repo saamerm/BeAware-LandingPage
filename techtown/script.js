@@ -186,7 +186,72 @@ $(document).ready(function () {
         updateSidebarActiveStates(); // This will update the sidebar's display options
     });
   }
+
+  modalSetup();
 });
+
+function modalSetup(){
+    // --- Modal Functionality for "Ask a Question" ---
+
+  // 1. Get references to the HTML elements
+  const openModalBtn = document.getElementById("openModal");
+  const questionModalElement = document.getElementById("askQuestionModal");
+  const questionForm = document.getElementById("questionForm");
+
+  // Check if the elements exist before proceeding
+  if (openModalBtn && questionModalElement && questionForm) {
+    // 2. Initialize the Bootstrap Modal component
+    const askQuestionModal = new window.bootstrap.Modal(questionModalElement);
+
+    // 3. Add event listener to the "Ask a Question" button to show the modal
+    openModalBtn.addEventListener("click", () => {
+      askQuestionModal.show();
+    });
+
+    // 4. Add event listener for the form submission
+    questionForm.addEventListener("submit", async (e) => {
+      e.preventDefault(); // Prevent the default browser form submission
+
+      // Get the values from the form inputs
+      const name = document.getElementById("name").value.trim(); // FIX: Correctly gets the name
+      const question = document.getElementById("question").value.trim();
+
+      // Validate that a question was actually entered
+      if (!question) {
+        alert("Please enter a question.");
+        return;
+      }
+
+      // --- Dynamic API URL construction ---
+      // Get the streamName dynamically from your existing API_URL constant
+      const streamName = new URL(API_URL).searchParams.get('streamName');
+      
+      // Format the question text (handles cases where name is left blank)
+      const submissionText = name ? `${name}: ${question}` : question;
+
+      // Construct the final URL for the API call
+      const submissionUrl = `https://api.deafassistant.com/question/AddQuestion?streamName=${streamName}&question=${encodeURIComponent(submissionText)}`;
+
+      try {
+        // Send the data to the API using a POST request
+        const res = await fetch(submissionUrl, { method: "POST" });
+
+        if (res.ok) {
+          alert("Question submitted successfully!");
+          askQuestionModal.hide(); // Hide the modal on success
+          questionForm.reset();  // Clear the form fields
+        } else {
+          // Handle server-side errors
+          alert("Failed to submit question. The server responded with an error.");
+        }
+      } catch (error) {
+        // Handle network errors
+        alert("An error occurred while submitting the question. Please check your connection.");
+        console.error("Error submitting question:", error);
+      }
+    });
+  }
+}
 
 // --- Function to update sidebar active states (with ARIA) ---
 function updateSidebarActiveStates() {
@@ -576,6 +641,7 @@ function checkLanguage() { // Called ONCE on load to get available languages for
         // populateLanguageMenu will use these (potentially just DEFAULT_LANGUAGE)
         populateLanguageMenu(); 
         translate(DEFAULT_LANGUAGE);
+        checkMockLanguage(); // This will call populateLanguageMenu and translate
     });
 }
 
