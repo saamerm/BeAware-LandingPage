@@ -38,6 +38,7 @@ let translationNumberParam = 5;
 let autoRetrieveParam = false;
 let videoTextColorParam = "";
 let chromaParam = "";
+let fontSizeParam = "x-large";
 let heightParam = "";
 var interval = 1000; // Your interval
 
@@ -51,26 +52,13 @@ $(document).ready(function () {
   checkLanguage(); // This will fetch languages, populate menu, and then translate
 
   // Initial language load is now handled by checkLanguage -> populateLanguageMenu -> translate
-  // try {
-  //   loadLang(response.inputLanguage); // This might be redundant or premature
-  // } catch (error) {
-  //   console.error("Error loading language initially:", error);
-  // }
-
-  // Remove legacy click listeners for translation links, sidebar handles it
-  // $("#output1").on("click", () => translate(response.outputLanguage));
-  // ...
 
   $("#get-live-caption, #live-caption-empty2, #live-caption2").on("click", buttonTapped);
   // Mute/Unmute logic is triggered by sidebar, but original buttons can remain hidden
-  // $("#mute").on("click", muteButtonTapped);
-  // $("#unmute").on("click", unmuteButtonTapped);
   $("#mute").hide();
   $("#unmute").show(); // Show X-mark initially (muted state)
 
-
   setInterval(recurringFunction, interval);
-  // callUserViewedAPI("techtown");
 
   // --- Sidebar Menu Logic ---
   const menuToggleBtn = $('#menu-toggle');
@@ -151,9 +139,6 @@ $(document).ready(function () {
 
 
       switch(action) {
-          // ... (your existing switch cases for stream, theme, language, audio) ...
-          // No change needed here if they call functions that update the state
-          // and then updateSidebarActiveStates() is called.
           case 'stream':
               buttonTapped();
               break;
@@ -340,7 +325,7 @@ function getValueFromUrlParams() {
   autoRetrieveParam = urlParams.get("autoRetrieve") === 'true';
   chromaParam = urlParams.get("chroma");
   heightParam = urlParams.get("height");
-
+  fontSizeParam = urlParams.get("fontSize");
   if (heightParam) {
     $("#live-caption").css({ maxHeight: `${heightParam}%` });
   }
@@ -367,6 +352,9 @@ function getValueFromUrlParams() {
 
   if (chromaParam) {
     document.body.style.backgroundColor = `#${chromaParam}`;
+  }
+  if (fontSizeParam) {
+    document.querySelector('.live-caption').style.fontSize = fontSizeParam;
   }
   
   if (autoRetrieveParam) {
@@ -404,10 +392,6 @@ function buttonTapped() {
   updateSidebarActiveStates(); // Sync sidebar
   // loadLang(languageCode); // This is now part of start/stopTimer effectively
 }
-
-// ... (muteButtonTapped, unmuteButtonTapped - ensure they update isPlayingSpeech correctly) ...
-// ... (iOSSpeakerFix, mute, unmute - no direct ARIA, but support state changes) ...
-// ... (showRightTranscript - ensure #live-caption aria-live works as expected) ...
 
 function muteButtonTapped() {
   // No alert needed, sidebar shows state
@@ -579,8 +563,6 @@ function getTranscript() {
   $.support.cors = true;
   $.getJSON(API_URL, function (data) {
     if (data) {
-      // updateResponseLanguages(data); // API might also update available langs dynamically, if so, re-populate
-      // populateLanguageMenu(); // And update menu
 
       if (data.transcript !== undefined) {
         updateResponseData(data); // This updates transcript text and also the language codes in `response`
@@ -631,10 +613,9 @@ function updateResponseData(data) { // Primarily for transcript text and associa
 
 function checkLanguage() { // Called ONCE on load to get available languages for the menu
     if (isTesting) {
-      checkMockLanguage(); // This will call populateLanguageMenu and translate
-      return;
+        checkMockLanguage(); // This will call populateLanguageMenu and translate
+        return;
     }
-
     $.support.cors = true;
     // This initial call is to get the stream's language configuration
     $.getJSON(API_URL, function(data) { 

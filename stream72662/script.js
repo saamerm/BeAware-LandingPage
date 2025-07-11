@@ -28,7 +28,7 @@ let isStreamingCaptions = false;
 let isPlayingSpeech = false;
 let readText = "";
 let transcript = "";
-let isTesting = false; // TODO: Before publishing, Change this to false
+var isTesting = false; // TODO: Before publishing, Change this to false
 let counter = 0; // Only used for debug
 let synth = window.speechSynthesis; // Initialize speech synthesis here
 let currentUtterance = null; // Keep track of the current speech utterance
@@ -38,11 +38,13 @@ let translationNumberParam = 5;
 let autoRetrieveParam = false;
 let videoTextColorParam = "";
 let chromaParam = "";
+let fontSizeParam = "x-large";
 let heightParam = "";
 var interval = 1000; // Your interval
 
 // --- DOM Ready Handler ---
 $(document).ready(function () {
+  isTesting = false
   isStreamingCaptions = false; // Ensure initial state
   isPlayingSpeech = false; // Default to muted
 
@@ -50,26 +52,13 @@ $(document).ready(function () {
   checkLanguage(); // This will fetch languages, populate menu, and then translate
 
   // Initial language load is now handled by checkLanguage -> populateLanguageMenu -> translate
-  // try {
-  //   loadLang(response.inputLanguage); // This might be redundant or premature
-  // } catch (error) {
-  //   console.error("Error loading language initially:", error);
-  // }
-
-  // Remove legacy click listeners for translation links, sidebar handles it
-  // $("#output1").on("click", () => translate(response.outputLanguage));
-  // ...
 
   $("#get-live-caption, #live-caption-empty2, #live-caption2").on("click", buttonTapped);
   // Mute/Unmute logic is triggered by sidebar, but original buttons can remain hidden
-  // $("#mute").on("click", muteButtonTapped);
-  // $("#unmute").on("click", unmuteButtonTapped);
   $("#mute").hide();
   $("#unmute").show(); // Show X-mark initially (muted state)
 
-
   setInterval(recurringFunction, interval);
-  // callUserViewedAPI("mtw");
 
   // --- Sidebar Menu Logic ---
   const menuToggleBtn = $('#menu-toggle');
@@ -150,9 +139,6 @@ $(document).ready(function () {
 
 
       switch(action) {
-          // ... (your existing switch cases for stream, theme, language, audio) ...
-          // No change needed here if they call functions that update the state
-          // and then updateSidebarActiveStates() is called.
           case 'stream':
               buttonTapped();
               break;
@@ -187,7 +173,73 @@ $(document).ready(function () {
         updateSidebarActiveStates(); // This will update the sidebar's display options
     });
   }
+
+  modalSetup();
 });
+
+function modalSetup(){
+    // --- Modal Functionality for "Ask a Question" ---
+
+  // 1. Get references to the HTML elements
+  const openModalBtn = document.getElementById("openModal");
+  const questionModalElement = document.getElementById("askQuestionModal");
+  const questionForm = document.getElementById("questionForm");
+
+  // Check if the elements exist before proceeding
+  if (openModalBtn && questionModalElement && questionForm) {
+    // 2. Initialize the Bootstrap Modal component
+    const askQuestionModal = new window.bootstrap.Modal(questionModalElement);
+
+    // 3. Add event listener to the "Ask a Question" button to show the modal
+    openModalBtn.addEventListener("click", () => {
+      askQuestionModal.show();
+    });
+
+    // 4. Add event listener for the form submission
+    questionForm.addEventListener("submit", async (e) => {
+      e.preventDefault(); // Prevent the default browser form submission
+
+      // Get the values from the form inputs
+      const name = document.getElementById("name").value.trim(); // FIX: Correctly gets the name
+      const question = document.getElementById("question").value.trim();
+
+      // Validate that a question was actually entered
+      if (!question) {
+        alert("Please enter a question.");
+        return;
+      }
+
+      // --- Dynamic API URL construction ---
+      // Get the streamName dynamically from your existing API_URL constant
+      const streamName = new URL(API_URL).searchParams.get('streamName');
+      
+      // Format the question text (handles cases where name is left blank)
+      const submissionText = name ? `${name}: ${question}` : question;
+
+      // Construct the final URL for the API call
+      const submissionUrl = `https://api.deafassistant.com/question/AddQuestion?streamName=${streamName}&question=${encodeURIComponent(submissionText)}`;
+
+      try {
+        // Send the data to the API using a POST request
+        const res = await fetch(submissionUrl, { method: "POST" });
+
+        if (res.ok) {
+          alert("Question submitted successfully!");
+          askQuestionModal.hide(); // Hide the modal on success
+          questionForm.reset();  // Clear the form fields
+        } else {
+          // Handle server-side errors
+          alert("Failed to submit question. The server responded with an error.");
+        }
+      } catch (error) {
+        // Handle network errors
+        alert("An error occurred while submitting the question. Please check your connection.");
+        console.error("Error submitting question:", error);
+      }
+    });
+  }
+  // --- End of Modal Functionality ---
+}
 
 // --- Function to update sidebar active states (with ARIA) ---
 function updateSidebarActiveStates() {
@@ -273,7 +325,7 @@ function getValueFromUrlParams() {
   autoRetrieveParam = urlParams.get("autoRetrieve") === 'true';
   chromaParam = urlParams.get("chroma");
   heightParam = urlParams.get("height");
-
+  fontSizeParam = urlParams.get("fontSize");
   if (heightParam) {
     $("#live-caption").css({ maxHeight: `${heightParam}%` });
   }
@@ -300,6 +352,9 @@ function getValueFromUrlParams() {
 
   if (chromaParam) {
     document.body.style.backgroundColor = `#${chromaParam}`;
+  }
+  if (fontSizeParam) {
+    document.querySelector('.live-caption').style.fontSize = fontSizeParam;
   }
   
   if (autoRetrieveParam) {
@@ -337,10 +392,6 @@ function buttonTapped() {
   updateSidebarActiveStates(); // Sync sidebar
   // loadLang(languageCode); // This is now part of start/stopTimer effectively
 }
-
-// ... (muteButtonTapped, unmuteButtonTapped - ensure they update isPlayingSpeech correctly) ...
-// ... (iOSSpeakerFix, mute, unmute - no direct ARIA, but support state changes) ...
-// ... (showRightTranscript - ensure #live-caption aria-live works as expected) ...
 
 function muteButtonTapped() {
   // No alert needed, sidebar shows state
@@ -425,7 +476,6 @@ function showRightTranscript() {
     // Potentially scroll liveCaption2 as well if it's scrollable
   }
 }
-
 
 function loadLang(lang) {
   if (!languageData[lang]) {
@@ -513,8 +563,6 @@ function getTranscript() {
   $.support.cors = true;
   $.getJSON(API_URL, function (data) {
     if (data) {
-      // updateResponseLanguages(data); // API might also update available langs dynamically, if so, re-populate
-      // populateLanguageMenu(); // And update menu
 
       if (data.transcript !== undefined) {
         updateResponseData(data); // This updates transcript text and also the language codes in `response`
@@ -525,7 +573,14 @@ function getTranscript() {
         else if (languageCode === response.outputLanguage2) textToRead = data.translation2;
         else if (languageCode === response.outputLanguage3) textToRead = data.translation3;
         else if (languageCode === response.outputLanguage4) textToRead = data.translation4;
-
+        if (data.customQuestionPrompt && data.customQuestionPrompt.trim() !== "") {
+          $("#openModal").show();
+          $("#openModal a").text(data.customQuestionPrompt);
+          $("#askQuestionModalLabel").text(data.customQuestionPrompt);
+          $("#questionLabel").text(data.customQuestionPrompt);      
+        } else {
+          $("#openModal").hide();
+        }
         if (textToRead) {
           readLogic(textToRead);
         }
@@ -567,7 +622,14 @@ function checkLanguage() { // Called ONCE on load to get available languages for
         if (data) {
             updateResponseLanguages(data); // Set up response.xxxLanguage based on stream config
             populateLanguageMenu();      // Build the sidebar menu with these languages
-            
+            if (data.customQuestionPrompt && data.customQuestionPrompt.trim() !== "") {
+              $("#openModal").show();
+              $("#openModal a").text(data.customQuestionPrompt);
+              $("#askQuestionModalLabel").text(data.customQuestionPrompt);
+              $("#questionLabel").text(data.customQuestionPrompt);          
+            } else {
+              $("#openModal").hide();
+            }    
             // Set initial language: try API's input, then default
             languageCode = (response.inputLanguage && languageData[response.inputLanguage]) ? response.inputLanguage : DEFAULT_LANGUAGE;
             translate(languageCode);       // Load initial language and update UI
@@ -582,6 +644,7 @@ function checkLanguage() { // Called ONCE on load to get available languages for
         // populateLanguageMenu will use these (potentially just DEFAULT_LANGUAGE)
         populateLanguageMenu(); 
         translate(DEFAULT_LANGUAGE);
+        checkMockLanguage(); // This will call populateLanguageMenu and translate
     });
 }
 
@@ -742,7 +805,14 @@ function getMockTranscript() {
   else if (languageCode === response.outputLanguage2) textToRead = response.output2;
   else if (languageCode === response.outputLanguage3) textToRead = response.output3;
   else if (languageCode === response.outputLanguage4) textToRead = response.output4;
-  
+  if (simulatedApiData.customQuestionPrompt && simulatedApiData.customQuestionPrompt.trim() !== "") {
+    $("#openModal").show();
+    $("#openModal a").text(simulatedApiData.customQuestionPrompt);
+    $("#askQuestionModalLabel").text(simulatedApiData.customQuestionPrompt);
+    $("#questionLabel").text(simulatedApiData.customQuestionPrompt);
+  } else {
+    $("#openModal").hide();
+  }    
   if (textToRead) {
     readLogic(textToRead);
   }
@@ -754,15 +824,21 @@ function getMockTranscript() {
 
 // Your existing mockObject, mockObject2, mockObject3
 const mockObject = {
-  "timestamp": "2024-12-10T20:56:50.4571326", "roomName": "72662", "description": "",
-  "transcript": "The event will start shortly.", "isActivelyStreaming": true,
-  "translation": "El evento comenzará en breve", "translation2": "سيبدأ الحدث قريبا",
-  "translation3": "Das Event beginnt in Kürze.", "translation4": "L'événement commencera sous peu",
-  "inputLanguage": "en-US", "outputLanguage": "es-ES", "outputLanguage2": "ar-SA",
-  "outputLanguage3": "de-DE", "outputLanguage4": "fr-FR",
-  "isPremiumCustomer": false, "blockStorage": false, "uid": null
-};
-// ... (other mock objects if needed for specific test cases) ...
+  "timestamp": "2024-12-10T20:56:50.4571326",
+  "roomName": "stream72662",
+  "description": "",
+  "transcript": "The event will start shortly.",
+  "isActivelyStreaming": true,
+  "translation": "El evento comenzará en breve",
+  "translation2": "سيبدأ الحدث قريبا",
+  "inputLanguage": "en-US",
+  "outputLanguage": "es",
+  "outputLanguage2": "ar-001",
+  "customQuestionPrompt": "Ask a question about the event",
+  "isPremiumCustomer": false,
+  "blockStorage": false,
+  "uid": null
+}
 
 const mockObject2 = {
   "id":59,"timestamp":"2025-01-29T04:36:36.4389888","roomName":"stream72662","description":"","isActivelyStreaming":true,
@@ -849,6 +925,16 @@ const languageData = {
     "hotmail":"PD Te amo. Obtenga su transcripción gratuita de eventos en vivo",
     "name":"Español"
   },
+  'bn': {
+    "caption-header":"ক্যাপশন ও অনুবাদ",
+    "get-live-caption":"লাইভ ক্যাপশন পান",
+    "get-live-caption-stop":"স্ট্রিমিং বন্ধ করুন",
+    "english-language":"ইংরেজি",
+    "french-language":"ফরাসি",
+    "live-caption-empty":"ট্রান্সক্রিপশন এখানে প্রদর্শিত হবে",
+    "hotmail":"পিএস: আমি তোমাকে ভালোবাসি। বিনামূল্যে ইভেন্ট সাবটাইটেল এবং অনুবাদ পান",
+    "name":"বাংলা"
+  },  
   'pt': {	"caption-header":"Legendas ao vivo de eventos",	"get-live-caption":"Obtenha legendas ao vivo",	"get-live-caption-stop":"Pare de transmitir",	"live-caption-empty":"A transcrição será exibida aqui",	"hotmail":"PS Eu Te Amo. Obtenha sua transcrição gratuita de evento ao vivo",	"name":"Português"	},
   'ar': {	"caption-header":"حدث التسميات التوضيحية الحية",	"get-live-caption":"احصل على التسميات التوضيحية المباشرة",	"get-live-caption-stop":"توقف عن البث",	"live-caption-empty":"سيتم عرض النسخ هنا",	"hotmail":"ملاحظة: أنا أحبك. احصل على النسخ المجاني للحدث المباشر",	"name":"عربي"	},
   'ru': {	"caption-header":"Прямые субтитры к событиям",	"get-live-caption":"Получить живые субтитры",	"get-live-caption-stop":"Остановить трансляцию",	"live-caption-empty":"Транскрипция будет отображаться здесь",	"hotmail":"PS я тебя люблю. Получите бесплатную транскрипцию живого мероприятия",	"name":"Русский"	},

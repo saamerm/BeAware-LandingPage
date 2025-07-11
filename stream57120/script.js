@@ -2,7 +2,7 @@
 const API_URL = "https://api.deafassistant.com/stream/LiteGetStream?streamName=stream57120";
 const LAYOVER_HTML = `
   <div class="inner-div">
-    <div id="holder2" class="holder2" style="height: 100px; border: #fafafa; border-style: solid;">
+    <div id="holder2" class="holder2" style="height: 100px; border: #fafafa11; border-style: solid;">
       <div id="live-caption-empty2" class="scroller2 scroller-empty">Transcription will display here</div>
       <div class="scroller2"><div id="live-caption2" class="overlay2"></div></div>
     </div>
@@ -28,7 +28,7 @@ let isStreamingCaptions = false;
 let isPlayingSpeech = false;
 let readText = "";
 let transcript = "";
-let isTesting = false; // TODO: Before publishing, Change this to false
+var isTesting = false; // TODO: Before publishing, Change this to false
 let counter = 0; // Only used for debug
 let synth = window.speechSynthesis; // Initialize speech synthesis here
 let currentUtterance = null; // Keep track of the current speech utterance
@@ -44,6 +44,7 @@ var interval = 1000; // Your interval
 
 // --- DOM Ready Handler ---
 $(document).ready(function () {
+  isTesting = false
   isStreamingCaptions = false; // Ensure initial state
   isPlayingSpeech = false; // Default to muted
 
@@ -51,23 +52,11 @@ $(document).ready(function () {
   checkLanguage(); // This will fetch languages, populate menu, and then translate
 
   // Initial language load is now handled by checkLanguage -> populateLanguageMenu -> translate
-  // try {
-  //   loadLang(response.inputLanguage); // This might be redundant or premature
-  // } catch (error) {
-  //   console.error("Error loading language initially:", error);
-  // }
-
-  // Remove legacy click listeners for translation links, sidebar handles it
-  // $("#output1").on("click", () => translate(response.outputLanguage));
-  // ...
 
   $("#get-live-caption, #live-caption-empty2, #live-caption2").on("click", buttonTapped);
   // Mute/Unmute logic is triggered by sidebar, but original buttons can remain hidden
-  // $("#mute").on("click", muteButtonTapped);
-  // $("#unmute").on("click", unmuteButtonTapped);
   $("#mute").hide();
   $("#unmute").show(); // Show X-mark initially (muted state)
-
 
   setInterval(recurringFunction, interval);
 
@@ -150,9 +139,6 @@ $(document).ready(function () {
 
 
       switch(action) {
-          // ... (your existing switch cases for stream, theme, language, audio) ...
-          // No change needed here if they call functions that update the state
-          // and then updateSidebarActiveStates() is called.
           case 'stream':
               buttonTapped();
               break;
@@ -187,7 +173,73 @@ $(document).ready(function () {
         updateSidebarActiveStates(); // This will update the sidebar's display options
     });
   }
+
+  modalSetup();
 });
+
+function modalSetup(){
+    // --- Modal Functionality for "Ask a Question" ---
+
+  // 1. Get references to the HTML elements
+  const openModalBtn = document.getElementById("openModal");
+  const questionModalElement = document.getElementById("askQuestionModal");
+  const questionForm = document.getElementById("questionForm");
+
+  // Check if the elements exist before proceeding
+  if (openModalBtn && questionModalElement && questionForm) {
+    // 2. Initialize the Bootstrap Modal component
+    const askQuestionModal = new window.bootstrap.Modal(questionModalElement);
+
+    // 3. Add event listener to the "Ask a Question" button to show the modal
+    openModalBtn.addEventListener("click", () => {
+      askQuestionModal.show();
+    });
+
+    // 4. Add event listener for the form submission
+    questionForm.addEventListener("submit", async (e) => {
+      e.preventDefault(); // Prevent the default browser form submission
+
+      // Get the values from the form inputs
+      const name = document.getElementById("name").value.trim(); // FIX: Correctly gets the name
+      const question = document.getElementById("question").value.trim();
+
+      // Validate that a question was actually entered
+      if (!question) {
+        alert("Please enter a question.");
+        return;
+      }
+
+      // --- Dynamic API URL construction ---
+      // Get the streamName dynamically from your existing API_URL constant
+      const streamName = new URL(API_URL).searchParams.get('streamName');
+      
+      // Format the question text (handles cases where name is left blank)
+      const submissionText = name ? `${name}: ${question}` : question;
+
+      // Construct the final URL for the API call
+      const submissionUrl = `https://api.deafassistant.com/question/AddQuestion?streamName=${streamName}&question=${encodeURIComponent(submissionText)}`;
+
+      try {
+        // Send the data to the API using a POST request
+        const res = await fetch(submissionUrl, { method: "POST" });
+
+        if (res.ok) {
+          alert("Question submitted successfully!");
+          askQuestionModal.hide(); // Hide the modal on success
+          questionForm.reset();  // Clear the form fields
+        } else {
+          // Handle server-side errors
+          alert("Failed to submit question. The server responded with an error.");
+        }
+      } catch (error) {
+        // Handle network errors
+        alert("An error occurred while submitting the question. Please check your connection.");
+        console.error("Error submitting question:", error);
+      }
+    });
+  }
+  // --- End of Modal Functionality ---
+}
 
 // --- Function to update sidebar active states (with ARIA) ---
 function updateSidebarActiveStates() {
@@ -340,10 +392,6 @@ function buttonTapped() {
   updateSidebarActiveStates(); // Sync sidebar
   // loadLang(languageCode); // This is now part of start/stopTimer effectively
 }
-
-// ... (muteButtonTapped, unmuteButtonTapped - ensure they update isPlayingSpeech correctly) ...
-// ... (iOSSpeakerFix, mute, unmute - no direct ARIA, but support state changes) ...
-// ... (showRightTranscript - ensure #live-caption aria-live works as expected) ...
 
 function muteButtonTapped() {
   // No alert needed, sidebar shows state
@@ -515,8 +563,6 @@ function getTranscript() {
   $.support.cors = true;
   $.getJSON(API_URL, function (data) {
     if (data) {
-      // updateResponseLanguages(data); // API might also update available langs dynamically, if so, re-populate
-      // populateLanguageMenu(); // And update menu
 
       if (data.transcript !== undefined) {
         updateResponseData(data); // This updates transcript text and also the language codes in `response`
@@ -527,7 +573,14 @@ function getTranscript() {
         else if (languageCode === response.outputLanguage2) textToRead = data.translation2;
         else if (languageCode === response.outputLanguage3) textToRead = data.translation3;
         else if (languageCode === response.outputLanguage4) textToRead = data.translation4;
-
+        if (data.customQuestionPrompt && data.customQuestionPrompt.trim() !== "") {
+          $("#openModal").show();
+          $("#openModal a").text(data.customQuestionPrompt);
+          $("#askQuestionModalLabel").text(data.customQuestionPrompt);
+          $("#questionLabel").text(data.customQuestionPrompt);      
+        } else {
+          $("#openModal").hide();
+        }
         if (textToRead) {
           readLogic(textToRead);
         }
@@ -569,7 +622,14 @@ function checkLanguage() { // Called ONCE on load to get available languages for
         if (data) {
             updateResponseLanguages(data); // Set up response.xxxLanguage based on stream config
             populateLanguageMenu();      // Build the sidebar menu with these languages
-            
+            if (data.customQuestionPrompt && data.customQuestionPrompt.trim() !== "") {
+              $("#openModal").show();
+              $("#openModal a").text(data.customQuestionPrompt);
+              $("#askQuestionModalLabel").text(data.customQuestionPrompt);
+              $("#questionLabel").text(data.customQuestionPrompt);          
+            } else {
+              $("#openModal").hide();
+            }    
             // Set initial language: try API's input, then default
             languageCode = (response.inputLanguage && languageData[response.inputLanguage]) ? response.inputLanguage : DEFAULT_LANGUAGE;
             translate(languageCode);       // Load initial language and update UI
@@ -584,6 +644,7 @@ function checkLanguage() { // Called ONCE on load to get available languages for
         // populateLanguageMenu will use these (potentially just DEFAULT_LANGUAGE)
         populateLanguageMenu(); 
         translate(DEFAULT_LANGUAGE);
+        checkMockLanguage(); // This will call populateLanguageMenu and translate
     });
 }
 
@@ -744,7 +805,14 @@ function getMockTranscript() {
   else if (languageCode === response.outputLanguage2) textToRead = response.output2;
   else if (languageCode === response.outputLanguage3) textToRead = response.output3;
   else if (languageCode === response.outputLanguage4) textToRead = response.output4;
-  
+  if (simulatedApiData.customQuestionPrompt && simulatedApiData.customQuestionPrompt.trim() !== "") {
+    $("#openModal").show();
+    $("#openModal a").text(simulatedApiData.customQuestionPrompt);
+    $("#askQuestionModalLabel").text(simulatedApiData.customQuestionPrompt);
+    $("#questionLabel").text(simulatedApiData.customQuestionPrompt);
+  } else {
+    $("#openModal").hide();
+  }    
   if (textToRead) {
     readLogic(textToRead);
   }
@@ -766,21 +834,23 @@ const mockObject = {
   "inputLanguage": "en-US",
   "outputLanguage": "es",
   "outputLanguage2": "ar-001",
+  "customQuestionPrompt": "Ask a question about the event",
   "isPremiumCustomer": false,
-  "blockStorage": false
+  "blockStorage": false,
+  "uid": null
 }
 
 const mockObject2 = {
   "id":59,"timestamp":"2025-01-29T04:36:36.4389888","roomName":"stream57120","description":"","isActivelyStreaming":true,
   "transcript":" What happened to this. So, let's see if the translation gets removed from this text, where is the value? Why is this not working? Let's go on and continue. Is this translation showing nothing. Yes, it is not showing anything. What is actually going on here? I have no idea.",
   "translation":"¿Qué pasó con esto? Entonces, veamos si la traducción se elimina de este texto, ¿dónde está el valor? ¿Por qué esto no funciona? Sigamos adelante y continuemos. ¿Esta traducción no muestra nada? Sí, no está mostrando nada. ¿Qué está pasando aquí? No tengo ni idea.",
-  "translation2":"","inputLanguage":"en-US","outputLanguage":"es","outputLanguage2":"","isPremiumCustomer":false,"blockStorage":false
+  "translation2":"","inputLanguage":"en-US","outputLanguage":"es","outputLanguage2":"","isPremiumCustomer":false,"blockStorage":false,"uid":null
 }
 const mockObject3 = {
   "id":59,"timestamp":"2025-01-29T04:36:36.4389888","roomName":"stream57120","description":"","isActivelyStreaming":true,
   "transcript":" What happened to this. So, let's see if the translation gets removed from this text, where is the value? Why is this not working? Let's go on and continue. Is this translation showing nothing. Yes, it is not showing anything. What is actually going on here? I have no idea.",
   "translation":"حدث التسميات التوضيحية الحية",
-  "translation2":"","inputLanguage":"en-US","outputLanguage":"ar","outputLanguage2":"","isPremiumCustomer":false,"blockStorage":false
+  "translation2":"","inputLanguage":"en-US","outputLanguage":"ar","outputLanguage2":"","isPremiumCustomer":false,"blockStorage":false,"uid":null
 }
 const languageData = {
   'en': {

@@ -192,18 +192,13 @@ a.active {
   color: black;
 }
 
-.customPadding{
-  padding:5px;
+.customPadding { /* Used on header */
+  padding: 10px 15px; /* Adjusted slightly from 5px */
 }
 
-@import url("https://fonts.googleapis.com/css2?family=Montserrat&display=swap");
-* {box-sizing: border-box;}
+/* Legacy Dark mode checkbox styles (from your CSS) */
+.checkbox { /* The actual input element */
 
-body {
-  transition: background 0.2s linear;
-}
-
-.checkbox {
   opacity: 0;
   position: absolute;
 }

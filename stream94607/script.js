@@ -12,183 +12,533 @@ const DEFAULT_LANGUAGE = "en";
 
 let response = {
   input: "",
-  inputLanguage: DEFAULT_LANGUAGE,
+  inputLanguage: DEFAULT_LANGUAGE, // Fallback
   output1: "",
-  outputLanguage: "fr",
+  outputLanguage: "", // Initialize as empty, API will populate
   output2: "",
-  outputLanguage2: "es",
+  outputLanguage2: "",
+  output3: "",
+  outputLanguage3: "",
+  output4: "",
+  outputLanguage4: "",
 };
-let languageCode = DEFAULT_LANGUAGE; // Initial value
+let languageCode = DEFAULT_LANGUAGE;
 let voiceChoice;
 let isStreamingCaptions = false;
 let isPlayingSpeech = false;
 let readText = "";
 let transcript = "";
-let isTesting = false; // TODO: Before publishing, Change this to false
+var isTesting = false; // TODO: Before publishing, Change this to false
 let counter = 0; // Only used for debug
 let synth = window.speechSynthesis; // Initialize speech synthesis here
 let currentUtterance = null; // Keep track of the current speech utterance
 let speechQueue = [];
 let forVideoParam = false;
+let translationNumberParam = 5;
 let autoRetrieveParam = false;
 let videoTextColorParam = "";
 let chromaParam = "";
+let fontSizeParam = "x-large";
+let heightParam = "";
+var interval = 1000; // Your interval
 
 // --- DOM Ready Handler ---
 $(document).ready(function () {
+  isTesting = false
   isStreamingCaptions = false; // Ensure initial state
-  getValueFromUrlParams();
-  checkLanguage();
+  isPlayingSpeech = false; // Default to muted
 
-  try {
-    loadLang(response.inputLanguage);
-  } catch (error) {
-    console.error("Error loading language:", error);
+  getValueFromUrlParams();
+  checkLanguage(); // This will fetch languages, populate menu, and then translate
+
+  // Initial language load is now handled by checkLanguage -> populateLanguageMenu -> translate
+
+  $("#get-live-caption, #live-caption-empty2, #live-caption2").on("click", buttonTapped);
+  // Mute/Unmute logic is triggered by sidebar, but original buttons can remain hidden
+  $("#mute").hide();
+  $("#unmute").show(); // Show X-mark initially (muted state)
+
+  setInterval(recurringFunction, interval);
+
+  // --- Sidebar Menu Logic ---
+  const menuToggleBtn = $('#menu-toggle');
+  const closeMenuBtn = $('#close-menu-btn');
+  const sidebar = $('#sidebar-menu');
+  const body = $('body');
+  const mainContent = $('#main-content'); // For inert attribute
+
+  function openSidebar() {
+      sidebar.addClass('open').attr('aria-hidden', 'false');
+      menuToggleBtn.attr('aria-expanded', 'true');
+      mainContent.attr('inert', 'true'); // Make main content non-interactive
+      sidebar.focus(); // Focus the sidebar itself or the first interactive element
+      // Set focus to the first radio button in the first group that is checked, or just the first radio.
+      const firstActiveOption = sidebar.find('.menu-option[aria-checked="true"]').first();
+      if (firstActiveOption.length) {
+          firstActiveOption.focus();
+      } else {
+          sidebar.find('.menu-option[role="radio"]').first().focus();
+      }
   }
 
-  // Event listeners for translation
-  $("#output1").on("click", () => translate(response.outputLanguage));
-  $("#output2").on("click", () => translate(response.outputLanguage2));
-  $("#input").on("click", () => translate(response.inputLanguage));
+  function closeSidebar() {
+      sidebar.removeClass('open').attr('aria-hidden', 'true');
+      menuToggleBtn.attr('aria-expanded', 'false').focus(); // Return focus to toggle button
+      mainContent.removeAttr('inert');
+  }
 
-  // Event listeners for live captions and mute/unmute
-  $("#get-live-caption, #live-caption-empty2, #live-caption2").on("click", buttonTapped);
-  $("#mute").on("click", muteButtonTapped);
-  $("#unmute").on("click", unmuteButtonTapped);
-  $("#mute").hide();
+  menuToggleBtn.on('click', function() {
+      sidebar.hasClass('open') ? closeSidebar() : openSidebar();
+  });
 
-  // Start recurring function (for fetching data)
-  setInterval(recurringFunction, 1000);
-  // callUserViewedAPI("stream94607"); // Automatically converted during replace, to the stream name
-});
+  closeMenuBtn.on('click', closeSidebar);
 
-// --- Functions ---
+  $(document).on('click', function(event) {
+      if (sidebar.hasClass('open') &&
+          !$(event.target).closest('#sidebar-menu').length &&
+          !$(event.target).closest('#menu-toggle').length) {
+          closeSidebar();
+      }
+  });
+  
+  // Keyboard navigation for sidebar (radiogroups)
+  sidebar.on('keydown', '.menu-option[role="radio"]', function(e) {
+    const $this = $(this);
+    const $group = $this.closest('[role="radiogroup"]');
+    const $options = $group.find('.menu-option[role="radio"]');
+    let currentIndex = $options.index($this);
 
-function getValueFromUrlParams() {
-  const urlParams = new URLSearchParams(window.location.search);
-  forVideoParam = urlParams.get("forVideo");
-  videoTextColorParam = urlParams.get("videoTextColor");
-  autoRetrieveParam = urlParams.get("autoRetrieve");
-  chromaParam = urlParams.get("chroma");
-  heightParam = urlParams.get("height");
-  if (heightParam) {
-    $("#live-caption").css({ 
-      maxHeight: `${heightParam}%`,
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        currentIndex = (currentIndex + 1) % $options.length;
+        $options.eq(currentIndex).focus();
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        currentIndex = (currentIndex - 1 + $options.length) % $options.length;
+        $options.eq(currentIndex).focus();
+    } else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        $this.click(); // Trigger the existing click handler
+    } else if (e.key === 'Escape') {
+        closeSidebar();
+    }
+  });
+
+
+  $('#sidebar-menu').on('click', '.menu-option', function() {
+      const $this = $(this);
+      const action = $this.data('action');
+      const value = $this.data('value');
+      
+      // Update ARIA states within the group
+      $this.closest('[role="radiogroup"]').find('.menu-option[role="radio"]').attr({
+          'aria-checked': 'false',
+          'tabindex': -1
+      });
+      $this.attr({'aria-checked': 'true', 'tabindex': 0 });
+
+
+      switch(action) {
+          case 'stream':
+              buttonTapped();
+              break;
+          case 'theme':
+              if (value === 'dark') {
+                  body.addClass('dark-mode');
+                  $('#checkbox').prop('checked', true);
+              } else {
+                  body.removeClass('dark-mode');
+                  $('#checkbox').prop('checked', false);
+              }
+              break;
+          case 'language':
+              translate(value);
+              break;
+          case 'audio':
+              if (value === 'mute') {
+                  muteButtonTapped();
+              } else {
+                  unmuteButtonTapped();
+              }
+              break;
+      }
+      updateSidebarActiveStates(); // This will re-apply tabindex and aria-checked based on global state
+      // Optional: closeSidebar();
+  });
+
+  const legacyCheckbox = $("#checkbox");
+  if (legacyCheckbox.length) {
+    legacyCheckbox.on("change", () => {
+        $('body').toggleClass('dark-mode');
+        updateSidebarActiveStates(); // This will update the sidebar's display options
     });
   }
 
+  modalSetup();
+});
+
+function modalSetup(){
+    // --- Modal Functionality for "Ask a Question" ---
+
+  // 1. Get references to the HTML elements
+  const openModalBtn = document.getElementById("openModal");
+  const questionModalElement = document.getElementById("askQuestionModal");
+  const questionForm = document.getElementById("questionForm");
+
+  // Check if the elements exist before proceeding
+  if (openModalBtn && questionModalElement && questionForm) {
+    // 2. Initialize the Bootstrap Modal component
+    const askQuestionModal = new window.bootstrap.Modal(questionModalElement);
+
+    // 3. Add event listener to the "Ask a Question" button to show the modal
+    openModalBtn.addEventListener("click", () => {
+      askQuestionModal.show();
+    });
+
+    // 4. Add event listener for the form submission
+    questionForm.addEventListener("submit", async (e) => {
+      e.preventDefault(); // Prevent the default browser form submission
+
+      // Get the values from the form inputs
+      const name = document.getElementById("name").value.trim(); // FIX: Correctly gets the name
+      const question = document.getElementById("question").value.trim();
+
+      // Validate that a question was actually entered
+      if (!question) {
+        alert("Please enter a question.");
+        return;
+      }
+
+      // --- Dynamic API URL construction ---
+      // Get the streamName dynamically from your existing API_URL constant
+      const streamName = new URL(API_URL).searchParams.get('streamName');
+      
+      // Format the question text (handles cases where name is left blank)
+      const submissionText = name ? `${name}: ${question}` : question;
+
+      // Construct the final URL for the API call
+      const submissionUrl = `https://api.deafassistant.com/question/AddQuestion?streamName=${streamName}&question=${encodeURIComponent(submissionText)}`;
+
+      try {
+        // Send the data to the API using a POST request
+        const res = await fetch(submissionUrl, { method: "POST" });
+
+        if (res.ok) {
+          alert("Question submitted successfully!");
+          askQuestionModal.hide(); // Hide the modal on success
+          questionForm.reset();  // Clear the form fields
+        } else {
+          // Handle server-side errors
+          alert("Failed to submit question. The server responded with an error.");
+        }
+      } catch (error) {
+        // Handle network errors
+        alert("An error occurred while submitting the question. Please check your connection.");
+        console.error("Error submitting question:", error);
+      }
+    });
+  }
+  // --- End of Modal Functionality ---
+}
+
+// --- Function to update sidebar active states (with ARIA) ---
+function updateSidebarActiveStates() {
+    // Stream state
+    const streamSection = $('#stream-section');
+    streamSection.find('.menu-option').attr({'aria-checked': 'false', 'tabindex': -1});
+    const activeStreamOption = isStreamingCaptions ? 
+        streamSection.find('.menu-option[data-value="on"]') : 
+        streamSection.find('.menu-option[data-value="off"]');
+    activeStreamOption.addClass('active-option').attr({'aria-checked': 'true', 'tabindex': 0});
+    streamSection.find('.menu-option').not(activeStreamOption).removeClass('active-option');
+
+
+    // Theme state
+    const displaySection = $('#display-section');
+    displaySection.find('.menu-option').attr({'aria-checked': 'false', 'tabindex': -1});
+    const activeThemeOption = $('body').hasClass('dark-mode') ?
+        displaySection.find('.menu-option[data-value="dark"]') :
+        displaySection.find('.menu-option[data-value="light"]');
+    activeThemeOption.addClass('active-option').attr({'aria-checked': 'true', 'tabindex': 0});
+    displaySection.find('.menu-option').not(activeThemeOption).removeClass('active-option');
+    $('#checkbox').prop('checked', $('body').hasClass('dark-mode'));
+
+
+    // Language state
+    const langSection = $('#language-section');
+    langSection.find('.menu-option').attr({'aria-checked': 'false', 'tabindex': -1}).removeClass('active-option');
+    const activeLangOption = langSection.find(`.menu-option[data-value="${languageCode}"]`);
+    if (activeLangOption.length) {
+        activeLangOption.addClass('active-option').attr({'aria-checked': 'true', 'tabindex': 0});
+    }
+
+
+    // Audio state
+    const audioSection = $('#audio-section');
+    audioSection.find('.menu-option').attr({'aria-checked': 'false', 'tabindex': -1});
+    const activeAudioOption = isPlayingSpeech ?
+        audioSection.find('.menu-option[data-value="unmute"]') :
+        audioSection.find('.menu-option[data-value="mute"]');
+    activeAudioOption.addClass('active-option').attr({'aria-checked': 'true', 'tabindex': 0});
+    audioSection.find('.menu-option').not(activeAudioOption).removeClass('active-option');
+}
+
+// --- Function to populate language menu in sidebar (with ARIA) ---
+function populateLanguageMenu() {
+    const langSection = $('#language-section');
+    // Clear only menu options, not the heading
+    langSection.find('.menu-option[role="radio"]').remove();
+
+    const availableLanguages = new Set();
+    if (response.inputLanguage && languageData[response.inputLanguage]) availableLanguages.add(response.inputLanguage);
+    if (response.outputLanguage && languageData[response.outputLanguage]) availableLanguages.add(response.outputLanguage);
+    if (response.outputLanguage2 && languageData[response.outputLanguage2]) availableLanguages.add(response.outputLanguage2);
+    if (response.outputLanguage3 && languageData[response.outputLanguage3]) availableLanguages.add(response.outputLanguage3);
+    if (response.outputLanguage4 && languageData[response.outputLanguage4]) availableLanguages.add(response.outputLanguage4);
+    
+    if (availableLanguages.size === 0 && languageData[DEFAULT_LANGUAGE]) {
+        availableLanguages.add(DEFAULT_LANGUAGE);
+    }
+
+    availableLanguages.forEach(langCode => {
+        const optionText = languageData[langCode] ? languageData[langCode].name : langCode; // Fallback to code if name missing
+        const option = $('<div></div>')
+            .addClass('menu-option')
+            .attr('role', 'radio') // Add role
+            .attr('data-action', 'language')
+            .attr('data-value', langCode)
+            .attr('tabindex', -1) // Initially not in tab order
+            .attr('aria-checked', 'false') // Initially not checked
+            .text(optionText);
+        langSection.append(option);
+    });
+    // After populating, update ARIA states based on current languageCode
+    updateSidebarActiveStates();
+}
+// --- Your Existing Functions (Modified where necessary) ---
+
+function getValueFromUrlParams() {
+  const urlParams = new URLSearchParams(window.location.search);
+  forVideoParam = urlParams.get("forVideo") === 'true';
+  translationNumberParam = urlParams.get("translationNumber");
+  videoTextColorParam = urlParams.get("videoTextColor");
+  autoRetrieveParam = urlParams.get("autoRetrieve") === 'true';
+  chromaParam = urlParams.get("chroma");
+  heightParam = urlParams.get("height");
+  fontSizeParam = urlParams.get("fontSize");
+  if (heightParam) {
+    $("#live-caption").css({ maxHeight: `${heightParam}%` });
+  }
   if (forVideoParam) {
     $("#holder").hide();
     $("#header").hide();
+    $("#outer-div").show().html(LAYOVER_HTML);
   } else {
     $("#outer-div").hide();
   }
 
   if (videoTextColorParam) {
-    $("#holder2").css({ color: `#${videoTextColorParam}` });
-  }
-
-  if (autoRetrieveParam) {
-    buttonTapped();
+     if ($("#holder2").length) { // Check if holder2 exists already
+        $("#holder2").css({ color: `#${videoTextColorParam}` });
+    } else { // If not, wait for it to be inserted (common with LAYOVER_HTML)
+        $(document).one('DOMNodeInserted', '#outer-div', function(e) {
+            // Check if the inserted content contains holder2
+            if ($(e.target).find('#holder2').length || $(e.target).is('#holder2')) {
+                 $("#holder2").css({ color: `#${videoTextColorParam}` });
+            }
+        });
+    }
   }
 
   if (chromaParam) {
     document.body.style.backgroundColor = `#${chromaParam}`;
   }
-
-  $("#outer-div").html(LAYOVER_HTML);
+  if (fontSizeParam) {
+    document.querySelector('.live-caption').style.fontSize = fontSizeParam;
+  }
+  
+  if (autoRetrieveParam) {
+    // Delay slightly to ensure other initializations (like language) might complete
+    setTimeout(buttonTapped, 100); 
+  }
 }
 
 
 function buttonTapped() {
-  isStreamingCaptions ? stopTimer() : startTimer();
+  // startTimer/stopTimer update button text based on languageCode
+  // which should be set by translate() before this can be reliably called.
+
   isStreamingCaptions = !isStreamingCaptions;
+    // Update button text and ARIA live region for announcements
+  const liveCaptionButton = $("#get-live-caption");
+  if (isStreamingCaptions) {
+      if (languageData[languageCode]) liveCaptionButton.text(languageData[languageCode]['get-live-caption-stop']);
+      else liveCaptionButton.text("Stop Streaming");
+      liveCaptionButton.attr("aria-pressed", "true"); // Announce it's active
+      // You might want an aria-live region to announce "Streaming started"
+  } else {
+      if (languageData[languageCode]) liveCaptionButton.text(languageData[languageCode]['get-live-caption']);
+      else liveCaptionButton.text("Get Live Captions");
+      liveCaptionButton.attr("aria-pressed", "false"); // Announce it's inactive
+      // Announce "Streaming stopped"
+  }
+  
+  if (isStreamingCaptions) {
+    iOSSpeakerFix();
+    startTimer(); // Original function for button text based on lang
+  } else {
+    stopTimer(); // Original function
+  }
+  updateSidebarActiveStates(); // Sync sidebar
+  // loadLang(languageCode); // This is now part of start/stopTimer effectively
 }
 
 function muteButtonTapped() {
-  if (isStreamingCaptions) {
-    mute();
-  } else {
-    alert("Captions are not streaming");
-  }
+  // No alert needed, sidebar shows state
+  mute();
+  updateSidebarActiveStates();
 }
 
 function unmuteButtonTapped() {
-  if (isStreamingCaptions) {
-    iOSSpeakerFix();
-    unmute();
-  } else {
-    alert("Captions are not streaming");
-  }
+  iOSSpeakerFix();
+  unmute();
+  updateSidebarActiveStates();
 }
-
 
 function iOSSpeakerFix() {
-    // Create a new utterance with the latest text and language code
-    const utterance = new SpeechSynthesisUtterance("");
-    synth.speak(utterance);
+  if (!synth) return;
+  if (synth.state === 'suspended') { // Attempt to resume if suspended (common on mobile)
+    synth.resume();
+  }
+  const utterance = new SpeechSynthesisUtterance("");
+  utterance.volume = 0; // Play silently to activate audio context
+  synth.speak(utterance);
 }
-
 
 function mute() {
   isPlayingSpeech = false;
   $("#unmute").show();
   $("#mute").hide();
+  if (currentUtterance) {
+      synth.cancel();
+      speechQueue = [];
+      currentUtterance = null;
+  }
 }
 
 function unmute() {
   isPlayingSpeech = true;
   $("#mute").show();
   $("#unmute").hide();
+  processQueue(); // Attempt to process queue if items were added while muted
 }
 
 function showRightTranscript() {
+  let currentTranscriptText = ""; // Use a local var
+  if (translationNumberParam == 1) {
+    languageCode = response.outputLanguage; // Use output1 for translationNumber 1
+  } else if (translationNumberParam == 2) {
+    languageCode = response.outputLanguage2; // Use output2 for translationNumber 2
+  } else if (translationNumberParam == 3) {
+    languageCode = response.outputLanguage3; // Use output3 for translationNumber 3
+  } else if (translationNumberParam == 4) {
+    languageCode = response.outputLanguage4; // Use output4 for translationNumber 4
+  } else if (translationNumberParam == 0) {
+    languageCode = response.inputLanguage; // Default to input language
+  } else{
+    // Don't do anything
+  }
   if (languageCode === response.inputLanguage) {
-    transcript = response.input;
+    currentTranscriptText = response.input;
   } else if (languageCode === response.outputLanguage) {
-    transcript = response.output1;
+    currentTranscriptText = response.output1;
+  } else if (languageCode === response.outputLanguage2) {
+    currentTranscriptText = response.output2;
+  } else if (languageCode === response.outputLanguage3) {
+    currentTranscriptText = response.output3;
+  } else if (languageCode === response.outputLanguage4) {
+    currentTranscriptText = response.output4;
   } else {
-    transcript = response.output2;
+    currentTranscriptText = response.input; // Default to input
   }
 
   const liveCaption = $("#live-caption");
-  const liveCaption2 = $("#live-caption2");
+  const liveCaption2 = $("#live-caption2"); // For video overlay
 
-  if (liveCaption.text() !== transcript) {
-    liveCaption.html(transcript);
+  if (liveCaption.length && liveCaption.html() !== currentTranscriptText) {
+    liveCaption.html(currentTranscriptText);
+    liveCaption.scrollTop(liveCaption[0].scrollHeight);
   }
-  if (liveCaption2.text() !== transcript) {
-    liveCaption2.html(transcript);
+  // For video overlay, ensure elements exist
+  if (liveCaption2.length && liveCaption2.html() !== currentTranscriptText) {
+    liveCaption2.html(currentTranscriptText);
+    liveCaption2.scrollTop(liveCaption2[0].scrollHeight);
+    // Potentially scroll liveCaption2 as well if it's scrollable
   }
 }
 
 function loadLang(lang) {
-  readText = ""; // Reset read logic
+  if (!languageData[lang]) {
+    console.warn("Language data missing for:", lang, "Using default:", DEFAULT_LANGUAGE);
+    lang = DEFAULT_LANGUAGE; // Fallback to default if selected lang data is missing
+    if (!languageData[lang]) { // If default is also missing, critical error
+        console.error("Default language data missing. UI text will not update.");
+        // Display a generic message or leave as is
+        $("#caption-header").text("Live Captioning");
+        $("#live-caption-empty").text("Transcription will appear here.");
+        // ... set other texts to generic defaults
+        return;
+    }
+  }
+  readText = ""; 
   const langData = languageData[lang];
   $("#caption-header").html(langData["caption-header"]);
   $("#live-caption-empty").html(langData["live-caption-empty"]);
-  $("#live-caption-empty2").html(langData["live-caption-empty"]); // For video
+  if ($("#live-caption-empty2").length) { // Check if overlay element exists
+      $("#live-caption-empty2").html(langData["live-caption-empty"]);
+  }
   $("#hotmail").html(langData["hotmail"]);
-  $("#input").html(languageData[response.inputLanguage]["name"]);
 
-  // Conditionally set the language names
-  if (response.outputLanguage) {
-    $("#output1").html(languageData[response.outputLanguage]["name"]);
-  }
-  if (response.outputLanguage2) {
-    $("#output2").html(languageData[response.outputLanguage2]["name"]);
-  }
+  // Update legacy link texts (they are hidden but good for consistency)
+  if (languageData[response.inputLanguage]) $("#input").html(languageData[response.inputLanguage]["name"]);
+  else $("#input").html("Input");
+
+  const outputs = [response.outputLanguage, response.outputLanguage2, response.outputLanguage3, response.outputLanguage4];
+  outputs.forEach((outputLang, index) => {
+      const outputEl = $(`#output${index + 1}`);
+      if (outputLang && languageData[outputLang]) {
+          outputEl.html(languageData[outputLang]["name"]).show();
+      } else {
+          outputEl.html(`Output ${index + 1}`).hide(); // Hide if no lang or no data
+      }
+  });
   
-  // Set button text based on streaming state
-  const buttonText = isStreamingCaptions ? "get-live-caption-stop" : "get-live-caption";
-  $("#get-live-caption").html(langData[buttonText]);
+    // Update the main "Get Live Captions" button text based on current streaming state
+  const buttonTextKey = isStreamingCaptions ? "get-live-caption-stop" : "get-live-caption";
+  const langDataForButton = languageData[lang] || languageData[DEFAULT_LANGUAGE]; // Fallback for button text
+  if (langDataForButton) {
+      $("#get-live-caption").text(langDataForButton[buttonTextKey]);
+  }
 }
 
 function recurringFunction() {
-  if (!response.input) {
-    $("#live-caption-empty2").show();
+  const mainCaptionEmpty = $("#live-caption-empty");
+  const overlayCaptionEmpty = $("#live-caption-empty2");
+
+  if (!response.input || response.input.trim() === "") {
+    mainCaptionEmpty.show();
+    $("#live-caption").hide();
+    if (overlayCaptionEmpty.length) {
+        overlayCaptionEmpty.show();
+        if ($("#live-caption2").length) $("#live-caption2").parent().hide(); // Hide parent scroller
+    }
   } else {
-    $("#live-caption-empty, #live-caption-empty2").hide();
+    mainCaptionEmpty.hide();
+    $("#live-caption").show();
+    if (overlayCaptionEmpty.length) {
+        overlayCaptionEmpty.hide();
+        if ($("#live-caption2").length) $("#live-caption2").parent().show();
+    }
     showRightTranscript();
   }
 
@@ -198,272 +548,281 @@ function recurringFunction() {
 }
 
 function startTimer() {
-    $("#get-live-caption").html(languageData[languageCode]['get-live-caption-stop'])
+    if (languageData[languageCode]) {
+      $("#get-live-caption").html(languageData[languageCode]['get-live-caption-stop']);
+    }
 }
   
 function stopTimer() {
-    $("#get-live-caption").html(languageData[languageCode]['get-live-caption'])
+    if (languageData[languageCode]) {
+      $("#get-live-caption").html(languageData[languageCode]['get-live-caption']);
+    }
 }
 
 function getTranscript() {
   $.support.cors = true;
-
   $.getJSON(API_URL, function (data) {
-    if (data && data.transcript) {
-      updateResponseData(data);
-      
-      // Audio enhancement
-      let textToRead;
-      if (languageCode === response.inputLanguage){
-          textToRead = data.transcript;
-      } else if (languageCode === response.outputLanguage){
-          textToRead = data.translation;
-      } else if (languageCode === response.outputLanguage2){
-        textToRead = data.translation2;
-      }
+    if (data) {
 
-      if (textToRead) {
-        readLogic(textToRead)
+      if (data.transcript !== undefined) {
+        updateResponseData(data); // This updates transcript text and also the language codes in `response`
+      
+        let textToRead = "";
+        if (languageCode === response.inputLanguage) textToRead = data.transcript;
+        else if (languageCode === response.outputLanguage) textToRead = data.translation;
+        else if (languageCode === response.outputLanguage2) textToRead = data.translation2;
+        else if (languageCode === response.outputLanguage3) textToRead = data.translation3;
+        else if (languageCode === response.outputLanguage4) textToRead = data.translation4;
+        if (data.customQuestionPrompt && data.customQuestionPrompt.trim() !== "") {
+          $("#openModal").show();
+          $("#openModal a").text(data.customQuestionPrompt);
+          $("#askQuestionModalLabel").text(data.customQuestionPrompt);
+          $("#questionLabel").text(data.customQuestionPrompt);      
+        } else {
+          $("#openModal").hide();
+        }
+        if (textToRead) {
+          readLogic(textToRead);
+        }
       }
-      if (!data.isActivelyStreaming) {
-        buttonTapped(); // Auto stop if not actively streaming
+      if (data.isActivelyStreaming === false && isStreamingCaptions) {
+        buttonTapped();
       }
     }
+  }).fail(function(jqXHR, textStatus, errorThrown) {
+      console.error("Error fetching transcript:", textStatus, errorThrown);
   });
 }
-function updateResponseData(data) {
-    response.input = data.transcript;
-    response.inputLanguage = data.inputLanguage.substring(0, 2);
-    response.output1 = data.translation;
-    response.outputLanguage = data.outputLanguage.substring(0, 2);
-    response.output2 = data.translation2;
-    response.outputLanguage2 = data.outputLanguage2.substring(0, 2);
+
+function updateResponseData(data) { // Primarily for transcript text and associated language codes
+    response.input = data.transcript || "";
+    if (data.inputLanguage) response.inputLanguage = data.inputLanguage.substring(0, 2);
+    
+    response.output1 = data.translation || "";
+    if (data.outputLanguage) response.outputLanguage = data.outputLanguage.substring(0, 2);
+    
+    response.output2 = data.translation2 || "";
+    if (data.outputLanguage2) response.outputLanguage2 = data.outputLanguage2.substring(0, 2);
+
+    response.output3 = data.translation3 || "";
+    if (data.outputLanguage3) response.outputLanguage3 = data.outputLanguage3.substring(0, 2);
+
+    response.output4 = data.translation4 || "";
+    if (data.outputLanguage4) response.outputLanguage4 = data.outputLanguage4.substring(0, 2);
 }
 
-function checkLanguage() {
+function checkLanguage() { // Called ONCE on load to get available languages for the menu
     if (isTesting) {
-        checkMockLanguage();
+        checkMockLanguage(); // This will call populateLanguageMenu and translate
         return;
     }
     $.support.cors = true;
-    $.getJSON(API_URL, function(data) {
-        if (data && data.transcript) {
-            updateResponseLanguages(data);
-            translate(response.inputLanguage);
-            $("#input").html(languageData[response.inputLanguage].name);
-    
-            if (response.outputLanguage) {
-              $("#output1").html(languageData[response.outputLanguage].name);
+    // This initial call is to get the stream's language configuration
+    $.getJSON(API_URL, function(data) { 
+        if (data) {
+            updateResponseLanguages(data); // Set up response.xxxLanguage based on stream config
+            populateLanguageMenu();      // Build the sidebar menu with these languages
+            if (data.customQuestionPrompt && data.customQuestionPrompt.trim() !== "") {
+              $("#openModal").show();
+              $("#openModal a").text(data.customQuestionPrompt);
+              $("#askQuestionModalLabel").text(data.customQuestionPrompt);
+              $("#questionLabel").text(data.customQuestionPrompt);          
             } else {
-                $("#output1").hide();
-            }
-    
-            if (response.outputLanguage2) {
-              $("#output2").html(languageData[response.outputLanguage2].name);
-            } else {
-              $("#output2").hide();
-            }
+              $("#openModal").hide();
+            }    
+            // Set initial language: try API's input, then default
+            languageCode = (response.inputLanguage && languageData[response.inputLanguage]) ? response.inputLanguage : DEFAULT_LANGUAGE;
+            translate(languageCode);       // Load initial language and update UI
+        } else {
+            console.warn("Initial language check: No data received. Using defaults.");
+            populateLanguageMenu(); // Populate with defaults if any
+            translate(DEFAULT_LANGUAGE);
         }
+    }).fail(function() {
+        console.error("Failed to fetch initial language settings from API. Using defaults.");
+        // In case of API failure, response.xxxLanguage might be empty or default
+        // populateLanguageMenu will use these (potentially just DEFAULT_LANGUAGE)
+        populateLanguageMenu(); 
+        translate(DEFAULT_LANGUAGE);
+        checkMockLanguage(); // This will call populateLanguageMenu and translate
     });
 }
 
-function updateResponseLanguages(data) {
-  response.inputLanguage = data.inputLanguage.substring(0, 2);
-  response.outputLanguage = data.outputLanguage.substring(0, 2);
-  response.outputLanguage2 = data.outputLanguage2.substring(0, 2);
+function updateResponseLanguages(data) { // Called by checkLanguage (once) or if API can change available langs
+  // This function defines WHICH languages are available for selection
+  response.inputLanguage = (data.inputLanguage) ? data.inputLanguage.substring(0, 2) : DEFAULT_LANGUAGE;
+  response.outputLanguage = (data.outputLanguage) ? data.outputLanguage.substring(0, 2) : "";
+  response.outputLanguage2 = (data.outputLanguage2) ? data.outputLanguage2.substring(0, 2) : "";
+  response.outputLanguage3 = (data.outputLanguage3) ? data.outputLanguage3.substring(0, 2) : "";
+  response.outputLanguage4 = (data.outputLanguage4) ? data.outputLanguage4.substring(0, 2) : "";
 }
 
 function readLogic(message) {
-    if (!readText) {
-        readText = message;
+    if (!isPlayingSpeech || !isStreamingCaptions) return; // Don't process if muted or not streaming
+
+    if (!readText || message.startsWith(readText.substring(0, Math.min(10, readText.length))) === false ) {
+        // If readText is empty OR new message doesn't start like old one (language change or jump)
+        // Then speak the whole new message.
+        speechQueue = []; // Clear queue for new full message
+        if (currentUtterance) synth.cancel(); // Cancel ongoing if any
+        speakText(message, languageCode);
+        readText = message; // Set readText to the full new message
     } else {
         const newWordCount = getNumberOfWords(message);
         const oldWordCount = getNumberOfWords(readText);
         
         if (newWordCount > oldWordCount){
             const unreadText = removeWords(message, oldWordCount);
-            if(isPlayingSpeech) {
-                speakText(unreadText, languageCode)
-            }
+            speakText(unreadText, languageCode); // Add incremental text to queue
         }
-        readText = message;
+        // Always update readText to the latest full message received from API
+        // This ensures 'oldWordCount' is correct for the next comparison.
+        readText = message; 
     }
 }
 
 function speakText(newText, langCode) {
-  if (!synth) {
-    console.error("SpeechSynthesis API is not supported in this browser.");
-    return;
-  }
-  if (!newText.trim()) {
-    console.warn("No text provided for speech synthesis.");
-    return;
-  }
+  if (!synth || !newText || !newText.trim()) return;
 
   speechQueue.push({ text: newText, lang: langCode });
-
-  if (!currentUtterance) {
+  if (!synth.speaking) { // Only call processQueue if not already speaking
     processQueue();
   }
 }
 
 function processQueue() {
-  if (speechQueue.length === 0) {
-    return;
+  if (speechQueue.length === 0 || !isPlayingSpeech || !isStreamingCaptions || synth.speaking) {
+    return; // Don't process if queue empty, muted, not streaming, or already speaking
   }
 
   const { text, lang } = speechQueue.shift();
   const utterance = new SpeechSynthesisUtterance(text);
-  voiceChoice = window.speechSynthesis.getVoices().find((voice) => voice.lang.slice(0, 2) === languageCode);
+  
+  voiceChoice = window.speechSynthesis.getVoices().find(voice => voice.lang.startsWith(lang));
     
   if (voiceChoice) {
     utterance.voice = voiceChoice;
   } else {
-      alert("This language is not available for playback on your device. Please try another device");
-      muteButtonTapped()
-      return
+      // console.warn(`No specific voice for ${lang}. Using default. Or alert & mute.`);
+      alert(`Language ${lang} not available for playback on your device.`);
+      muteButtonTapped(); // This might be too aggressive
+      return; 
   }
-  
   utterance.lang = lang;
 
-
-  currentUtterance = utterance;
+  currentUtterance = utterance; // Set before speaking
+  utterance.onstart = () => { /* currentUtterance is already set */ };
   utterance.onend = () => {
     currentUtterance = null;
     processQueue();
   };
   utterance.onerror = (event) => {
-    console.error("An error occurred during speech synthesis:", event.error);
+    console.error("Speech synthesis error:", event.error, "Text:", text);
     currentUtterance = null;
     processQueue();
   };
-
-  if (isStreamingCaptions) {
-    synth.speak(utterance);
-  }
+  synth.speak(utterance);
 }
 
-function translate(language) {
-    languageCode = language;
-    loadLang(language);
-    // voiceChoice is now being set in `processQueue` to ensure it is always in scope
+function translate(selectedLang) {
+    if (!languageData[selectedLang]) {
+        console.warn("Attempted to translate to unsupported or unknown language:", selectedLang);
+        // Optionally fall back to default or do nothing
+        // selectedLang = DEFAULT_LANGUAGE; 
+        return; // Or handle error more gracefully
+    }
+    languageCode = selectedLang;
+    loadLang(languageCode); // Update UI texts for the new language
+    
+    // Reset speech for new language
+    readText = ""; // So the new language transcript is read from the beginning
+    if (currentUtterance) {
+        synth.cancel(); // Stop any ongoing speech
+        currentUtterance = null;
+    }
+    speechQueue = []; // Clear the speech queue
+
+    updateSidebarActiveStates(); // Update active selection in sidebar
 }
 
 function getNumberOfWords(inputString) {
-  return inputString ? inputString.trim().split(/\s+/).length : 0;
+  return inputString ? inputString.trim().split(/\s+/).filter(Boolean).length : 0;
 }
 
 function removeWords(inputString, numberOfWordsToRemove) {
-  if (!inputString || !inputString.trim()) {
-    return "";
-  }
-
-  const wordsArray = inputString.split(/\s+/);
+  if (!inputString || !inputString.trim()) return "";
+  const wordsArray = inputString.trim().split(/\s+/);
   const newWordsArray = wordsArray.slice(numberOfWordsToRemove);
   return newWordsArray.join(" ");
 }
 
-const checkbox = document.getElementById("checkbox")
-checkbox.addEventListener("change", () => {
-  // document.body.classList.toggle("dark")
-  invertColors()
-})
-function invertColors() { 
-  // the css we are going to inject
-  var css = 'html {-webkit-filter: invert(100%);' +
-      '-moz-filter: invert(100%);' + 
-      '-o-filter: invert(100%);' + 
-      '-ms-filter: invert(100%); }',
-  
-  head = document.getElementsByTagName('head')[0],
-  style = document.createElement('style');
-  
-  // a hack, so you can "invert back" clicking the bookmarklet again
-  if (!window.counter) { window.counter = 1;} else  { window.counter ++;
-  if (window.counter % 2 == 0) { var css ='html {-webkit-filter: invert(0%); -moz-filter:    invert(0%); -o-filter: invert(0%); -ms-filter: invert(0%); }'}
-   };
-  
-  style.type = 'text/css';
-  if (style.styleSheet){
-  style.styleSheet.cssText = css;
-  } else {
-  style.appendChild(document.createTextNode(css));
-  }
-  
-  //injecting the css to the head
-  head.appendChild(style);
-}
+// Dark Mode (Class-based, invertColors() is replaced by body.dark-mode toggling)
+// The legacy checkbox listener is already set up to toggle 'dark-mode' class
 
-function callUserViewedAPI(streamName) {
-  const apiUrl = `http://api.deafassistant.com/api/v1/stream/view-counter`;
-  fetch(apiUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(streamName),
-  })
-    .then(response => {
-      if (response.ok) {
-        console.log('API call successful');
-      } else {
-        console.error('API call failed');
-      }
-    })
-    .catch(error => {
-      console.error('API call failed with an exception:', error);
-    });
-}
-
+// --- Mock Data Functions ---
 function checkMockLanguage() {
-  const mockData = mockObject;
-  if (mockData && mockData.transcript) {
-    updateResponseLanguages(mockData);
-    translate(response.inputLanguage);
-    $("#input").html(languageData[response.inputLanguage].name);
-    if (response.outputLanguage) {
-        $("#output1").html(languageData[response.outputLanguage].name);
-    } else {
-        $("#output1").hide();
-    }
-    if (response.outputLanguage2) {
-        $("#output2").html(languageData[response.outputLanguage2].name);
-    } else {
-        $("#output2").hide();
-    }
+  const mockData = mockObject; // Use your primary mock object
+  if (mockData) { // No need to check mockData.transcript here, just for language config
+    updateResponseLanguages(mockData); // Sets response.xxxLanguage
+    populateLanguageMenu();          // Builds sidebar menu from response.xxxLanguage
+
+    // Set initial language for testing
+    languageCode = (response.inputLanguage && languageData[response.inputLanguage]) ? response.inputLanguage : DEFAULT_LANGUAGE;
+    translate(languageCode);           // Loads this language
+  } else {
+      console.error("Mock object is undefined. Cannot check mock language.");
+      populateLanguageMenu(); // Populate with defaults
+      translate(DEFAULT_LANGUAGE);
   }
 }
 
-let mockWord = "";
+let mockWord = ""; // Keep this for getMockTranscript
 
 function getMockTranscript() {
-  // mockWord += " سيبدأ الحدث";
-    mockWord = mockWord + " Donde esta el baño."; // mock spanish data
-    $("#live-caption").html(transcript+ " " + counter++ + mockWord);
-  const mockData = mockObject;
-  if (mockData && mockData.transcript) {
-      updateResponseData(mockData)
+  // mockWord += " سيبدأ الحدث"; // Example Arabic
+  mockWord += " Donde esta el baño."; // Example Spanish
+  
+  const mockDataToUse = mockObject; // Choose which mock object to get transcript text from
+
+  // Simulate that the current transcript is appended with mockWord
+  // This logic is a bit different from just using mockDataToUse.transcript directly.
+  // For testing 'readLogic', we need to simulate an evolving transcript.
+  
+  // Let's simulate the API response structure for updateResponseData
+  let simulatedApiData = { ...mockDataToUse }; // Clone
+  simulatedApiData.transcript = (simulatedApiData.transcript || "") + " " + counter + mockWord;
+  // If you want to simulate translations also evolving:
+  simulatedApiData.translation = (simulatedApiData.translation || "") + " " + counter + mockWord; // Adjust if translation differs
+  simulatedApiData.translation2 = (simulatedApiData.translation2 || "") + " " + counter + mockWord;
+  // etc. for translation3 and translation4
+
+  updateResponseData(simulatedApiData); // This updates response.input, response.output1 etc.
+  counter++;
       
-       // Audio enhancement
-       let textToRead;
-       if (languageCode === response.inputLanguage){
-            textToRead = mockData.transcript;
-        } else if (languageCode === response.outputLanguage){
-            textToRead = mockData.translation;
-        } else if (languageCode === response.outputLanguage2){
-            textToRead = mockData.translation2;
-        }
-        
-       if (textToRead) {
-         readLogic(textToRead + mockWord)
-       }
-     
-      if (!mockData.isActivelyStreaming) {
-        buttonTapped(); // Auto stop if not actively streaming
-      }
+  let textToRead;
+  if (languageCode === response.inputLanguage) textToRead = response.input; // Use the updated response.input
+  else if (languageCode === response.outputLanguage) textToRead = response.output1;
+  else if (languageCode === response.outputLanguage2) textToRead = response.output2;
+  else if (languageCode === response.outputLanguage3) textToRead = response.output3;
+  else if (languageCode === response.outputLanguage4) textToRead = response.output4;
+  if (simulatedApiData.customQuestionPrompt && simulatedApiData.customQuestionPrompt.trim() !== "") {
+    $("#openModal").show();
+    $("#openModal a").text(simulatedApiData.customQuestionPrompt);
+    $("#askQuestionModalLabel").text(simulatedApiData.customQuestionPrompt);
+    $("#questionLabel").text(simulatedApiData.customQuestionPrompt);
+  } else {
+    $("#openModal").hide();
+  }    
+  if (textToRead) {
+    readLogic(textToRead);
+  }
+ 
+  if (!simulatedApiData.isActivelyStreaming && isStreamingCaptions) {
+    buttonTapped();
   }
 }
 
+// Your existing mockObject, mockObject2, mockObject3
 const mockObject = {
   "timestamp": "2024-12-10T20:56:50.4571326",
   "roomName": "stream94607",
@@ -475,6 +834,7 @@ const mockObject = {
   "inputLanguage": "en-US",
   "outputLanguage": "es",
   "outputLanguage2": "ar-001",
+  "customQuestionPrompt": "Ask a question about the event",
   "isPremiumCustomer": false,
   "blockStorage": false,
   "uid": null
@@ -497,8 +857,6 @@ const languageData = {
     "caption-header":"Captions & Translations",
     "get-live-caption":"Get Live Captions",
     "get-live-caption-stop":"Stop Streaming",
-    "english-language":"English",
-    "french-language":"Français",
     "live-caption-empty":"Transcription will display here",
     "hotmail":"PS: I love you. Get free event subtitles & translations",
     "name":"English"
@@ -519,14 +877,38 @@ const languageData = {
     "hotmail":"PS: Ich liebe dich. Holen Sie sich Ihre kostenlose Live-Event-Transkription unter ",
     "name":"Deutsche"
   },
-  'zh': {
-    "caption-header":"事件实时字幕",
-    "get-live-caption":"获取实时字幕",
-    "get-live-caption-stop":"停止直播",
-    "live-caption-empty":"转录内容将显示在此处",
-    "hotmail":"PS: 我爱你。在这里获取免费的现场活动转录: ",
-    "name":"中文"
+  'my': {
+    "caption-header": "စာတန်းထိုး & ဘာသာပြန်",
+    "get-live-caption": "တိုက်ရိုက်စာတန်းထိုးရယူပါ",
+    "get-live-caption-stop": "စတင်ထုတ်လွှင့်မှုကို ရပ်ပါ",
+    "live-caption-empty": "စာသားပြန်ဆိုမှုသည် ဤနေရာတွင် ပြသမည်",
+    "hotmail": "PS: မင်းကို ချစ်တယ်။ အခမဲ့ အခမ်းအနားစာတန်းထိုးနှင့် ဘာသာပြန်ရယူပါ",
+    "name": "မြန်မာ"
   },
+  'zh': {
+    "caption-header": "字幕与翻译",
+    "get-live-caption": "获取实时字幕",
+    "get-live-caption-stop": "停止直播",
+    "live-caption-empty": "转录内容将在此显示",
+    "hotmail": "PS: 我爱你。免费获取活动字幕和翻译",
+    "name": "简体中文"
+  },
+  'id': {
+    "caption-header": "Teks & Terjemahan",
+    "get-live-caption": "Dapatkan Teks Langsung",
+    "get-live-caption-stop": "Hentikan Streaming",
+    "live-caption-empty": "Transkripsi akan ditampilkan di sini",
+    "hotmail": "PS: Aku mencintaimu. Dapatkan subtitle & terjemahan acara gratis",
+    "name": "Bahasa"
+  },
+  'th': {
+    "caption-header": "คำบรรยาย & การแปล",
+    "get-live-caption": "รับคำบรรยายสด",
+    "get-live-caption-stop": "หยุดการสตรีม",
+    "live-caption-empty": "ข้อความที่ถอดความจะแสดงที่นี่",
+    "hotmail": "PS: ฉันรักคุณ รับคำบรรยายและการแปลเหตุการณ์ฟรี",
+    "name": "ไทย"
+  },  
   'ar': {
     "caption-header":"التسمية التوضيحية المباشرة للحدث",
     "get-live-caption":"احصل على تسميات توضيحية مباشرة",
@@ -542,39 +924,37 @@ const languageData = {
     "live-caption-empty":"La transcripción se mostrará aquí.",
     "hotmail":"PD Te amo. Obtenga su transcripción gratuita de eventos en vivo",
     "name":"Español"
-    },
-    'bn': {
-      "caption-header":"ক্যাপশন ও অনুবাদ",
-      "get-live-caption":"লাইভ ক্যাপশন পান",
-      "get-live-caption-stop":"স্ট্রিমিং বন্ধ করুন",
-      "english-language":"ইংরেজি",
-      "french-language":"ফরাসি",
-      "live-caption-empty":"ট্রান্সক্রিপশন এখানে প্রদর্শিত হবে",
-      "hotmail":"পিএস: আমি তোমাকে ভালোবাসি। বিনামূল্যে ইভেন্ট সাবটাইটেল এবং অনুবাদ পান",
-      "name":"বাংলা"
-    },  
-    'pt': {	"caption-header":"Legendas ao vivo de eventos",	"get-live-caption":"Obtenha legendas ao vivo",	"get-live-caption-stop":"Pare de transmitir",	"live-caption-empty":"A transcrição será exibida aqui",	"hotmail":"PS Eu Te Amo. Obtenha sua transcrição gratuita de evento ao vivo",	"name":"Português"	},
-    'ar': {	"caption-header":"حدث التسميات التوضيحية الحية",	"get-live-caption":"احصل على التسميات التوضيحية المباشرة",	"get-live-caption-stop":"توقف عن البث",	"live-caption-empty":"سيتم عرض النسخ هنا",	"hotmail":"ملاحظة: أنا أحبك. احصل على النسخ المجاني للحدث المباشر",	"name":"عربي"	},
-    'ru': {	"caption-header":"Прямые субтитры к событиям",	"get-live-caption":"Получить живые субтитры",	"get-live-caption-stop":"Остановить трансляцию",	"live-caption-empty":"Транскрипция будет отображаться здесь",	"hotmail":"PS я тебя люблю. Получите бесплатную транскрипцию живого мероприятия",	"name":"Русский"	},
-    'de': {	"caption-header":"Live-Untertitel der Veranstaltung",	"get-live-caption":"Erhalten Sie Live-Untertitel",	"get-live-caption-stop":"Stoppen Sie das Streaming",	"live-caption-empty":"Die Transkription wird hier angezeigt",	"hotmail":"PS Ich liebe Dich. Holen Sie sich Ihre kostenlose Live-Event-Transkription",	"name":"Deutsch"	},
-    'uk': {	"caption-header":"Живі субтитри подій",	"get-live-caption":"Отримайте живі субтитри",	"get-live-caption-stop":"Зупинити трансляцію",	"live-caption-empty":"Тут відображатиметься транскрипція",	"hotmail":"PS: я тебе люблю. Отримайте безкоштовну транскрипцію прямого ефіру",	"name":"українська"	},
-    'hi': {	"caption-header":"इवेंट लाइव कैप्शनिंग",	"get-live-caption":"लाइव कैप्शन प्राप्त करें",	"get-live-caption-stop":"स्ट्रीमिंग बंद करो",	"live-caption-empty":"प्रतिलेखन यहां प्रदर्शित होगा",	"hotmail":"पीएस मैं तुमसे प्यार करता हूँ। अपना निःशुल्क लाइव-इवेंट ट्रांसक्रिप्शन प्राप्त करें",	"name":"हिंदी"	},
-    'ur': {	"caption-header":"ایونٹ لائیو کیپشننگ",	"get-live-caption":"لائیو کیپشن حاصل کریں۔",	"get-live-caption-stop":"سلسلہ بندی بند کریں۔",	"live-caption-empty":"نقل یہاں ظاہر ہوگی۔",	"hotmail":"PS: میں تم سے پیار کرتا ہوں۔ اپنے لائیو ایونٹ کی مفت نقل حاصل کریں۔",	"name":"اردو"	},
-    'yo': {	"caption-header":"Ifiweranṣẹ Live Iṣẹlẹ",	"get-live-caption":"Gba Awọn akọle Live",	"get-live-caption-stop":"Duro ṣiṣanwọle",	"live-caption-empty":"Transcription yoo han nibi",	"hotmail":"PS: Mo nifẹ rẹ. Gba transcription-iṣẹlẹ laaye ọfẹ rẹ",	"name":"Yoruba"	},
-    'id': {	"caption-header":"Teks Langsung Acara",	"get-live-caption":"Dapatkan Teks Langsung",	"get-live-caption-stop":"Hentikan Streaming",	"live-caption-empty":"Transkripsi akan ditampilkan di sini",	"hotmail":"PS Aku mencintaimu. Dapatkan transkripsi acara langsung gratis Anda",	"name":"Bahasa"	},
-    'it': {	"caption-header":"Sottotitoli in tempo reale per eventi",	"get-live-caption":"Ottieni sottotitoli in tempo reale",	"get-live-caption-stop":"Interrompi lo streaming",	"live-caption-empty":"La trascrizione verrà visualizzata qui",	"hotmail":"PS Ti amo. Ottieni la trascrizione gratuita degli eventi dal vivo",	"name":"Italiano"	},
-    'ja': {	"caption-header":"イベントのライブキャプション",	"get-live-caption":"ライブキャプションを取得する",	"get-live-caption-stop":"ストリーミングを停止する",	"live-caption-empty":"ここに文字起こしが表示されます",	"hotmail":"PS: 愛しています。無料のライブイベントの文字起こしを入手",	"name":"日本語"	},
-    'sw': {	"caption-header":"Manukuu ya Tukio Papo Hapo",	"get-live-caption":"Pata Manukuu Papo Hapo",	"get-live-caption-stop":"Acha Kutiririsha",	"live-caption-empty":"Unukuzi utaonyeshwa hapa",	"hotmail":"PS: Ninakupenda. Pata manukuu yako ya tukio la moja kwa moja bila malipo",	"name":"kiswahili"	},
-    'pl': {	"caption-header":"Napisy na żywo z wydarzenia",	"get-live-caption":"Uzyskaj napisy na żywo",	"get-live-caption-stop":"Zatrzymaj transmisję strumieniową",	"live-caption-empty":"Tutaj wyświetli się transkrypcja",	"hotmail":"PS Kocham Cię. Uzyskaj bezpłatną transkrypcję wydarzenia na żywo",	"name":"Polski"	},
-    'vi': {	"caption-header":"Chú thích trực tiếp sự kiện",	"get-live-caption":"Nhận phụ đề trực tiếp",	"get-live-caption-stop":"Dừng phát trực tuyến",	"live-caption-empty":"Phiên âm sẽ hiển thị ở đây",	"hotmail":"Tái bút: Anh yêu em. Nhận bản ghi sự kiện trực tiếp miễn phí của bạn",	"name":"Tiếng Việt"	},
-    'ro': {	"caption-header":"Subtitrare în direct la eveniment",	"get-live-caption":"Obțineți subtitrări live",	"get-live-caption-stop":"Opriți redarea în flux",	"live-caption-empty":"Transcrierea se va afișa aici",	"hotmail":"PS Te iubesc. Obțineți transcrierea gratuită a evenimentului live",	"name":"Română"	},
-    'zh-hant': {	"caption-header":"事件即時字幕",	"get-live-caption":"取得即時字幕",	"get-live-caption-stop":"停止串流",	"live-caption-empty":"轉錄將顯示在這裡",	"hotmail":"附註：我愛你。獲取免費的現場活動轉錄",	"name":"中國傳統的"	},
-    'zh': {	"caption-header":"事件实时字幕",	"get-live-caption":"获取实时字幕",	"get-live-caption-stop":"停止串流",	"live-caption-empty":"转录将显示在这里",	"hotmail":"附言：我爱你。获取免费的现场活动转录",	"name":"简体中文"	},
-    'hr': {	"caption-header":"Titliranje događaja uživo",	"get-live-caption":"Nabavite titlove uživo",	"get-live-caption-stop":"Zaustavi strujanje",	"live-caption-empty":"Ovdje će se prikazati transkripcija",	"hotmail":"PS Volim te. Dobijte besplatnu transkripciju događaja uživo",	"name":"Hrvatski"	},
-    'fa': {	"caption-header":"زیرنویس زنده رویداد",	"get-live-caption":"زیرنویس‌های زنده دریافت کنید",	"get-live-caption-stop":"توقف جریان",	"live-caption-empty":"رونویسی در اینجا نمایش داده می شود",	"hotmail":"در ضمن من عاشقتم. رونویسی رایگان رویداد زنده خود را دریافت کنید",	"name":"فارسی"	},
-    'nl': {	"caption-header":"Live ondertiteling van evenementen",	"get-live-caption":"Ontvang live ondertiteling",	"get-live-caption-stop":"Stop met streamen",	"live-caption-empty":"De transcriptie wordt hier weergegeven",	"hotmail":"PS ik hou van je. Ontvang uw gratis transcriptie van live-evenementen",	"name":"Nederlands"	},
-    'ko': {	"caption-header":"이벤트 라이브 캡션",	"get-live-caption":"실시간 자막 받기",	"get-live-caption-stop":"스트리밍 중지",	"live-caption-empty":"여기에 스크립트가 표시됩니다.",	"hotmail":"PS: 사랑해요. 무료 라이브 이벤트 전사를 받아보세요",	"name":"한국인"	},
-    'sv': {	"caption-header":"Livetextning för evenemang",	"get-live-caption":"Få livetextning",	"get-live-caption-stop":"Sluta streama",	"live-caption-empty":"Transkription visas här",	"hotmail":"PS Jag älskar dig. Få din gratis transkription av live-evenemang",	"name":"svenska"	},
-    'hu': {	"caption-header":"Esemény élő feliratozás",	"get-live-caption":"Szerezzen élő feliratokat",	"get-live-caption-stop":"Streaming leállítása",	"live-caption-empty":"Az átírás itt fog megjelenni",	"hotmail":"Utóirat: Szeretlek. Szerezze meg ingyenes élő esemény átiratát",	"name":"Magyar"	},
-    'sq': {	"caption-header":"Titrat e drejtpërdrejtë të ngjarjes",	"get-live-caption":"Merr titrat e drejtpërdrejtë",	"get-live-caption-stop":"Ndalo transmetimin",	"live-caption-empty":"Transkriptimi do të shfaqet këtu",	"hotmail":"Ps Të Dua. Merr transkriptimin falas të ngjarjeve të drejtpërdrejta",	"name":"shqiptare"	},          
+  },
+  'bn': {
+    "caption-header":"ক্যাপশন ও অনুবাদ",
+    "get-live-caption":"লাইভ ক্যাপশন পান",
+    "get-live-caption-stop":"স্ট্রিমিং বন্ধ করুন",
+    "english-language":"ইংরেজি",
+    "french-language":"ফরাসি",
+    "live-caption-empty":"ট্রান্সক্রিপশন এখানে প্রদর্শিত হবে",
+    "hotmail":"পিএস: আমি তোমাকে ভালোবাসি। বিনামূল্যে ইভেন্ট সাবটাইটেল এবং অনুবাদ পান",
+    "name":"বাংলা"
+  },  
+  'pt': {	"caption-header":"Legendas ao vivo de eventos",	"get-live-caption":"Obtenha legendas ao vivo",	"get-live-caption-stop":"Pare de transmitir",	"live-caption-empty":"A transcrição será exibida aqui",	"hotmail":"PS Eu Te Amo. Obtenha sua transcrição gratuita de evento ao vivo",	"name":"Português"	},
+  'ar': {	"caption-header":"حدث التسميات التوضيحية الحية",	"get-live-caption":"احصل على التسميات التوضيحية المباشرة",	"get-live-caption-stop":"توقف عن البث",	"live-caption-empty":"سيتم عرض النسخ هنا",	"hotmail":"ملاحظة: أنا أحبك. احصل على النسخ المجاني للحدث المباشر",	"name":"عربي"	},
+  'ru': {	"caption-header":"Прямые субтитры к событиям",	"get-live-caption":"Получить живые субтитры",	"get-live-caption-stop":"Остановить трансляцию",	"live-caption-empty":"Транскрипция будет отображаться здесь",	"hotmail":"PS я тебя люблю. Получите бесплатную транскрипцию живого мероприятия",	"name":"Русский"	},
+  'de': {	"caption-header":"Live-Untertitel der Veranstaltung",	"get-live-caption":"Erhalten Sie Live-Untertitel",	"get-live-caption-stop":"Stoppen Sie das Streaming",	"live-caption-empty":"Die Transkription wird hier angezeigt",	"hotmail":"PS Ich liebe Dich. Holen Sie sich Ihre kostenlose Live-Event-Transkription",	"name":"Deutsch"	},
+  'uk': {	"caption-header":"Живі субтитри подій",	"get-live-caption":"Отримайте живі субтитри",	"get-live-caption-stop":"Зупинити трансляцію",	"live-caption-empty":"Тут відображатиметься транскрипція",	"hotmail":"PS: я тебе люблю. Отримайте безкоштовну транскрипцію прямого ефіру",	"name":"українська"	},
+  'hi': {	"caption-header":"इवेंट लाइव कैप्शनिंग",	"get-live-caption":"लाइव कैप्शन प्राप्त करें",	"get-live-caption-stop":"स्ट्रीमिंग बंद करो",	"live-caption-empty":"प्रतिलेखन यहां प्रदर्शित होगा",	"hotmail":"पीएस मैं तुमसे प्यार करता हूँ। अपना निःशुल्क लाइव-इवेंट ट्रांसक्रिप्शन प्राप्त करें",	"name":"हिंदी"	},
+  'ur': {	"caption-header":"ایونٹ لائیو کیپشننگ",	"get-live-caption":"لائیو کیپشن حاصل کریں۔",	"get-live-caption-stop":"سلسلہ بندی بند کریں۔",	"live-caption-empty":"نقل یہاں ظاہر ہوگی۔",	"hotmail":"PS: میں تم سے پیار کرتا ہوں۔ اپنے لائیو ایونٹ کی مفت نقل حاصل کریں۔",	"name":"اردو"	},
+  'yo': {	"caption-header":"Ifiweranṣẹ Live Iṣẹlẹ",	"get-live-caption":"Gba Awọn akọle Live",	"get-live-caption-stop":"Duro ṣiṣanwọle",	"live-caption-empty":"Transcription yoo han nibi",	"hotmail":"PS: Mo nifẹ rẹ. Gba transcription-iṣẹlẹ laaye ọfẹ rẹ",	"name":"Yoruba"	},
+  'it': {	"caption-header":"Sottotitoli in tempo reale per eventi",	"get-live-caption":"Ottieni sottotitoli in tempo reale",	"get-live-caption-stop":"Interrompi lo streaming",	"live-caption-empty":"La trascrizione verrà visualizzata qui",	"hotmail":"PS Ti amo. Ottieni la trascrizione gratuita degli eventi dal vivo",	"name":"Italiano"	},
+  'ja': {	"caption-header":"イベントのライブキャプション",	"get-live-caption":"ライブキャプションを取得する",	"get-live-caption-stop":"ストリーミングを停止する",	"live-caption-empty":"ここに文字起こしが表示されます",	"hotmail":"PS: 愛しています。無料のライブイベントの文字起こしを入手",	"name":"日本語"	},
+  'sw': {	"caption-header":"Manukuu ya Tukio Papo Hapo",	"get-live-caption":"Pata Manukuu Papo Hapo",	"get-live-caption-stop":"Acha Kutiririsha",	"live-caption-empty":"Unukuzi utaonyeshwa hapa",	"hotmail":"PS: Ninakupenda. Pata manukuu yako ya tukio la moja kwa moja bila malipo",	"name":"kiswahili"	},
+  'pl': {	"caption-header":"Napisy na żywo z wydarzenia",	"get-live-caption":"Uzyskaj napisy na żywo",	"get-live-caption-stop":"Zatrzymaj transmisję strumieniową",	"live-caption-empty":"Tutaj wyświetli się transkrypcja",	"hotmail":"PS Kocham Cię. Uzyskaj bezpłatną transkrypcję wydarzenia na żywo",	"name":"Polski"	},
+  'vi': {	"caption-header":"Chú thích trực tiếp sự kiện",	"get-live-caption":"Nhận phụ đề trực tiếp",	"get-live-caption-stop":"Dừng phát trực tuyến",	"live-caption-empty":"Phiên âm sẽ hiển thị ở đây",	"hotmail":"Tái bút: Anh yêu em. Nhận bản ghi sự kiện trực tiếp miễn phí của bạn",	"name":"Tiếng Việt"	},
+  'ro': {	"caption-header":"Subtitrare în direct la eveniment",	"get-live-caption":"Obțineți subtitrări live",	"get-live-caption-stop":"Opriți redarea în flux",	"live-caption-empty":"Transcrierea se va afișa aici",	"hotmail":"PS Te iubesc. Obțineți transcrierea gratuită a evenimentului live",	"name":"Română"	},
+  'zh-hant': {	"caption-header":"事件即時字幕",	"get-live-caption":"取得即時字幕",	"get-live-caption-stop":"停止串流",	"live-caption-empty":"轉錄將顯示在這裡",	"hotmail":"附註：我愛你。獲取免費的現場活動轉錄",	"name":"中國傳統的"	},
+  'hr': {	"caption-header":"Titliranje događaja uživo",	"get-live-caption":"Nabavite titlove uživo",	"get-live-caption-stop":"Zaustavi strujanje",	"live-caption-empty":"Ovdje će se prikazati transkripcija",	"hotmail":"PS Volim te. Dobijte besplatnu transkripciju događaja uživo",	"name":"Hrvatski"	},
+  'fa': {	"caption-header":"زیرنویس زنده رویداد",	"get-live-caption":"زیرنویس‌های زنده دریافت کنید",	"get-live-caption-stop":"توقف جریان",	"live-caption-empty":"رونویسی در اینجا نمایش داده می شود",	"hotmail":"در ضمن من عاشقتم. رونویسی رایگان رویداد زنده خود را دریافت کنید",	"name":"فارسی"	},
+  'nl': {	"caption-header":"Live ondertiteling van evenementen",	"get-live-caption":"Ontvang live ondertiteling",	"get-live-caption-stop":"Stop met streamen",	"live-caption-empty":"De transcriptie wordt hier weergegeven",	"hotmail":"PS ik hou van je. Ontvang uw gratis transcriptie van live-evenementen",	"name":"Nederlands"	},
+  'ko': {	"caption-header":"이벤트 라이브 캡션",	"get-live-caption":"실시간 자막 받기",	"get-live-caption-stop":"스트리밍 중지",	"live-caption-empty":"여기에 스크립트가 표시됩니다.",	"hotmail":"PS: 사랑해요. 무료 라이브 이벤트 전사를 받아보세요",	"name":"한국인"	},
+  'sv': {	"caption-header":"Livetextning för evenemang",	"get-live-caption":"Få livetextning",	"get-live-caption-stop":"Sluta streama",	"live-caption-empty":"Transkription visas här",	"hotmail":"PS Jag älskar dig. Få din gratis transkription av live-evenemang",	"name":"svenska"	},
+  'hu': {	"caption-header":"Esemény élő feliratozás",	"get-live-caption":"Szerezzen élő feliratokat",	"get-live-caption-stop":"Streaming leállítása",	"live-caption-empty":"Az átírás itt fog megjelenni",	"hotmail":"Utóirat: Szeretlek. Szerezze meg ingyenes élő esemény átiratát",	"name":"Magyar"	},
+  'sq': {	"caption-header":"Titrat e drejtpërdrejtë të ngjarjes",	"get-live-caption":"Merr titrat e drejtpërdrejtë",	"get-live-caption-stop":"Ndalo transmetimin",	"live-caption-empty":"Transkriptimi do të shfaqet këtu",	"hotmail":"Ps Të Dua. Merr transkriptimin falas të ngjarjeve të drejtpërdrejta",	"name":"shqiptare"	},          
 };
