@@ -141,6 +141,8 @@ input:focus {
   box-sizing: border-box;
   margin: auto;
   text-align: center;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
 }
 
 .scroller-empty {

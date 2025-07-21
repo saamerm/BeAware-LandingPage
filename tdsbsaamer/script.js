@@ -34,6 +34,7 @@ let synth = window.speechSynthesis; // Initialize speech synthesis here
 let currentUtterance = null; // Keep track of the current speech utterance
 let speechQueue = [];
 let forVideoParam = false;
+let scrollSpeedParam = 999;
 let translationNumberParam = 5;
 let autoRetrieveParam = false;
 let videoTextColorParam = "";
@@ -272,9 +273,17 @@ function getValueFromUrlParams() {
   autoRetrieveParam = urlParams.get("autoRetrieve") === 'true';
   chromaParam = urlParams.get("chroma");
   heightParam = urlParams.get("height");
+  scrollSpeedParam = urlParams.get("scrollSpeed") || 999; // Default to 999 if not set
 
   if (heightParam) {
     $("#live-caption").css({ maxHeight: `${heightParam}%` });
+  }
+  if (scrollSpeedParam) {
+    // Ensure scrollSpeedParam is a number and set it globally
+    scrollSpeedParam = parseInt(scrollSpeedParam, 10);
+    if (isNaN(scrollSpeedParam) || scrollSpeedParam <= 0) {
+      scrollSpeedParam = 999; // Fallback to default if invalid
+    }
   }
   if (forVideoParam) {
     $("#holder").hide();
@@ -416,11 +425,13 @@ function showRightTranscript() {
   if (liveCaption.length && liveCaption.html() !== currentTranscriptText) {
     liveCaption.html(currentTranscriptText);
     liveCaption.scrollTop(liveCaption[0].scrollHeight);
+    liveCaption.stop().animate({ scrollTop: liveCaption[0].scrollHeight }, scrollSpeedParam);
   }
   // For video overlay, ensure elements exist
   if (liveCaption2.length && liveCaption2.html() !== currentTranscriptText) {
     liveCaption2.html(currentTranscriptText);
     liveCaption2.scrollTop(liveCaption2[0].scrollHeight);
+    liveCaption2.stop().animate({ scrollTop: liveCaption2[0].scrollHeight }, scrollSpeedParam);
     // Potentially scroll liveCaption2 as well if it's scrollable
   }
 }
