@@ -273,7 +273,7 @@ function getValueFromUrlParams() {
   autoRetrieveParam = urlParams.get("autoRetrieve") === 'true';
   chromaParam = urlParams.get("chroma");
   heightParam = urlParams.get("height");
-  scrollSpeedParam = urlParams.get("scrollSpeed") || 999; // Default to 999 if not set
+  scrollSpeedParam = urlParams.get("scrollSpeed") || 499; // Default to 499 if not set
 
   if (heightParam) {
     $("#live-caption").css({ maxHeight: `${heightParam}%` });
@@ -282,7 +282,7 @@ function getValueFromUrlParams() {
     // Ensure scrollSpeedParam is a number and set it globally
     scrollSpeedParam = parseInt(scrollSpeedParam, 10);
     if (isNaN(scrollSpeedParam) || scrollSpeedParam <= 0) {
-      scrollSpeedParam = 999; // Fallback to default if invalid
+      scrollSpeedParam = 499; // Fallback to default if invalid
     }
   }
   if (forVideoParam) {
