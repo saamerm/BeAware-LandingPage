@@ -466,20 +466,28 @@ function showRightTranscript() {
     // Don't do anything
   }
 
-  if (translationLanguageParam == response.outputLanguage) {
-    languageCode = response.outputLanguage; // Use output1 for translationLanguage 1
-  } else if (translationLanguageParam == response.outputLanguage2) {
-    languageCode = response.outputLanguage2; // Use output2 for translationLanguage 2
-  } else if (translationLanguageParam == response.outputLanguage3) {
-    languageCode = response.outputLanguage3; // Use output3 for translationLanguage 3
-  } else if (translationLanguageParam == response.outputLanguage4) {
-    languageCode = response.outputLanguage4; // Use output4 for translationLanguage 4
-  } else if (translationLanguageParam == response.outputLanguage5) {
-    languageCode = response.outputLanguage5; // Use output5 for translationLanguage 5
-  } else if (translationLanguageParam == response.inputLanguage) {
-    languageCode = response.inputLanguage; // Default to input language
-  } else{
-    // Don't do anything
+  if (translationLanguageParam != languageCode){
+    if (translationLanguageParam == response.outputLanguage) {
+      languageCode = response.outputLanguage; // Use output1 for translationLanguage 1
+      translate(languageCode);       // Load initial language and update UI
+    } else if (translationLanguageParam == response.outputLanguage2) {
+      languageCode = response.outputLanguage2; // Use output2 for translationLanguage 2
+      translate(languageCode);       // Load initial language and update UI
+    } else if (translationLanguageParam == response.outputLanguage3) {
+      languageCode = response.outputLanguage3; // Use output3 for translationLanguage 3
+      translate(languageCode);       // Load initial language and update UI
+    } else if (translationLanguageParam == response.outputLanguage4) {
+      languageCode = response.outputLanguage4; // Use output4 for translationLanguage 4
+      translate(languageCode);       // Load initial language and update UI
+    } else if (translationLanguageParam == response.outputLanguage5) {
+      languageCode = response.outputLanguage5; // Use output5 for translationLanguage 5
+      translate(languageCode);       // Load initial language and update UI
+    } else if (translationLanguageParam == response.inputLanguage) {
+      languageCode = response.inputLanguage; // Default to input language
+      translate(languageCode);       // Load initial language and update UI
+    } else{
+      // Don't do anything
+    }
   }
 
   if (languageCode === response.inputLanguage) {
