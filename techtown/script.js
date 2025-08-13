@@ -21,6 +21,8 @@ let response = {
   outputLanguage3: "",
   output4: "",
   outputLanguage4: "",
+  output5: "",
+  outputLanguage5: "",
 };
 let languageCode = DEFAULT_LANGUAGE;
 let voiceChoice;
@@ -296,6 +298,7 @@ function populateLanguageMenu() {
     if (response.outputLanguage2 && languageData[response.outputLanguage2]) availableLanguages.add(response.outputLanguage2);
     if (response.outputLanguage3 && languageData[response.outputLanguage3]) availableLanguages.add(response.outputLanguage3);
     if (response.outputLanguage4 && languageData[response.outputLanguage4]) availableLanguages.add(response.outputLanguage4);
+    if (response.outputLanguage5 && languageData[response.outputLanguage5]) availableLanguages.add(response.outputLanguage5);
     
     if (availableLanguages.size === 0 && languageData[DEFAULT_LANGUAGE]) {
         availableLanguages.add(DEFAULT_LANGUAGE);
@@ -452,6 +455,8 @@ function showRightTranscript() {
     languageCode = response.outputLanguage3; // Use output3 for translationNumber 3
   } else if (translationNumberParam == 4) {
     languageCode = response.outputLanguage4; // Use output4 for translationNumber 4
+  } else if (translationNumberParam == 5) {
+    languageCode = response.outputLanguage5; // Use output5 for translationNumber 5
   } else if (translationNumberParam == 0) {
     languageCode = response.inputLanguage; // Default to input language
   } else{
@@ -467,6 +472,8 @@ function showRightTranscript() {
     currentTranscriptText = response.output3;
   } else if (languageCode === response.outputLanguage4) {
     currentTranscriptText = response.output4;
+  } else if (languageCode === response.outputLanguage5) {
+    currentTranscriptText = response.output5;
   } else {
     currentTranscriptText = response.input; // Default to input
   }
@@ -514,7 +521,7 @@ function loadLang(lang) {
   if (languageData[response.inputLanguage]) $("#input").html(languageData[response.inputLanguage]["name"]);
   else $("#input").html("Input");
 
-  const outputs = [response.outputLanguage, response.outputLanguage2, response.outputLanguage3, response.outputLanguage4];
+  const outputs = [response.outputLanguage, response.outputLanguage2, response.outputLanguage3, response.outputLanguage4, response.outputLanguage5];
   outputs.forEach((outputLang, index) => {
       const outputEl = $(`#output${index + 1}`);
       if (outputLang && languageData[outputLang]) {
@@ -584,6 +591,7 @@ function getTranscript() {
         else if (languageCode === response.outputLanguage2) textToRead = data.translation2;
         else if (languageCode === response.outputLanguage3) textToRead = data.translation3;
         else if (languageCode === response.outputLanguage4) textToRead = data.translation4;
+        else if (languageCode === response.outputLanguage5) textToRead = data.translation5;
         if (data.customQuestionPrompt && data.customQuestionPrompt.trim() !== "") {
           $("#openModal").show();
           $("#openModal a").text(data.customQuestionPrompt);
@@ -620,6 +628,9 @@ function updateResponseData(data) { // Primarily for transcript text and associa
 
     response.output4 = data.translation4 || "";
     if (data.outputLanguage4) response.outputLanguage4 = data.outputLanguage4.substring(0, 2);
+
+    response.output5 = data.translation5 || "";
+    if (data.outputLanguage5) response.outputLanguage5 = data.outputLanguage5.substring(0, 2);
 }
 
 function checkLanguage() { // Called ONCE on load to get available languages for the menu
@@ -666,6 +677,7 @@ function updateResponseLanguages(data) { // Called by checkLanguage (once) or if
   response.outputLanguage2 = (data.outputLanguage2) ? data.outputLanguage2.substring(0, 2) : "";
   response.outputLanguage3 = (data.outputLanguage3) ? data.outputLanguage3.substring(0, 2) : "";
   response.outputLanguage4 = (data.outputLanguage4) ? data.outputLanguage4.substring(0, 2) : "";
+  response.outputLanguage5 = (data.outputLanguage5) ? data.outputLanguage5.substring(0, 2) : "";
 }
 
 function readLogic(message) {
@@ -816,6 +828,7 @@ function getMockTranscript() {
   else if (languageCode === response.outputLanguage2) textToRead = response.output2;
   else if (languageCode === response.outputLanguage3) textToRead = response.output3;
   else if (languageCode === response.outputLanguage4) textToRead = response.output4;
+  else if (languageCode === response.outputLanguage5) textToRead = response.output5;
   if (simulatedApiData.customQuestionPrompt && simulatedApiData.customQuestionPrompt.trim() !== "") {
     $("#openModal").show();
     $("#openModal a").text(simulatedApiData.customQuestionPrompt);
