@@ -38,6 +38,7 @@ let speechQueue = [];
 let forVideoParam = false;
 let scrollSpeedParam = 499;
 let translationNumberParam = 5;
+let translationLanguageParam = "";
 let autoRetrieveParam = false;
 let videoTextColorParam = "";
 let chromaParam = "";
@@ -325,6 +326,7 @@ function getValueFromUrlParams() {
   const urlParams = new URLSearchParams(window.location.search);
   forVideoParam = urlParams.get("forVideo") === 'true';
   translationNumberParam = urlParams.get("translationNumber");
+  translationLanguageParam = urlParams.get("translationLanguage");
   videoTextColorParam = urlParams.get("videoTextColor");
   autoRetrieveParam = urlParams.get("autoRetrieve") === 'true';
   chromaParam = urlParams.get("chroma");
@@ -445,6 +447,7 @@ function unmute() {
   processQueue(); // Attempt to process queue if items were added while muted
 }
 
+// Recurring function
 function showRightTranscript() {
   let currentTranscriptText = ""; // Use a local var
   if (translationNumberParam == 1) {
@@ -462,6 +465,23 @@ function showRightTranscript() {
   } else{
     // Don't do anything
   }
+
+  if (translationLanguageParam == response.outputLanguage) {
+    languageCode = response.outputLanguage; // Use output1 for translationLanguage 1
+  } else if (translationLanguageParam == response.outputLanguage2) {
+    languageCode = response.outputLanguage2; // Use output2 for translationLanguage 2
+  } else if (translationLanguageParam == response.outputLanguage3) {
+    languageCode = response.outputLanguage3; // Use output3 for translationLanguage 3
+  } else if (translationLanguageParam == response.outputLanguage4) {
+    languageCode = response.outputLanguage4; // Use output4 for translationLanguage 4
+  } else if (translationLanguageParam == response.outputLanguage5) {
+    languageCode = response.outputLanguage5; // Use output5 for translationLanguage 5
+  } else if (translationLanguageParam == response.inputLanguage) {
+    languageCode = response.inputLanguage; // Default to input language
+  } else{
+    // Don't do anything
+  }
+
   if (languageCode === response.inputLanguage) {
     currentTranscriptText = response.input;
   } else if (languageCode === response.outputLanguage) {
@@ -577,6 +597,7 @@ function stopTimer() {
     }
 }
 
+// Recurring function
 function getTranscript() {
   $.support.cors = true;
   $.getJSON(API_URL, function (data) {
@@ -633,7 +654,8 @@ function updateResponseData(data) { // Primarily for transcript text and associa
     if (data.outputLanguage5) response.outputLanguage5 = data.outputLanguage5.substring(0, 2);
 }
 
-function checkLanguage() { // Called ONCE on load to get available languages for the menu
+// Called ONCE on load to get available languages for the menu
+function checkLanguage() { 
     if (isTesting) {
         checkMockLanguage(); // This will call populateLanguageMenu and translate
         return;
