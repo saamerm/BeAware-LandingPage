@@ -36,6 +36,7 @@ let speechQueue = [];
 let forVideoParam = false;
 let scrollSpeedParam = 499;
 let translationNumberParam = 5;
+let translationLanguageParam = "en";
 let autoRetrieveParam = false;
 let videoTextColorParam = "";
 let chromaParam = "";
@@ -322,6 +323,7 @@ function getValueFromUrlParams() {
   const urlParams = new URLSearchParams(window.location.search);
   forVideoParam = urlParams.get("forVideo") === 'true';
   translationNumberParam = urlParams.get("translationNumber");
+  translationLanguageParam = urlParams.get("translationLanguage");
   videoTextColorParam = urlParams.get("videoTextColor");
   autoRetrieveParam = urlParams.get("autoRetrieve") === 'true';
   chromaParam = urlParams.get("chroma");
@@ -457,6 +459,22 @@ function showRightTranscript() {
   } else{
     // Don't do anything
   }
+  if (translationLanguageParam == response.outputLanguage) {
+    languageCode = response.outputLanguage; // Use output1 for translationNumber 1
+  } else if (translationLanguageParam == response.outputLanguage2) {
+    languageCode = response.outputLanguage2; // Use output2 for translationNumber 2
+  } else if (translationLanguageParam == response.outputLanguage3) {
+    languageCode = response.outputLanguage3; // Use output3 for translationNumber 3
+  } else if (translationLanguageParam == response.outputLanguage4) {
+    languageCode = response.outputLanguage4; // Use output4 for translationNumber 4
+  } else if (translationLanguageParam == response.outputLanguage5) {
+    languageCode = response.outputLanguage5; // Use output5 for translationNumber 5
+  } else if (translationLanguageParam == 0) {
+    languageCode = response.inputLanguage; // Default to input language
+  } else{
+    // Don't do anything
+  }
+
   if (languageCode === response.inputLanguage) {
     currentTranscriptText = response.input;
   } else if (languageCode === response.outputLanguage) {
