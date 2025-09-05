@@ -177,6 +177,12 @@ $(document).ready(function () {
   }
 
   modalSetup();
+  // If user is using dark mode, use that by default
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;  
+  if (prefersDark) {
+      body.addClass('dark-mode');
+      $('#checkbox').prop('checked', true);
+  }
 });
 
 function modalSetup(){
