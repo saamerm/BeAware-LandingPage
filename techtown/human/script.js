@@ -117,10 +117,7 @@ function sendData(isFinalCall) {
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
-    return response.json();
-  })
-  .then(data => {
-    console.log('API Success:', data);
+    console.log('API Success:', response);
     // Update the last sent transcript only on success
     lastSentTranscript = transcriptToSend;
   })
