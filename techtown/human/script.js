@@ -95,7 +95,7 @@ function sendData(isFinalCall) {
   // Prepare the data payload for the API
   const postData = {
     roomName: "techtown",
-    isActivelyStreaming: isFinalCall ? "false" : "true",
+    isActivelyStreaming: isFinalCall ? false : true,
     inputLanguage: inputLangSelect.value,
     transcript: transcriptToSend,
     outputLanguage: outputLangSelect.value,
