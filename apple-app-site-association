@@ -1,0 +1,12 @@
+{
+    "applinks": {
+      "apps": [],
+      "details": [
+        {
+          "appID": "VTU445YWD6.tfp.beawareconf.Clip",
+          "paths": [ "/:streamName" ]
+        }
+      ]
+    }
+  }
+  
