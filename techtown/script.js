@@ -353,6 +353,7 @@ function getValueFromUrlParams() {
     $("#holder").hide();
     $("#header").hide();
     $("#outer-div").show().html(LAYOVER_HTML);
+    checkForAdvancedOverlayParam(urlParams);
   } else {
     $("#outer-div").hide();
   }
@@ -383,7 +384,25 @@ function getValueFromUrlParams() {
   }
 }
 
-
+function checkForAdvancedOverlayParam(urlParams){
+  var advancedOverlayParam = urlParams.get("advancedOverlay") === 'true';
+  heightParam = urlParams.get("height");
+  videoTextColorParam = urlParams.get("videoTextColor");
+  if (advancedOverlayParam) {
+    $("#live-caption2").removeClass("overlay2").addClass("overlay3");
+    if (heightParam){
+      $("#live-caption2").css({height: heightParam});
+    }
+    if (videoTextColorParam){
+      $("#live-caption2").css({color: videoTextColorParam});
+    } 
+    if (videoTextColorParam === "white"){
+      $("#live-caption2").css({background: "rgba(0, 0, 0, 0.8)"});
+    } else if (videoTextColorParam === "black"){
+      $("#live-caption2").css({background: "rgba(255, 255, 255, 0.8)"});
+    }
+  }
+}
 function buttonTapped() {
   // startTimer/stopTimer update button text based on languageCode
   // which should be set by translate() before this can be reliably called.
