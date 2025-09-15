@@ -391,6 +391,24 @@ body.dark-mode #legacy-controls .fa-language {
     color: #6254b7; /* Lighter version for dark mode */
 }
 
+/* September 11 2025 */
+body.dark-mode .modal-content {
+  background-color: #221657; /* Lighter version for dark mode */
+}
+body.dark-mode .form-floating {
+  color: #221657; 
+}
+/* body.dark-mode .modal-title {
+  color: #221657; 
+} */
+body.dark-mode .btn-close {
+  color: #e0e0e0;
+  background-color: #e0e0e0; /* Darker background */
+}
+body.dark-mode .close-btn {
+  color: #221657;
+  background-color: #221657; /* Darker background */
+}
 /* September 10 2025 - Scrolling variable lines */
 .overlay3 {
   min-width: none;
