@@ -1,34 +1,20 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Live Captions for DeafBlind</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Live Captions — DeafBlind Braille Mode</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f5f5f5;
-    }
-    .controls {
-      margin-bottom: 20px;
-    }
-    .caption-container {
-      margin-top: 20px;
-      padding: 15px;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      min-height: 100px;
-    }
+    body { font-family: system-ui, sans-serif; margin:20px; background:#f7f9fc; }
+    .controls { margin-bottom:1em; }
+    .caption-container { padding:12px; background:#fff; border-radius:10px; min-height:120px; }
+    .full-transcript { white-space:pre-wrap; }
+    .braille-row { display:flex; flex-wrap:wrap; gap:6px; }
     .braille-cell {
-      display: inline-block;
-      padding: 5px 10px;
-      margin: 2px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      background: #eef;
-      min-width: 20px;
+      display:inline-block; padding:8px 10px; border:1px solid #ccc;
+      border-radius:6px; background:#eef; min-width:2ch; max-width:40ch;
     }
+    .braille-cell:focus { outline:3px solid #3b82f6; background:#eaf2ff; }
   </style>
 </head>
 <body>
@@ -39,56 +25,99 @@
       <input type="checkbox" id="brailleToggle">
       Using Braille Keyboard
     </label>
-    <div id="brailleConfig" style="display: none; margin-top: 10px;">
-      <label for="brailleCells">Number of cells/keys: </label>
-      <input type="number" id="brailleCells" min="1" max="100" value="20">
-    </div>
+    <span id="brailleConfig" style="display:none;">
+      <label>Max characters per cell:
+        <input type="number" id="brailleCells" min="1" max="200" value="20">
+      </label>
+    </span>
   </div>
 
-  <div id="captionContainer" class="caption-container" aria-live="polite"></div>
+  <div id="captionContainer" class="caption-container" role="region" aria-live="polite">
+    <div id="placeholder" class="full-transcript">Waiting for captions…</div>
+  </div>
 
   <script>
+    const API_URL = "https://api.deafassistant.com/stream/LiteGetStream?streamName=techtown";
     const brailleToggle = document.getElementById('brailleToggle');
     const brailleConfig = document.getElementById('brailleConfig');
     const brailleCellsInput = document.getElementById('brailleCells');
     const captionContainer = document.getElementById('captionContainer');
 
+    let fullTranscript = "";     // complete text we’ve built up
+    let lastRenderedLength = 0;  // how much we’ve already displayed
+    let useMock = (location.hostname === "localhost" || location.hostname.includes("127.0.0.1") || location.protocol === "file:");
+    let mockText = "Starting captions";
+
     brailleToggle.addEventListener('change', () => {
-      brailleConfig.style.display = brailleToggle.checked ? 'block' : 'none';
+      brailleConfig.style.display = brailleToggle.checked ? 'inline-block' : 'none';
+      // re-render existing transcript when toggling
+      renderIncremental(fullTranscript);
     });
+
+    function splitTextToChunks(text, maxChars) {
+      const chunks = [];
+      let remaining = text.trim();
+      while (remaining.length > 0) {
+        if (remaining.length <= maxChars) { chunks.push(remaining); break; }
+        let slice = remaining.slice(0, maxChars);
+        const lastSpace = slice.lastIndexOf(' ');
+        if (lastSpace > -1) {
+          chunks.push(slice.slice(0, lastSpace));
+          remaining = remaining.slice(lastSpace+1).trimStart();
+        } else {
+          chunks.push(slice);
+          remaining = remaining.slice(maxChars).trimStart();
+        }
+      }
+      return chunks;
+    }
+
+    function renderIncremental(text) {
+      const isBraille = brailleToggle.checked;
+      if (!isBraille) {
+        // full transcript mode, just append the *new* text
+        if (lastRenderedLength === 0) captionContainer.innerHTML = "";
+        const block = document.getElementById('fullBlock') || document.createElement('div');
+        block.id = 'fullBlock';
+        block.className = 'full-transcript';
+        block.textContent = text;
+        if (!block.parentNode) captionContainer.appendChild(block);
+      } else {
+        // Braille mode: only append *new* cells
+        let maxChars = parseInt(brailleCellsInput.value, 10) || 20;
+        const allChunks = splitTextToChunks(text, maxChars);
+        const already = captionContainer.querySelectorAll('.braille-cell').length;
+        if (already === 0) captionContainer.innerHTML = '<div class="braille-row" id="brailleRow"></div>';
+        const row = document.getElementById('brailleRow');
+        for (let i = already; i < allChunks.length; i++) {
+          const c = document.createElement('div');
+          c.className = 'braille-cell';
+          c.tabIndex = 0;
+          c.textContent = allChunks[i];
+          row.appendChild(c);
+        }
+      }
+      lastRenderedLength = text.length;
+    }
 
     async function fetchCaptions() {
       try {
-        const response = await fetch("https://api.deafassistant.com/stream/LiteGetStream?streamName=techtown");
-        const data = await response.json();
-        const transcript = data.transcript || "";
-
-        renderTranscript(transcript);
-      } catch (err) {
-        console.error("Error fetching captions:", err);
-      }
-    }
-
-    function renderTranscript(text) {
-      captionContainer.innerHTML = "";
-
-      if (brailleToggle.checked) {
-        const cells = parseInt(brailleCellsInput.value, 10) || 1;
-        const chunkSize = Math.ceil(text.length / cells);
-
-        for (let i = 0; i < cells; i++) {
-          const chunk = text.slice(i * chunkSize, (i + 1) * chunkSize);
-          const div = document.createElement("div");
-          div.className = "braille-cell";
-          div.textContent = chunk;
-          captionContainer.appendChild(div);
+        if (useMock) {
+          // simulate growing transcript
+          mockText += " hello";
+          fullTranscript = mockText;
+        } else {
+          const res = await fetch(API_URL, {cache:"no-store"});
+          const data = await res.json();
+          fullTranscript = data.transcript || fullTranscript;
         }
-      } else {
-        captionContainer.textContent = text;
+        renderIncremental(fullTranscript);
+      } catch (e) {
+        console.error("fetch error", e);
       }
     }
 
-    // Poll every second
+    // poll every second
     setInterval(fetchCaptions, 1000);
   </script>
 </body>
