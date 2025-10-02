@@ -116,9 +116,15 @@ input:focus {
   align-items: center;
   gap: 10px;
   border-radius: 24px;
-  background: #a40234;
+  background: linear-gradient(to top left, #a40234, #a40234BB);
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
   border: none;
   cursor: pointer;
+}
+.ios-button:hover {
+  background-color: #a40234;
+  transform: translateY(2px);
+  box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0);
 }
 .ios-button-text{
   color: var(--neutrals-white, #FFF);
@@ -141,6 +147,8 @@ input:focus {
   box-sizing: border-box;
   margin: auto;
   text-align: center;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
 }
 
 .scroller-empty {
@@ -396,9 +404,6 @@ body.dark-mode .modal-content {
 body.dark-mode .form-floating {
   color: #221657; 
 }
-/* body.dark-mode .modal-title {
-  color: #221657; 
-} */
 body.dark-mode .btn-close {
   color: #e0e0e0;
   background-color: #e0e0e0; /* Darker background */
