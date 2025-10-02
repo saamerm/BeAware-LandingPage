@@ -675,6 +675,8 @@ function getTranscript() {
       if (data.transcript !== undefined) {
         // Check if languages have changed
         if (checkIfLanguageChanged(data)) {          
+          updateResponseLanguages(data); // Set up response.xxxLanguage based on stream config
+          populateLanguageMenu();      // Build the sidebar menu with these languages
           swapToExistingLanguage(); // Ensure current languageCode is still valid and then try to switch to it
         }; 
         updateResponseData(data); // This updates transcript text and also the language codes in `response`
