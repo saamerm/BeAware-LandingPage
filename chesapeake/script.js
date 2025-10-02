@@ -631,6 +631,41 @@ function stopTimer() {
     }
 }
 
+function checkIfLanguageChanged(data) {
+  // Compare current response languages with new data
+  const langChanged = 
+      (data.inputLanguage && data.inputLanguage.substring(0, 2) !== response.inputLanguage) ||
+      (data.outputLanguage && data.outputLanguage.substring(0, 2) !== response.outputLanguage) ||
+      (data.outputLanguage2 && data.outputLanguage2.substring(0, 2) !== response.outputLanguage2) ||
+      (data.outputLanguage3 && data.outputLanguage3.substring(0, 2) !== response.outputLanguage3) ||
+      (data.outputLanguage4 && data.outputLanguage4.substring(0, 2) !== response.outputLanguage4) ||
+      (data.outputLanguage5 && data.outputLanguage5.substring(0, 2) !== response.outputLanguage5);
+  return langChanged;
+}
+
+function swapToExistingLanguage(){
+  // Ensure current languageCode is still valid, else switch to input or default
+  const availableLangs = new Set();
+  if (response.inputLanguage) availableLangs.add(response.inputLanguage);
+  if (response.outputLanguage) availableLangs.add(response.outputLanguage);
+  if (response.outputLanguage2) availableLangs.add(response.outputLanguage2);
+  if (response.outputLanguage3) availableLangs.add(response.outputLanguage3);
+  if (response.outputLanguage4) availableLangs.add(response.outputLanguage4);
+  if (response.outputLanguage5) availableLangs.add(response.outputLanguage5);
+
+  if (!availableLangs.has(languageCode)) {
+      // Current languageCode is no longer valid
+      if (availableLangs.has(response.inputLanguage)) {
+          languageCode = response.inputLanguage; // Switch to input language if available
+      } else if (availableLangs.size > 0) {
+          languageCode = Array.from(availableLangs)[0]; // Switch to first available language
+      } else {
+          languageCode = DEFAULT_LANGUAGE; // Fallback to default
+      }
+      translate(languageCode); // Update UI and readText accordingly
+  }
+}
+
 // Recurring function
 function getTranscript() {
   $.support.cors = true;
@@ -638,6 +673,12 @@ function getTranscript() {
     if (data) {
 
       if (data.transcript !== undefined) {
+        // Check if languages have changed
+        if (checkIfLanguageChanged(data)) {          
+          updateResponseLanguages(data); // Set up response.xxxLanguage based on stream config
+          populateLanguageMenu();      // Build the sidebar menu with these languages
+          swapToExistingLanguage(); // Ensure current languageCode is still valid and then try to switch to it
+        }; 
         updateResponseData(data); // This updates transcript text and also the language codes in `response`
       
         let textToRead = "";
