@@ -179,6 +179,12 @@ $(document).ready(function () {
   }
 
   modalSetup();
+  // If user is using dark mode, use that by default
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;  
+  if (prefersDark) {
+      body.addClass('dark-mode');
+      $('#checkbox').prop('checked', true);
+  }
 });
 
 function modalSetup(){
@@ -378,7 +384,6 @@ function getValueFromUrlParams() {
   }
 }
 
-
 function checkForAdvancedOverlayParam(urlParams){
   var advancedOverlayParam = urlParams.get("advancedOverlay") === 'true';
   heightParam = urlParams.get("height");
@@ -398,6 +403,7 @@ function checkForAdvancedOverlayParam(urlParams){
     }
   }
 }
+
 function buttonTapped() {
   // startTimer/stopTimer update button text based on languageCode
   // which should be set by translate() before this can be reliably called.
@@ -412,7 +418,7 @@ function buttonTapped() {
       // You might want an aria-live region to announce "Streaming started"
   } else {
       if (languageData[languageCode]) liveCaptionButton.text(languageData[languageCode]['get-live-caption']);
-      else liveCaptionButton.text("Get Live Captions");
+      else liveCaptionButton.text("Show Captions");
       liveCaptionButton.attr("aria-pressed", "false"); // Announce it's inactive
       // Announce "Streaming stopped"
   }
@@ -579,7 +585,7 @@ function loadLang(lang) {
       }
   });
   
-    // Update the main "Get Live Captions" button text based on current streaming state
+    // Update the main "Show Captions" button text based on current streaming state
   const buttonTextKey = isStreamingCaptions ? "get-live-caption-stop" : "get-live-caption";
   const langDataForButton = languageData[lang] || languageData[DEFAULT_LANGUAGE]; // Fallback for button text
   if (langDataForButton) {
@@ -929,7 +935,7 @@ const mockObject3 = {
 const languageData = {
   'en': {
     "caption-header":"Captions & Translations",
-    "get-live-caption":"Get Live Captions",
+    "get-live-caption":"Show Captions",
     "get-live-caption-stop":"Stop Streaming",
     "live-caption-empty":"Transcription will display here",
     "hotmail":"PS: I love you. Get free event subtitles & translations",
@@ -1031,4 +1037,6 @@ const languageData = {
   'sv': {	"caption-header":"Livetextning för evenemang",	"get-live-caption":"Få livetextning",	"get-live-caption-stop":"Sluta streama",	"live-caption-empty":"Transkription visas här",	"hotmail":"PS Jag älskar dig. Få din gratis transkription av live-evenemang",	"name":"svenska"	},
   'hu': {	"caption-header":"Esemény élő feliratozás",	"get-live-caption":"Szerezzen élő feliratokat",	"get-live-caption-stop":"Streaming leállítása",	"live-caption-empty":"Az átírás itt fog megjelenni",	"hotmail":"Utóirat: Szeretlek. Szerezze meg ingyenes élő esemény átiratát",	"name":"Magyar"	},
   'sq': {	"caption-header":"Titrat e drejtpërdrejtë të ngjarjes",	"get-live-caption":"Merr titrat e drejtpërdrejtë",	"get-live-caption-stop":"Ndalo transmetimin",	"live-caption-empty":"Transkriptimi do të shfaqet këtu",	"hotmail":"Ps Të Dua. Merr transkriptimin falas të ngjarjeve të drejtpërdrejta",	"name":"shqiptare"	},          
+  "tr": { "caption-header": "Altyazılar ve Çeviriler", "get-live-caption": "Canlı Altyazıyı Başlat", "get-live-caption-stop": "Canlıyı Durdur", "live-caption-empty": "Transkripsiyon burada görünecek", "hotmail": "Not: Seni seviyorum. Etkinlik için ücretsiz altyazı ve çeviri alın", "name": "Türkçe"},   
+  "az": { "caption-header": "Alt yazılar və Tərcümələr", "get-live-caption": "Canlı Alt Yazını Başlat", "get-live-caption-stop": "Canlıyı Dayandır", "live-caption-empty": "Transkripsiya burada göstəriləcək", "hotmail": "Qeyd: Səni sevirəm. Tədbir üçün pulsuz alt yazı və tərcümələr əldə edin", "name": "Azərbaycan"},
 };

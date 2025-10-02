@@ -21,6 +21,8 @@ let response = {
   outputLanguage3: "",
   output4: "",
   outputLanguage4: "",
+  output5: "",
+  outputLanguage5: "",
 };
 let languageCode = DEFAULT_LANGUAGE;
 let voiceChoice;
@@ -36,6 +38,7 @@ let speechQueue = [];
 let forVideoParam = false;
 let scrollSpeedParam = 499;
 let translationNumberParam = 5;
+let translationLanguageParam = "";
 let autoRetrieveParam = false;
 let videoTextColorParam = "";
 let chromaParam = "";
@@ -45,7 +48,7 @@ var interval = 1000; // Your interval
 
 // --- DOM Ready Handler ---
 $(document).ready(function () {
-  isTesting = false
+  isTesting = false; // isTesting logs as true unless this is set
   isStreamingCaptions = false; // Ensure initial state
   isPlayingSpeech = false; // Default to muted
 
@@ -302,6 +305,7 @@ function populateLanguageMenu() {
     if (response.outputLanguage2 && languageData[response.outputLanguage2]) availableLanguages.add(response.outputLanguage2);
     if (response.outputLanguage3 && languageData[response.outputLanguage3]) availableLanguages.add(response.outputLanguage3);
     if (response.outputLanguage4 && languageData[response.outputLanguage4]) availableLanguages.add(response.outputLanguage4);
+    if (response.outputLanguage5 && languageData[response.outputLanguage5]) availableLanguages.add(response.outputLanguage5);
     
     if (availableLanguages.size === 0 && languageData[DEFAULT_LANGUAGE]) {
         availableLanguages.add(DEFAULT_LANGUAGE);
@@ -328,6 +332,7 @@ function getValueFromUrlParams() {
   const urlParams = new URLSearchParams(window.location.search);
   forVideoParam = urlParams.get("forVideo") === 'true';
   translationNumberParam = urlParams.get("translationNumber");
+  translationLanguageParam = urlParams.get("translationLanguage");
   videoTextColorParam = urlParams.get("videoTextColor");
   autoRetrieveParam = urlParams.get("autoRetrieve") === 'true';
   chromaParam = urlParams.get("chroma");
@@ -379,7 +384,6 @@ function getValueFromUrlParams() {
   }
 }
 
-
 function checkForAdvancedOverlayParam(urlParams){
   var advancedOverlayParam = urlParams.get("advancedOverlay") === 'true';
   heightParam = urlParams.get("height");
@@ -399,6 +403,7 @@ function checkForAdvancedOverlayParam(urlParams){
     }
   }
 }
+
 function buttonTapped() {
   // startTimer/stopTimer update button text based on languageCode
   // which should be set by translate() before this can be reliably called.
@@ -413,7 +418,7 @@ function buttonTapped() {
       // You might want an aria-live region to announce "Streaming started"
   } else {
       if (languageData[languageCode]) liveCaptionButton.text(languageData[languageCode]['get-live-caption']);
-      else liveCaptionButton.text("Get Live Captions");
+      else liveCaptionButton.text("Show Captions");
       liveCaptionButton.attr("aria-pressed", "false"); // Announce it's inactive
       // Announce "Streaming stopped"
   }
@@ -468,6 +473,7 @@ function unmute() {
   processQueue(); // Attempt to process queue if items were added while muted
 }
 
+// Recurring function
 function showRightTranscript() {
   let currentTranscriptText = ""; // Use a local var
   if (translationNumberParam == 1) {
@@ -478,11 +484,38 @@ function showRightTranscript() {
     languageCode = response.outputLanguage3; // Use output3 for translationNumber 3
   } else if (translationNumberParam == 4) {
     languageCode = response.outputLanguage4; // Use output4 for translationNumber 4
+  } else if (translationNumberParam == 5) {
+    languageCode = response.outputLanguage5; // Use output5 for translationNumber 5
   } else if (translationNumberParam == 0) {
     languageCode = response.inputLanguage; // Default to input language
   } else{
     // Don't do anything
   }
+
+  if (translationLanguageParam != languageCode){
+    if (translationLanguageParam == response.outputLanguage) {
+      languageCode = response.outputLanguage; // Use output1 for translationLanguage 1
+      translate(languageCode);       // Load initial language and update UI
+    } else if (translationLanguageParam == response.outputLanguage2) {
+      languageCode = response.outputLanguage2; // Use output2 for translationLanguage 2
+      translate(languageCode);       // Load initial language and update UI
+    } else if (translationLanguageParam == response.outputLanguage3) {
+      languageCode = response.outputLanguage3; // Use output3 for translationLanguage 3
+      translate(languageCode);       // Load initial language and update UI
+    } else if (translationLanguageParam == response.outputLanguage4) {
+      languageCode = response.outputLanguage4; // Use output4 for translationLanguage 4
+      translate(languageCode);       // Load initial language and update UI
+    } else if (translationLanguageParam == response.outputLanguage5) {
+      languageCode = response.outputLanguage5; // Use output5 for translationLanguage 5
+      translate(languageCode);       // Load initial language and update UI
+    } else if (translationLanguageParam == response.inputLanguage) {
+      languageCode = response.inputLanguage; // Default to input language
+      translate(languageCode);       // Load initial language and update UI
+    } else{
+      // Don't do anything
+    }
+  }
+
   if (languageCode === response.inputLanguage) {
     currentTranscriptText = response.input;
   } else if (languageCode === response.outputLanguage) {
@@ -493,12 +526,15 @@ function showRightTranscript() {
     currentTranscriptText = response.output3;
   } else if (languageCode === response.outputLanguage4) {
     currentTranscriptText = response.output4;
+  } else if (languageCode === response.outputLanguage5) {
+    currentTranscriptText = response.output5;
   } else {
     currentTranscriptText = response.input; // Default to input
   }
 
   const liveCaption = $("#live-caption");
   const liveCaption2 = $("#live-caption2"); // For video overlay
+
   if (liveCaption.length && liveCaption.html() !== currentTranscriptText) {
     liveCaption.html(currentTranscriptText);
     liveCaption.scrollTop(liveCaption[0].scrollHeight);
@@ -539,7 +575,7 @@ function loadLang(lang) {
   if (languageData[response.inputLanguage]) $("#input").html(languageData[response.inputLanguage]["name"]);
   else $("#input").html("Input");
 
-  const outputs = [response.outputLanguage, response.outputLanguage2, response.outputLanguage3, response.outputLanguage4];
+  const outputs = [response.outputLanguage, response.outputLanguage2, response.outputLanguage3, response.outputLanguage4, response.outputLanguage5];
   outputs.forEach((outputLang, index) => {
       const outputEl = $(`#output${index + 1}`);
       if (outputLang && languageData[outputLang]) {
@@ -549,7 +585,7 @@ function loadLang(lang) {
       }
   });
   
-    // Update the main "Get Live Captions" button text based on current streaming state
+    // Update the main "Show Captions" button text based on current streaming state
   const buttonTextKey = isStreamingCaptions ? "get-live-caption-stop" : "get-live-caption";
   const langDataForButton = languageData[lang] || languageData[DEFAULT_LANGUAGE]; // Fallback for button text
   if (langDataForButton) {
@@ -595,6 +631,7 @@ function stopTimer() {
     }
 }
 
+// Recurring function
 function getTranscript() {
   $.support.cors = true;
   $.getJSON(API_URL, function (data) {
@@ -609,6 +646,7 @@ function getTranscript() {
         else if (languageCode === response.outputLanguage2) textToRead = data.translation2;
         else if (languageCode === response.outputLanguage3) textToRead = data.translation3;
         else if (languageCode === response.outputLanguage4) textToRead = data.translation4;
+        else if (languageCode === response.outputLanguage5) textToRead = data.translation5;
         if (data.customQuestionPrompt && data.customQuestionPrompt.trim() !== "") {
           $("#openModal").show();
           $("#openModal a").text(data.customQuestionPrompt);
@@ -645,9 +683,13 @@ function updateResponseData(data) { // Primarily for transcript text and associa
 
     response.output4 = data.translation4 || "";
     if (data.outputLanguage4) response.outputLanguage4 = data.outputLanguage4.substring(0, 2);
+
+    response.output5 = data.translation5 || "";
+    if (data.outputLanguage5) response.outputLanguage5 = data.outputLanguage5.substring(0, 2);
 }
 
-function checkLanguage() { // Called ONCE on load to get available languages for the menu
+// Called ONCE on load to get available languages for the menu
+function checkLanguage() { 
     if (isTesting) {
         checkMockLanguage(); // This will call populateLanguageMenu and translate
         return;
@@ -691,6 +733,7 @@ function updateResponseLanguages(data) { // Called by checkLanguage (once) or if
   response.outputLanguage2 = (data.outputLanguage2) ? data.outputLanguage2.substring(0, 2) : "";
   response.outputLanguage3 = (data.outputLanguage3) ? data.outputLanguage3.substring(0, 2) : "";
   response.outputLanguage4 = (data.outputLanguage4) ? data.outputLanguage4.substring(0, 2) : "";
+  response.outputLanguage5 = (data.outputLanguage5) ? data.outputLanguage5.substring(0, 2) : "";
 }
 
 function readLogic(message) {
@@ -841,6 +884,7 @@ function getMockTranscript() {
   else if (languageCode === response.outputLanguage2) textToRead = response.output2;
   else if (languageCode === response.outputLanguage3) textToRead = response.output3;
   else if (languageCode === response.outputLanguage4) textToRead = response.output4;
+  else if (languageCode === response.outputLanguage5) textToRead = response.output5;
   if (simulatedApiData.customQuestionPrompt && simulatedApiData.customQuestionPrompt.trim() !== "") {
     $("#openModal").show();
     $("#openModal a").text(simulatedApiData.customQuestionPrompt);
@@ -891,7 +935,7 @@ const mockObject3 = {
 const languageData = {
   'en': {
     "caption-header":"Captions & Translations",
-    "get-live-caption":"Get Live Captions",
+    "get-live-caption":"Show Captions",
     "get-live-caption-stop":"Stop Streaming",
     "live-caption-empty":"Transcription will display here",
     "hotmail":"PS: I love you. Get free event subtitles & translations",
@@ -993,4 +1037,6 @@ const languageData = {
   'sv': {	"caption-header":"Livetextning för evenemang",	"get-live-caption":"Få livetextning",	"get-live-caption-stop":"Sluta streama",	"live-caption-empty":"Transkription visas här",	"hotmail":"PS Jag älskar dig. Få din gratis transkription av live-evenemang",	"name":"svenska"	},
   'hu': {	"caption-header":"Esemény élő feliratozás",	"get-live-caption":"Szerezzen élő feliratokat",	"get-live-caption-stop":"Streaming leállítása",	"live-caption-empty":"Az átírás itt fog megjelenni",	"hotmail":"Utóirat: Szeretlek. Szerezze meg ingyenes élő esemény átiratát",	"name":"Magyar"	},
   'sq': {	"caption-header":"Titrat e drejtpërdrejtë të ngjarjes",	"get-live-caption":"Merr titrat e drejtpërdrejtë",	"get-live-caption-stop":"Ndalo transmetimin",	"live-caption-empty":"Transkriptimi do të shfaqet këtu",	"hotmail":"Ps Të Dua. Merr transkriptimin falas të ngjarjeve të drejtpërdrejta",	"name":"shqiptare"	},          
+  "tr": { "caption-header": "Altyazılar ve Çeviriler", "get-live-caption": "Canlı Altyazıyı Başlat", "get-live-caption-stop": "Canlıyı Durdur", "live-caption-empty": "Transkripsiyon burada görünecek", "hotmail": "Not: Seni seviyorum. Etkinlik için ücretsiz altyazı ve çeviri alın", "name": "Türkçe"},   
+  "az": { "caption-header": "Alt yazılar və Tərcümələr", "get-live-caption": "Canlı Alt Yazını Başlat", "get-live-caption-stop": "Canlıyı Dayandır", "live-caption-empty": "Transkripsiya burada göstəriləcək", "hotmail": "Qeyd: Səni sevirəm. Tədbir üçün pulsuz alt yazı və tərcümələr əldə edin", "name": "Azərbaycan"},
 };
