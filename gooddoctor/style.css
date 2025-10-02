@@ -116,9 +116,15 @@ input:focus {
   align-items: center;
   gap: 10px;
   border-radius: 24px;
-  background: #1d3b78;
+  background: linear-gradient(to top left, #003DA6, #003DA6BB);
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
   border: none;
   cursor: pointer;
+}
+.ios-button:hover {
+  background-color: #003DA6;
+  transform: translateY(2px);
+  box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0);
 }
 .ios-button-text{
   color: var(--neutrals-white, #FFF);
@@ -151,7 +157,7 @@ input:focus {
 }
 
 #header {
-  background-color: #1d3b78; /* Your original color */
+  background-color: #003DA6; /* Your original color */
   font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Verdana, Arial, sans-serif;
   display: flex; /* Changed for menu toggle */
   justify-content: space-between; /* Changed for menu toggle */
@@ -318,7 +324,7 @@ a.active {
 }
 
 #live-caption-container {
-  border: 1px solid #1d3b78; /* from your HTML */
+  border: 1px solid #003DA6; /* from your HTML */
 }
 
 /* --- DARK MODE STYLES (Class-based) --- */
@@ -389,6 +395,22 @@ body.dark-mode a.disabled { /* Legacy disabled link */
 }
 body.dark-mode #legacy-controls .fa-language {
     color: #6254b7; /* Lighter version for dark mode */
+}
+
+/* September 11 2025 */
+body.dark-mode .modal-content {
+  background-color: #221657; /* Lighter version for dark mode */
+}
+body.dark-mode .form-floating {
+  color: #221657; 
+}
+body.dark-mode .btn-close {
+  color: #e0e0e0;
+  background-color: #e0e0e0; /* Darker background */
+}
+body.dark-mode .close-btn {
+  color: #221657;
+  background-color: #221657; /* Darker background */
 }
 
 /* September 10 2025 - Scrolling variable lines */
