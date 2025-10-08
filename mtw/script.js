@@ -632,15 +632,9 @@ function stopTimer() {
 }
 
 function checkIfLanguageChanged(data) {
-  // Compare current response languages with new data
-  const langChanged = 
-      (data.inputLanguage && data.inputLanguage.substring(0, 2) !== response.inputLanguage) ||
-      (data.outputLanguage && data.outputLanguage.substring(0, 2) !== response.outputLanguage) ||
-      (data.outputLanguage2 && data.outputLanguage2.substring(0, 2) !== response.outputLanguage2) ||
-      (data.outputLanguage3 && data.outputLanguage3.substring(0, 2) !== response.outputLanguage3) ||
-      (data.outputLanguage4 && data.outputLanguage4.substring(0, 2) !== response.outputLanguage4) ||
-      (data.outputLanguage5 && data.outputLanguage5.substring(0, 2) !== response.outputLanguage5);
-  return langChanged;
+  const current = [ response.inputLanguage, response.outputLanguage, response.outputLanguage2, response.outputLanguage3, response.outputLanguage4, response.outputLanguage5 ];
+  const incoming = [ data.inputLanguage, data.outputLanguage, data.outputLanguage2, data.outputLanguage3, data.outputLanguage4, data.outputLanguage5 ]; 
+  return incoming.some((lang, i) => normalizeLang(lang) !== current[i]);
 }
 
 function swapToExistingLanguage(){
@@ -709,24 +703,30 @@ function getTranscript() {
   });
 }
 
+function normalizeLang(lang) {
+  if (!lang) return "";
+  const short = lang.substring(0, 2).toLowerCase();
+  // Keep region for languages that matter (e.g., zh-TW, zh-CN, pt-BR)
+  if (short === "zh" || short === "pt") {
+    return lang.toLowerCase();
+  }
+  return short;
+}
+
 function updateResponseData(data) { // Primarily for transcript text and associated language codes
-    response.input = data.transcript || "";
-    if (data.inputLanguage) response.inputLanguage = data.inputLanguage.substring(0, 2);
-    
-    response.output1 = data.translation || "";
-    if (data.outputLanguage) response.outputLanguage = data.outputLanguage.substring(0, 2);
-    
-    response.output2 = data.translation2 || "";
-    if (data.outputLanguage2) response.outputLanguage2 = data.outputLanguage2.substring(0, 2);
+  response.input  = data.transcript   || "";
+  response.output1 = data.translation  || "";
+  response.output2 = data.translation2 || "";
+  response.output3 = data.translation3 || "";
+  response.output4 = data.translation4 || "";
+  response.output5 = data.translation5 || "";
 
-    response.output3 = data.translation3 || "";
-    if (data.outputLanguage3) response.outputLanguage3 = data.outputLanguage3.substring(0, 2);
-
-    response.output4 = data.translation4 || "";
-    if (data.outputLanguage4) response.outputLanguage4 = data.outputLanguage4.substring(0, 2);
-
-    response.output5 = data.translation5 || "";
-    if (data.outputLanguage5) response.outputLanguage5 = data.outputLanguage5.substring(0, 2);
+  if (data.inputLanguage)  response.inputLanguage  = normalizeLang(data.inputLanguage);
+  if (data.outputLanguage) response.outputLanguage = normalizeLang(data.outputLanguage);
+  if (data.outputLanguage2) response.outputLanguage2 = normalizeLang(data.outputLanguage2);
+  if (data.outputLanguage3) response.outputLanguage3 = normalizeLang(data.outputLanguage3);
+  if (data.outputLanguage4) response.outputLanguage4 = normalizeLang(data.outputLanguage4);
+  if (data.outputLanguage5) response.outputLanguage5 = normalizeLang(data.outputLanguage5);
 }
 
 // Called ONCE on load to get available languages for the menu
@@ -767,14 +767,13 @@ function checkLanguage() {
     });
 }
 
-function updateResponseLanguages(data) { // Called by checkLanguage (once) or if API can change available langs
-  // This function defines WHICH languages are available for selection
-  response.inputLanguage = (data.inputLanguage) ? data.inputLanguage.substring(0, 2) : DEFAULT_LANGUAGE;
-  response.outputLanguage = (data.outputLanguage) ? data.outputLanguage.substring(0, 2) : "";
-  response.outputLanguage2 = (data.outputLanguage2) ? data.outputLanguage2.substring(0, 2) : "";
-  response.outputLanguage3 = (data.outputLanguage3) ? data.outputLanguage3.substring(0, 2) : "";
-  response.outputLanguage4 = (data.outputLanguage4) ? data.outputLanguage4.substring(0, 2) : "";
-  response.outputLanguage5 = (data.outputLanguage5) ? data.outputLanguage5.substring(0, 2) : "";
+function updateResponseLanguages(data) {
+  response.inputLanguage = normalizeLang(data.inputLanguage);
+  response.outputLanguage  = normalizeLang(data.outputLanguage);
+  response.outputLanguage2 = normalizeLang(data.outputLanguage2);
+  response.outputLanguage3 = normalizeLang(data.outputLanguage3);
+  response.outputLanguage4 = normalizeLang(data.outputLanguage4);
+  response.outputLanguage5 = normalizeLang(data.outputLanguage5);
 }
 
 function readLogic(message) {
@@ -1073,6 +1072,7 @@ const languageData = {
     "name":"বাংলা"
   },  
   'pt': {	"caption-header":"Legendas ao vivo de eventos",	"get-live-caption":"Obtenha legendas ao vivo",	"get-live-caption-stop":"Pare de transmitir",	"live-caption-empty":"A transcrição será exibida aqui",	"hotmail":"PS Eu Te Amo. Obtenha sua transcrição gratuita de evento ao vivo",	"name":"Português"	},
+  'pt-BR': {	"caption-header":"Legendas ao vivo de eventos",	"get-live-caption":"Obtenha legendas ao vivo",	"get-live-caption-stop":"Pare de transmitir",	"live-caption-empty":"A transcrição será exibida aqui",	"hotmail":"PS Eu Te Amo. Obtenha sua transcrição gratuita de evento ao vivo",	"name":"Português"	},
   'ar': {	"caption-header":"حدث التسميات التوضيحية الحية",	"get-live-caption":"احصل على التسميات التوضيحية المباشرة",	"get-live-caption-stop":"توقف عن البث",	"live-caption-empty":"سيتم عرض النسخ هنا",	"hotmail":"ملاحظة: أنا أحبك. احصل على النسخ المجاني للحدث المباشر",	"name":"عربي"	},
   'ru': {	"caption-header":"Прямые субтитры к событиям",	"get-live-caption":"Получить живые субтитры",	"get-live-caption-stop":"Остановить трансляцию",	"live-caption-empty":"Транскрипция будет отображаться здесь",	"hotmail":"PS я тебя люблю. Получите бесплатную транскрипцию живого мероприятия",	"name":"Русский"	},
   'de': {	"caption-header":"Live-Untertitel der Veranstaltung",	"get-live-caption":"Erhalten Sie Live-Untertitel",	"get-live-caption-stop":"Stoppen Sie das Streaming",	"live-caption-empty":"Die Transkription wird hier angezeigt",	"hotmail":"PS Ich liebe Dich. Holen Sie sich Ihre kostenlose Live-Event-Transkription",	"name":"Deutsch"	},
