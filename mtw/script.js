@@ -1013,7 +1013,7 @@ const languageData = {
     "hotmail": "PS: 我爱你。免费获取活动字幕和翻译",
     "name": "简体中文"
   },
-  'zh-CN': {
+  'zh-cn': {
     "caption-header": "字幕与翻译",
     "get-live-caption": "显示字幕",
     "get-live-caption-stop": "停止字幕",
@@ -1021,7 +1021,7 @@ const languageData = {
     "hotmail": "PS：我爱你。免费获取活动字幕和翻译",
     "name": "简体中文"
   },
-  'zh-TW': {
+  'zh-tw': {
     "caption-header": "字幕與翻譯",
     "get-live-caption": "顯示字幕",
     "get-live-caption-stop": "停止字幕",
@@ -1072,7 +1072,7 @@ const languageData = {
     "name":"বাংলা"
   },  
   'pt': {	"caption-header":"Legendas ao vivo de eventos",	"get-live-caption":"Obtenha legendas ao vivo",	"get-live-caption-stop":"Pare de transmitir",	"live-caption-empty":"A transcrição será exibida aqui",	"hotmail":"PS Eu Te Amo. Obtenha sua transcrição gratuita de evento ao vivo",	"name":"Português"	},
-  'pt-BR': {	"caption-header":"Legendas ao vivo de eventos",	"get-live-caption":"Obtenha legendas ao vivo",	"get-live-caption-stop":"Pare de transmitir",	"live-caption-empty":"A transcrição será exibida aqui",	"hotmail":"PS Eu Te Amo. Obtenha sua transcrição gratuita de evento ao vivo",	"name":"Português"	},
+  'pt-br': {	"caption-header":"Legendas ao vivo de eventos",	"get-live-caption":"Obtenha legendas ao vivo",	"get-live-caption-stop":"Pare de transmitir",	"live-caption-empty":"A transcrição será exibida aqui",	"hotmail":"PS Eu Te Amo. Obtenha sua transcrição gratuita de evento ao vivo",	"name":"Português"	},
   'ar': {	"caption-header":"حدث التسميات التوضيحية الحية",	"get-live-caption":"احصل على التسميات التوضيحية المباشرة",	"get-live-caption-stop":"توقف عن البث",	"live-caption-empty":"سيتم عرض النسخ هنا",	"hotmail":"ملاحظة: أنا أحبك. احصل على النسخ المجاني للحدث المباشر",	"name":"عربي"	},
   'ru': {	"caption-header":"Прямые субтитры к событиям",	"get-live-caption":"Получить живые субтитры",	"get-live-caption-stop":"Остановить трансляцию",	"live-caption-empty":"Транскрипция будет отображаться здесь",	"hotmail":"PS я тебя люблю. Получите бесплатную транскрипцию живого мероприятия",	"name":"Русский"	},
   'de': {	"caption-header":"Live-Untertitel der Veranstaltung",	"get-live-caption":"Erhalten Sie Live-Untertitel",	"get-live-caption-stop":"Stoppen Sie das Streaming",	"live-caption-empty":"Die Transkription wird hier angezeigt",	"hotmail":"PS Ich liebe Dich. Holen Sie sich Ihre kostenlose Live-Event-Transkription",	"name":"Deutsch"	},
