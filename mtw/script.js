@@ -817,17 +817,21 @@ function processQueue() {
   const { text, lang } = speechQueue.shift();
   const utterance = new SpeechSynthesisUtterance(text);
   
-  voiceChoice = window.speechSynthesis.getVoices().find(voice => voice.lang.startsWith(lang));
-    
+  var spokenLang = lang
+  if (lang.length === 5) {
+        spokenLang = lang.slice(0, -2) + lang.slice(-2).toUpperCase();
+  }
+  voiceChoice = window.speechSynthesis.getVoices().find(voice => voice.lang.startsWith(spokenLang));
+
   if (voiceChoice) {
     utterance.voice = voiceChoice;
   } else {
       // console.warn(`No specific voice for ${lang}. Using default. Or alert & mute.`);
-      alert(`Language ${lang} not available for playback on your device.`);
+      alert(`Language ${spokenLang} not available for playback on your device.`);
       muteButtonTapped(); // This might be too aggressive
       return; 
   }
-  utterance.lang = lang;
+  utterance.lang = spokenLang;
 
   currentUtterance = utterance; // Set before speaking
   utterance.onstart = () => { /* currentUtterance is already set */ };
