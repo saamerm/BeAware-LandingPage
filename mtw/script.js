@@ -1014,6 +1014,22 @@ const languageData = {
     "hotmail": "PS: 我爱你。免费获取活动字幕和翻译",
     "name": "简体中文"
   },
+  'zh-CN': {
+    "caption-header": "字幕与翻译",
+    "get-live-caption": "显示字幕",
+    "get-live-caption-stop": "停止字幕",
+    "live-caption-empty": "转录内容将在此显示",
+    "hotmail": "PS：我爱你。免费获取活动字幕和翻译",
+    "name": "简体中文"
+  },
+  'zh-TW': {
+    "caption-header": "字幕與翻譯",
+    "get-live-caption": "顯示字幕",
+    "get-live-caption-stop": "停止字幕",
+    "live-caption-empty": "轉錄內容將顯示在此",
+    "hotmail": "PS：我愛你。免費取得活動字幕與翻譯",
+    "name": "繁體中文"
+  },  
   'id': {
     "caption-header": "Teks & Terjemahan",
     "get-live-caption": "Dapatkan Teks Langsung",
