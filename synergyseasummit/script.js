@@ -1,5 +1,5 @@
 // --- Constants and Variables ---
-const API_URL = "https://api.deafassistant.com/stream/LiteGetStream?streamName=gooddoctor";
+const API_URL = "https://api.deafassistant.com/stream/LiteGetStream?streamName=synergyseasummit";
 const LAYOVER_HTML = `
   <div class="inner-div">
     <div id="holder2" class="holder2" style="height: 100px; border: #fafafa11; border-style: solid;">
@@ -30,7 +30,7 @@ let isStreamingCaptions = false;
 let isPlayingSpeech = false;
 let readText = "";
 let transcript = "";
-var isTesting = false; // TODO: Before publishing, Change this to false
+var isTesting = true; // TODO: Before publishing, Change this to false
 let counter = 0; // Only used for debug
 let synth = window.speechSynthesis; // Initialize speech synthesis here
 let currentUtterance = null; // Keep track of the current speech utterance
@@ -48,7 +48,7 @@ var interval = 1000; // Your interval
 
 // --- DOM Ready Handler ---
 $(document).ready(function () {
-  isTesting = false; // isTesting logs as true unless this is set
+  isTesting = true; // isTesting logs as true unless this is set
   isStreamingCaptions = false; // Ensure initial state
   isPlayingSpeech = false; // Default to muted
 
@@ -896,11 +896,11 @@ function checkMockLanguage() {
   }
 }
 
-let mockWord = ""; // Keep this for getMockTranscript
+let mockWord = "บรรยากาศที่อบอุ่นระหว่างพวกคุณทุกคนช่างวิเศษจริงๆ มันเป็นโลกที่วิเศษมาก และฉันรู้สึกขอบคุณสำหรับการประชุมสุดยอดครั้งนี้มาก ทุกครั้งที่เรามารวมตัวกัน เราจะก้าวข้ามเรื่องสัญชาติ ศาสนา สีผิว และทุกสิ่งทุกอย่าง มันทำให้ฉันรู้สึกเหมือนเป็นครอบครัวเดียวกัน มันเป็นโลกที่ดีที่สุด ฉันมาไต้หวันเป็นครั้งแรกในรอบ 35 ปี ตอนนั้นฉันอายุ 20 กว่าๆ ยังเด็กมาก เต็มไปด้วยความทะเยอทะยาน ความมุ่งมั่น และความรัก ฉันใช้เวลาทั้งวันไปกับการหวังว่าจะได้ใช้ชีวิตอย่างแท้จริง แต่เมื่อมองย้อนกลับไป อุดมคติและความเป็นจริงของฉันแตกต่างออกไปอย่างสิ้นเชิง ตอนนี้ 35 ปีผ่านไป ฉันกลับมาที่นี่เพื่อพูดคุย และอุดมคติและความเป็นจริงของฉันได้กลายเป็นหนึ่งเดียวกัน เมื่อเร็วๆ นี้ ฉันตระหนักว่าชีวิตจะดีขึ้นจริงๆ ยิ่งเรียนรู้มากขึ้น แม้ว่าการทำงานหนักจะเป็นสิ่งจำเป็น แต่ฉันก็เชื่อว่าฉันใส่ใจรูปลักษณ์ของตัวเองและเตรียมตัวมาอย่างดีเสมอ ตอนอายุ 20 กว่าๆ ผมเคยคิดว่าจะใช้ชีวิตยังไงตอนอายุ 30 พออายุ 30 กว่าๆ ผมก็เคยคิดว่าจะใช้ชีวิตยังไงตอนอายุ 40 กว่าๆ ตอนนี้ผมอายุ 60 กว่าๆ แล้ว ผมเลยคิดว่าจะใช้ชีวิตยังไงในอนาคต"; // Keep this for getMockTranscript
 
 function getMockTranscript() {
   // mockWord += " سيبدأ الحدث"; // Example Arabic
-  mockWord += " Donde esta el baño."; // Example Spanish
+  // mockWord += " Donde esta el baño."; // Example Spanish
   
   const mockDataToUse = mockObject; // Choose which mock object to get transcript text from
 
@@ -946,7 +946,7 @@ function getMockTranscript() {
 // Your existing mockObject, mockObject2, mockObject3
 const mockObject = {
   "timestamp": "2024-12-10T20:56:50.4571326",
-  "roomName": "gooddoctor",
+  "roomName": "synergyseasummit",
   "description": "",
   "transcript": "The event will start shortly.",
   "isActivelyStreaming": true,
@@ -962,13 +962,13 @@ const mockObject = {
 }
 
 const mockObject2 = {
-  "id":59,"timestamp":"2025-01-29T04:36:36.4389888","roomName":"gooddoctor","description":"","isActivelyStreaming":true,
+  "id":59,"timestamp":"2025-01-29T04:36:36.4389888","roomName":"synergyseasummit","description":"","isActivelyStreaming":true,
   "transcript":" What happened to this. So, let's see if the translation gets removed from this text, where is the value? Why is this not working? Let's go on and continue. Is this translation showing nothing. Yes, it is not showing anything. What is actually going on here? I have no idea.",
   "translation":"¿Qué pasó con esto? Entonces, veamos si la traducción se elimina de este texto, ¿dónde está el valor? ¿Por qué esto no funciona? Sigamos adelante y continuemos. ¿Esta traducción no muestra nada? Sí, no está mostrando nada. ¿Qué está pasando aquí? No tengo ni idea.",
   "translation2":"","inputLanguage":"en-US","outputLanguage":"es","outputLanguage2":"","isPremiumCustomer":false,"blockStorage":false,"uid":null
 }
 const mockObject3 = {
-  "id":59,"timestamp":"2025-01-29T04:36:36.4389888","roomName":"gooddoctor","description":"","isActivelyStreaming":true,
+  "id":59,"timestamp":"2025-01-29T04:36:36.4389888","roomName":"synergyseasummit","description":"","isActivelyStreaming":true,
   "transcript":" What happened to this. So, let's see if the translation gets removed from this text, where is the value? Why is this not working? Let's go on and continue. Is this translation showing nothing. Yes, it is not showing anything. What is actually going on here? I have no idea.",
   "translation":"حدث التسميات التوضيحية الحية",
   "translation2":"","inputLanguage":"en-US","outputLanguage":"ar","outputLanguage2":"","isPremiumCustomer":false,"blockStorage":false,"uid":null
