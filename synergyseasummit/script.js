@@ -30,7 +30,7 @@ let isStreamingCaptions = false;
 let isPlayingSpeech = false;
 let readText = "";
 let transcript = "";
-var isTesting = true; // TODO: Before publishing, Change this to false
+var isTesting = false; // TODO: Before publishing, Change this to false
 let counter = 0; // Only used for debug
 let synth = window.speechSynthesis; // Initialize speech synthesis here
 let currentUtterance = null; // Keep track of the current speech utterance
@@ -48,7 +48,7 @@ var interval = 1000; // Your interval
 
 // --- DOM Ready Handler ---
 $(document).ready(function () {
-  isTesting = true; // isTesting logs as true unless this is set
+  isTesting = false; // isTesting logs as true unless this is set
   isStreamingCaptions = false; // Ensure initial state
   isPlayingSpeech = false; // Default to muted
 

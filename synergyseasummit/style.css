@@ -1,9 +1,6 @@
 
 /* Your existing CSS */
 body {
-  background-image: url("temp.png");
-  background-size: cover;
-  background-repeat: no-repeat; /* Prevents the image from repeating */
   width: 100%;
   margin: 0;
   font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Verdana, Arial, sans-serif;
