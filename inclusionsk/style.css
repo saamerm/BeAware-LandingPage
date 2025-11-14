@@ -116,13 +116,13 @@ input:focus {
   align-items: center;
   gap: 10px;
   border-radius: 24px;
-  background: linear-gradient(to top left, 33b9f2, 33b9f2BB);
+  background: linear-gradient(to top left, 304B90, 304B90BB);
   box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
   border: none;
   cursor: pointer;
 }
 .ios-button:hover {
-  background-color: 33b9f2;
+  background-color: 304B90;
   transform: translateY(2px);
   box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0);
 }
@@ -157,7 +157,7 @@ input:focus {
 }
 
 #header {
-  background-color: 33b9f2; /* Your original color */
+  background-color: 304B90; /* Your original color */
   font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Verdana, Arial, sans-serif;
   display: flex; /* Changed for menu toggle */
   justify-content: space-between; /* Changed for menu toggle */
@@ -324,7 +324,7 @@ a.active {
 }
 
 #live-caption-container {
-  border: 1px solid 33b9f2; /* from your HTML */
+  border: 1px solid 304B90; /* from your HTML */
 }
 
 /* --- DARK MODE STYLES (Class-based) --- */
