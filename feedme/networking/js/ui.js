@@ -172,7 +172,8 @@ export function downloadVcfLogic(btn) {
 
     // --- 3. Construct VCard ---
     let vCard = "BEGIN:VCARD\nVERSION:4.0\n";
-    
+    let location = "feedme";
+    let date = new Date();
     // N is structured: Family;Given;Middle;;
     vCard += `N:${familyName};${givenName};${middleName};;\n`;
     vCard += `FN:${d.name}\n`;
@@ -182,7 +183,7 @@ export function downloadVcfLogic(btn) {
     
     if (d.email && d.email !== 'null') vCard += `EMAIL:${d.email}\n`;
     if (d.phone && d.phone !== 'null') vCard += `TEL:${d.phone}\n`;
-
+    vCard += `NOTE:Met at ${location} on ${date.toLocaleString()}\n`
     // Socials as URLs
     if (d.li && d.li !== 'null') vCard += `URL;type=LinkedIn:${d.li.includes('http') ? d.li : 'https://linkedin.com/in/'+d.li}\n`;
     if (d.tw && d.tw !== 'null') vCard += `URL;type=Twitter:https://twitter.com/${d.tw.replace('@','')}\n`;
