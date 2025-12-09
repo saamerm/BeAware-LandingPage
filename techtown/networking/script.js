@@ -257,6 +257,7 @@ function renderList(contacts) {
 window.downloadVcf = function(btn) {
     const d = btn.dataset;
     let vCard = "BEGIN:VCARD\nVERSION:4.0\n";
+    vCard += `N:${d.name}\n`;
     vCard += `FN:${d.name}\n`;
     if (d.org && d.org !== 'null') vCard += `ORG:${d.org}\n`;
     if (d.email && d.email !== 'null') vCard += `EMAIL:${d.email}\n`;

@@ -101,6 +101,9 @@ async function fetchAndRender() {
     if (!viewList.classList.contains('hidden') === false) return;
 
     try {
+        if (!state.currentUserUid || state.currentUserUid === "") {
+            state.currentUserUid = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY)).contactUid;
+        }
         const data = await getContacts(state.currentUserUid);
         const currentDataString = JSON.stringify(data);
 

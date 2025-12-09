@@ -129,27 +129,83 @@ export function renderList(contacts) {
 // Logic to generate the VCF file
 export function downloadVcfLogic(btn) {
     const d = btn.dataset;
+
+    // --- 1. Parse Name for the "N" field (Required for Apple Contacts) ---
+    // Format required: FamilyName;GivenName;MiddleName;Prefix;Suffix
+    const nameParts = (d.name || '').trim().split(/\s+/);
+    let givenName = '';
+    let familyName = '';
+    let middleName = '';
+
+    if (nameParts.length > 0) {
+        if (nameParts.length === 1) {
+            // Only one name provided
+            givenName = nameParts[0];
+        } else {
+            // Assume First word is Given, Last word is Family, everything else is Middle
+            givenName = nameParts[0];
+            familyName = nameParts[nameParts.length - 1];
+            
+            if (nameParts.length > 2) {
+                middleName = nameParts.slice(1, nameParts.length - 1).join(' ');
+            }
+        }
+    }
+
+    // --- 2. Parse Organization vs Title ---
+    // Input logic: "Title, Organization" OR just "Organization"
+    let orgName = '';
+    let title = '';
+
+    if (d.org && d.org !== 'null') {
+        if (d.org.includes(',')) {
+            const orgParts = d.org.split(',');
+            // First part is Title
+            title = orgParts[0].trim();
+            // Rest is Organization (joined back in case org name has commas like "Inc.")
+            orgName = orgParts.slice(1).join(',').trim();
+        } else {
+            // No comma, treat entire string as Organization
+            orgName = d.org.trim();
+        }
+    }
+
+    // --- 3. Construct VCard ---
     let vCard = "BEGIN:VCARD\nVERSION:4.0\n";
+    
+    // N is structured: Family;Given;Middle;;
+    vCard += `N:${familyName};${givenName};${middleName};;\n`;
     vCard += `FN:${d.name}\n`;
-    if (d.org && d.org !== 'null') vCard += `ORG:${d.org}\n`;
+    
+    if (orgName) vCard += `ORG:${orgName}\n`;
+    if (title) vCard += `TITLE:${title}\n`;
+    
     if (d.email && d.email !== 'null') vCard += `EMAIL:${d.email}\n`;
     if (d.phone && d.phone !== 'null') vCard += `TEL:${d.phone}\n`;
-    
-    if (d.li && d.li !== 'null') vCard += `item1.URL;type=LinkedIn:https://linkedin.com/in/${cleanHandle(d.li)}\n`;
-    if (d.tw && d.tw !== 'null') vCard += `item2.URL;type=Twitter:https://twitter.com/${cleanHandle(d.tw)}\n`;
-    if (d.insta && d.insta !== 'null') vCard += `item3.URL;type=Instagram:https://instagram.com/${cleanHandle(d.insta)}\n`;
-    
+
+    // Socials as URLs
+    if (d.li && d.li !== 'null') vCard += `URL;type=LinkedIn:${d.li.includes('http') ? d.li : 'https://linkedin.com/in/'+d.li}\n`;
+    if (d.tw && d.tw !== 'null') vCard += `URL;type=Twitter:https://twitter.com/${d.tw.replace('@','')}\n`;
+    if (d.insta && d.insta !== 'null') vCard += `URL;type=Instagram:https://instagram.com/${d.insta.replace('@','')}\n`;
+
     vCard += "END:VCARD";
-    console.log("vCard");
+
     console.log(vCard);
+
+    // Create Blob
     const blob = new Blob([vCard], { type: "text/vcard;charset=utf-8" });
     const url = URL.createObjectURL(blob);
+
+    // Trigger Download
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `${d.name.replace(/\s+/g, '_')}.vcf`);
+    // Safety check for filename
+    const fileName = d.name ? d.name.replace(/\s+/g, '_') : 'contact';
+    link.setAttribute('download', `${fileName}.vcf`);
+    
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
-    showToast("Contact card downloaded");
-}
+
+    if (typeof showToast === "function") showToast("Contact card downloaded");
+};
