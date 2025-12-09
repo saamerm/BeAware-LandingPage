@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caption URL Generator | ConferenceCaptioning.com</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --background-color: #f8f9fa;
+            --surface-color: #ffffff;
+            --text-color: #212529;
+            --text-color-muted: #6c757d;
+            --border-color: #dee2e6;
+            --input-bg-color: #ffffff;
+            --input-focus-shadow: rgba(0, 123, 255, 0.25);
+            --generated-url-bg: #e9ecef;
+            --generated-url-text: #495057;
+            --success-color: #28a745;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-color: #0d6efd;
+                --secondary-color: #adb5bd;
+                --background-color: #121212;
+                --surface-color: #1e1e1e;
+                --text-color: #e9ecef;
+                --text-color-muted: #adb5bd;
+                --border-color: #495057;
+                --input-bg-color: #2b2b2b;
+                --input-focus-shadow: rgba(13, 110, 253, 0.4);
+                --generated-url-bg: #343a40;
+                --generated-url-text: #ced4da;
+            }
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--surface-color);
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 700px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
+        }
+        
+        .logo {
+            max-height: 40px;
+            margin-bottom: 1rem;
+        }
+
+        header h1 {
+            margin: 0;
+            color: var(--text-color);
+            font-size: 2rem;
+        }
+
+        header p {
+            margin: 0.5rem 0 0;
+            color: var(--text-color-muted);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group.sub-option {
+            margin-left: 2rem;
+            padding-left: 1.5rem;
+            border-left: 2px solid var(--border-color);
+            margin-top: 1rem;
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg-color);
+            color: var(--text-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--input-focus-shadow);
+        }
+        
+        input[type="checkbox"] {
+            margin-right: 0.75rem;
+            transform: scale(1.2);
+            accent-color: var(--primary-color);
+        }
+
+        .slider-group, .color-picker-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        input[type="range"] { flex-grow: 1; accent-color: var(--primary-color); }
+        input[type="number"] { width: 80px; }
+        
+        input[type="color"] {
+            min-width: 40px; height: 40px; border: 1px solid var(--border-color); padding: 0; border-radius: 6px; cursor: pointer; background-color: transparent;
+        }
+
+        .segmented-control { display: flex; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; margin-top: 0.5rem; }
+        .segmented-control label { flex: 1; text-align: center; padding: 0.75rem; margin: 0; background-color: var(--input-bg-color); cursor: pointer; transition: background-color 0.2s, color 0.2s; position: relative; }
+        .segmented-control label:not(:last-child) { border-right: 1px solid var(--border-color); }
+        .segmented-control input[type="radio"] { display: none; }
+        .segmented-control input[type="radio"]:checked + label { background-color: var(--primary-color); color: white; font-weight: 600; }
+
+        .result-area { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); }
+        .generated-url-display { background-color: var(--generated-url-bg); color: var(--generated-url-text); padding: 1rem; border-radius: 6px; font-family: "Courier New", Courier, monospace; word-wrap: break-word; border: 1px solid var(--border-color); user-select: all; }
+        
+        .button-group { margin-top: 1rem; display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; }
+        
+        .btn { border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s, transform 0.1s; }
+        .btn:active { transform: scale(0.98); }
+
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: #0056b3; }
+        .btn-primary.copied { background-color: var(--success-color); }
+        
+        .btn-secondary { background-color: transparent; color: var(--primary-color); border: 1px solid var(--primary-color); }
+        .btn-secondary:hover { background-color: var(--primary-color); color: white; }
+
+        #preview-container { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); }
+        #preview-note { font-size: 0.9rem; color: var(--text-color-muted); text-align: center; margin-bottom: 1rem; }
+        #previewFrame { width: 100%; min-height: 150px; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--background-color); }
+        
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <picture>
+                <source srcset="https://conferencecaptioning.com/images/logo-white.svg" media="(prefers-color-scheme: dark)">
+                <img src="https://conferencecaptioning.com/images/logo.png" alt="ConferenceCaptioning.com Logo" class="logo">
+            </picture>
+            <h1>Caption URL Generator</h1>
+            <p>Easily create custom URLs for your video captions and attendees.</p>
+        </header>
+
+        <main>
+            <div class="form-group" id="streamNameGroup">
+                <label for="streamName">Enter Your Stream Name Here</label>
+                <input type="text" id="streamName" value="your-stream-name" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label"><input type="checkbox" id="showCaptions" checked>Show Captions on Video</label>
+            </div>
+
+            <div id="optionsContainer">
+                <div class="form-group"><label class="checkbox-label"><input type="checkbox" id="autoStart" checked>Auto Start On View</label></div>
+                
+                <div class="form-group">
+                    <label class="checkbox-label"><input type="checkbox" id="alternateLook">Alternate Subtitle Look</label>
+                    <div id="textColorOptions" class="form-group sub-option hidden">
+                         <label class="checkbox-label"><input type="checkbox" id="enableTextColor">Custom Video Text Color</label>
+                         <div id="textColorPicker" class="hidden">
+                             <div class="segmented-control">
+                                <input type="radio" id="textColorWhite" name="videoTextColor" value="white" checked><label for="textColorWhite">White on Black</label>
+                                <input type="radio" id="textColorBlack" name="videoTextColor" value="black"><label for="textColorBlack">Black on White</label>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label"><input type="checkbox" id="enableBottomDistance">Custom Distance from Bottom (%)</label>
+                    <div id="bottomDistanceControls" class="slider-group hidden">
+                        <input type="range" id="subtitleBottomSlider" min="0" max="1000" value="5">
+                        <input type="number" id="subtitleBottomNumber" min="0" max="1000" value="5">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox-label"><input type="checkbox" id="enableScrollSpeed">Custom Caption Scroll Speed (ms)</label>
+                    <div id="scrollSpeedControls" class="slider-group hidden">
+                        <input type="range" id="scrollSpeedSlider" min="100" max="2000" value="499">
+                        <input type="number" id="scrollSpeedNumber" min="100" max="2000" value="499">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label"><input type="checkbox" id="enableTranslationNumber">Use a translation instead of just captions</label>
+                    <div id="translationNumberControls" class="slider-group hidden">
+                        <input type="range" id="translationNumberSlider" min="1" max="5" value="1">
+                        <input type="number" id="translationNumber" min="1" max="5" value="1">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label"><input type="checkbox" id="enableChromaKey">Add Chroma Key Background</label>
+                    <div id="chromaKeyControls" class="color-picker-group hidden">
+                        <input type="color" id="chromaColorPicker" value="#00ff00">
+                        <input type="text" id="chromaColorText" value="#00ff00">
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-area">
+                <label>Your Internet Based Caption URL</label>
+                <div id="generatedUrlAV" class="generated-url-display"></div>
+                <div class="button-group">
+                    <button id="previewButton" class="btn btn-secondary">Generate Preview</button>
+                    <button id="onlineUrlCopy" class="btn btn-primary copy-button">Copy URL</button>
+                </div>
+            </div>
+
+            <div class="result-area" id="conferenceUrlArea">
+                <label>AV Team Local URL Video Overlay</label>
+                <div id="generatedUrlConference" class="generated-url-display"></div>
+                <div class="button-group">
+                    <button id="previewOnlineButton" class="btn btn-secondary">Generate Preview</button>
+                    <button id="localUrlCopy" class="btn btn-primary copy-button">Copy URL</button>
+                </div>
+            </div>
+
+            <div id="preview-container" class="hidden">
+                <p id="preview-note">Note: The preview does not update automatically. Click "Generate Preview" again after making changes.</p>
+                
+                <iframe id="previewFrame" title="Live Caption Preview" src="http://10.0.0.199:8080/index.html" style="width:100%; height:400px; border:1px solid var(--border-color); border-radius:6px; margin-top:1rem;"></iframe>
+            </div>
+        </main>
+    </div>
+    <script type="text/javascript" src="js/jquery-3.5.1.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const elements = {
+                streamNameInput: document.getElementById('streamName'),
+                generatedUrlAV: document.getElementById('generatedUrlAV'),
+                generatedUrlConference: document.getElementById('generatedUrlConference'),
+                previewButton: document.getElementById('previewButton'),
+                previewOnlineButton: document.getElementById('previewOnlineButton'),
+                previewContainer: document.getElementById('preview-container'),
+                previewFrame: document.getElementById('previewFrame'),
+                optionsContainer: document.getElementById('optionsContainer'),
+                showCaptionsCheck: document.getElementById('showCaptions'),
+                autoStartCheck: document.getElementById('autoStart'),
+                alternateLookCheck: document.getElementById('alternateLook'),
+                textColorOptions: document.getElementById('textColorOptions'),
+                enableTextColorCheck: document.getElementById('enableTextColor'),
+                textColorPicker: document.getElementById('textColorPicker'),
+                enableBottomDistanceCheck: document.getElementById('enableBottomDistance'),
+                bottomDistanceControls: document.getElementById('bottomDistanceControls'),
+                subtitleBottomSlider: document.getElementById('subtitleBottomSlider'),
+                subtitleBottomNumber: document.getElementById('subtitleBottomNumber'),
+                enableTranslationNumberCheck: document.getElementById('enableTranslationNumber'),
+                translationNumberControls: document.getElementById('translationNumberControls'),
+                translationNumberSlider: document.getElementById('translationNumberSlider'),
+                translationNumber: document.getElementById('translationNumber'),
+                enableScrollSpeedCheck: document.getElementById('enableScrollSpeed'),
+                scrollSpeedControls: document.getElementById('scrollSpeedControls'),
+                scrollSpeedSlider: document.getElementById('scrollSpeedSlider'),
+                scrollSpeedNumber: document.getElementById('scrollSpeedNumber'),
+                enableChromaKeyCheck: document.getElementById('enableChromaKey'),
+                chromaKeyControls: document.getElementById('chromaKeyControls'),
+                chromaColorPicker: document.getElementById('chromaColorPicker'),
+                chromaColorText: document.getElementById('chromaColorText'),
+                allInputs: document.querySelectorAll('input, select')
+            };
+
+            function generateUrl() {
+                const streamName = elements.streamNameInput.value.trim() || 'your-stream-name';
+                const baseUrls = {
+                    av: `https://deafassistant.com/${streamName}`,
+                    conference: `http://10.0.199:8080/index.html`
+                };
+                
+                const params = [];
+
+                if (elements.showCaptionsCheck.checked) {
+                    params.push('forVideo=true');
+                    if (elements.autoStartCheck.checked) params.push('autoRetrieve=true');
+                    if (elements.alternateLookCheck.checked) {
+                        params.push('advancedOverlay=true');
+                        if (elements.enableTextColorCheck.checked) {
+                            const selectedColor = document.querySelector('input[name="videoTextColor"]:checked').value;
+                            params.push(`videoTextColor=${selectedColor}`);
+                        }
+                    }
+                    if (elements.enableTranslationNumberCheck.checked) params.push(`translationNumber=${elements.translationNumber.value}`);
+                    if (elements.enableBottomDistanceCheck.checked) params.push(`subtitleBottom=${elements.subtitleBottomNumber.value}`);
+                    if (elements.enableScrollSpeedCheck.checked) params.push(`scrollSpeed=${elements.scrollSpeedNumber.value}`);
+                    if (elements.enableChromaKeyCheck.checked) {
+                        params.push(`chroma=${elements.chromaColorPicker.value.substring(1)}`);
+                    }
+                }
+
+                const queryString = params.length > 0 ? `?${params.join('&')}` : '';
+                elements.generatedUrlAV.textContent = baseUrls.av + queryString;
+                // The conference URL doesn't need video-specific parameters
+                elements.generatedUrlConference.textContent = baseUrls.conference + queryString;
+            }
+
+            function toggleVisibility() {
+                const showCaptions = elements.showCaptionsCheck.checked;
+                elements.optionsContainer.classList.toggle('hidden', !showCaptions);
+                elements.textColorOptions.classList.toggle('hidden', !elements.alternateLookCheck.checked || !showCaptions);
+                elements.textColorPicker.classList.toggle('hidden', !elements.enableTextColorCheck.checked || !elements.alternateLookCheck.checked || !showCaptions);
+                elements.bottomDistanceControls.classList.toggle('hidden', !elements.enableBottomDistanceCheck.checked || !showCaptions);
+                elements.translationNumberControls.classList.toggle('hidden', !elements.enableTranslationNumberCheck.checked || !showCaptions);
+                elements.scrollSpeedControls.classList.toggle('hidden', !elements.enableScrollSpeedCheck.checked || !showCaptions);
+                elements.chromaKeyControls.classList.toggle('hidden', !elements.enableChromaKeyCheck.checked || !showCaptions);
+            }
+
+            function syncInputs(slider, number) {
+                slider.addEventListener('input', () => number.value = slider.value);
+                number.addEventListener('input', () => slider.value = number.value);
+            }
+            syncInputs(elements.subtitleBottomSlider, elements.subtitleBottomNumber);
+            syncInputs(elements.scrollSpeedSlider, elements.scrollSpeedNumber);
+            syncInputs(elements.translationNumberSlider, elements.translationNumber);
+
+            elements.chromaColorPicker.addEventListener('input', () => elements.chromaColorText.value = elements.chromaColorPicker.value);
+            elements.chromaColorText.addEventListener('input', (e) => {
+                if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                    elements.chromaColorPicker.value = e.target.value;
+                }
+            });
+
+            elements.allInputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    toggleVisibility();
+                    generateUrl();
+                });
+            });
+
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const urlToCopy = e.target.closest('.result-area').querySelector('.generated-url-display').textContent;
+                    var $tempTextarea = $('<textarea>');
+                    $('body').append($tempTextarea);
+
+                    // Set its value and select the text
+                    $tempTextarea.val(urlToCopy).select();
+                    // Execute the copy command
+                    document.execCommand('copy')
+                    const originalText = button.textContent;
+                    button.textContent = 'Copied!';
+                    button.classList.add('copied');
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.classList.remove('copied');
+                    }, 2000);
+                    
+                });
+            });
+
+            elements.previewButton.addEventListener('click', () => {
+                elements.previewFrame.src = elements.generatedUrlAV.textContent;
+                elements.previewContainer.classList.remove('hidden');
+            });
+            elements.previewOnlineButton.addEventListener('click', () => {
+                elements.previewFrame.src = elements.generatedUrlConference.textContent;
+                elements.previewContainer.classList.remove('hidden');
+            });
+            
+            toggleVisibility();
+            generateUrl();
+
+            $('#conferenceUrlArea').hide(); // Not needed for web, so uncomment it there
+            // $('#streamNameGroup').hide(); // Not needed for app, so uncomment it there
+
+        });
+    </script>
+</body>
+</html>
