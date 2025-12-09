@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Connect | Networking</title>
+    
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1', // Indigo 500
+                        secondary: '#ec4899', // Pink 500
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="flex items-center justify-center p-4">
+
+    <!-- Main Container -->
+    <div class="w-full max-w-2xl animate__animated animate__fadeInUp">
+        
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-pink-400">
+                Event Connect
+            </h1>
+            <p class="text-slate-300 text-sm mt-2 font-medium">Network with attendees in real-time</p>
+        </div>
+
+        <!-- VIEW 1: REGISTRATION FORM -->
+        <div id="view-register" class="glass-card rounded-2xl p-6 sm:p-8 hidden">
+            <div class="mb-6 text-center border-b border-white/10 pb-4">
+                <p class="text-slate-300">
+                    Welcome! Please provide your details below to instantly connect with others who are already here.
+                </p>
+            </div>
+
+            <form id="contactForm" class="space-y-4">
+                
+                <!-- Row 1: Name & Title -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1 uppercase tracking-wide">Full Name <span class="text-pink-500">*</span></label>
+                        <div class="input-group">
+                            <input type="text" id="inpName" required class="input-field placeholder-slate-600" placeholder="Jane Doe">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1 uppercase tracking-wide">Title, Organization</label>
+                        <div class="input-group">
+                            <input type="text" id="inpTitle" class="input-field placeholder-slate-600" placeholder="CEO, Tech Corp">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 2: Email & Phone -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1 uppercase tracking-wide">Email Address</label>
+                        <div class="input-group">
+                            <input type="email" id="inpEmail" class="input-field placeholder-slate-600" placeholder="jane@example.com">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1 uppercase tracking-wide">Phone Number</label>
+                        <div class="input-group">
+                            <input type="tel" id="inpPhone" class="input-field placeholder-slate-600" placeholder="214-555-0123">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="pt-2 pb-1">
+                    <p class="text-xs text-slate-500 uppercase font-bold tracking-widest text-center">Social Media</p>
+                </div>
+
+                <!-- Social: LinkedIn -->
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1 uppercase tracking-wide"><i class="fab fa-linkedin mr-1"></i> LinkedIn</label>
+                    <div class="input-group">
+                        <span class="input-prefix">linkedin.com/in/</span>
+                        <input type="text" id="inpLinkedin" class="input-field" placeholder="username">
+                    </div>
+                </div>
+
+                <!-- Row 3: Twitter & Insta -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1 uppercase tracking-wide"><i class="fab fa-twitter mr-1"></i> Twitter / X</label>
+                        <div class="input-group">
+                            <span class="input-prefix">twitter.com/</span>
+                            <input type="text" id="inpTwitter" class="input-field" placeholder="handle">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1 uppercase tracking-wide"><i class="fab fa-instagram mr-1"></i> Instagram</label>
+                        <div class="input-group">
+                            <span class="input-prefix">instagram.com/</span>
+                            <input type="text" id="inpInsta" class="input-field" placeholder="handle">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terms -->
+                <div class="text-xs text-slate-500 text-center mt-4">
+                    By clicking submit you accept our 
+                    <a href="https://conferencecaptioning.com/terms-and-conditions.html" target="_blank" class="text-indigo-400 hover:text-indigo-300 underline">Terms of Use</a>.
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="btnSubmit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transform transition hover:scale-[1.01] active:scale-95 mt-2">
+                    <span id="btnText">Connect & Join List</span>
+                    <span id="btnLoader" class="loader hidden ml-2 inline-block align-middle"></span>
+                </button>
+            </form>
+        </div>
+
+        <!-- VIEW 2: NETWORKING LIST -->
+        <div id="view-list" class="glass-card rounded-2xl p-1 h-[80vh] flex flex-col hidden relative">
+            <div class="p-4 border-b border-white/10 flex justify-between items-center bg-slate-800/40 rounded-t-xl">
+                <h2 class="text-lg font-semibold text-white"><i class="fas fa-users mr-2 text-indigo-400"></i>Attendees</h2>
+                <div id="status-indicator" class="text-xs text-green-400 flex items-center font-mono">
+                    <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span> LIVE
+                </div>
+            </div>
+
+            <!-- Scrollable List Area -->
+            <div id="contacts-container" class="flex-1 overflow-y-auto p-4 space-y-3 pb-12">
+                <!-- Javascript will inject rows here -->
+                <div class="text-center text-slate-500 mt-10">
+                    <div class="loader mb-2 border-slate-500 border-t-slate-300"></div>
+                    <p>Loading attendees...</p>
+                </div>
+            </div>
+            
+            <!-- Floating Toast Notification -->
+            <div id="toast" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900 border border-slate-700 text-white px-5 py-3 rounded-full shadow-2xl text-sm opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center">
+                <i class="fas fa-check-circle text-green-400 mr-2"></i> <span id="toast-msg">Notification</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Logic -->
+    <script src="script.js"></script>
+</body>
+</html>
