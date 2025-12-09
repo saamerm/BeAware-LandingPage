@@ -437,7 +437,8 @@
             if (d.insta && d.insta !== 'null') vCard += `URL;type=Instagram:https://instagram.com/${d.insta.replace('@','')}\n`;
             
             vCard += "END:VCARD";
-
+            console.log("vCard");
+            console.log(vCard);
             // Create Blob
             const blob = new Blob([vCard], { type: "text/vcard;charset=utf-8" });
             const url = URL.createObjectURL(blob);

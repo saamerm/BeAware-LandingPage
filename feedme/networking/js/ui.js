@@ -135,12 +135,13 @@ export function downloadVcfLogic(btn) {
     if (d.email && d.email !== 'null') vCard += `EMAIL:${d.email}\n`;
     if (d.phone && d.phone !== 'null') vCard += `TEL:${d.phone}\n`;
     
-    if (d.li && d.li !== 'null') vCard += `URL;type=LinkedIn:https://linkedin.com/in/${cleanHandle(d.li)}\n`;
-    if (d.tw && d.tw !== 'null') vCard += `URL;type=Twitter:https://twitter.com/${cleanHandle(d.tw)}\n`;
-    if (d.insta && d.insta !== 'null') vCard += `URL;type=Instagram:https://instagram.com/${cleanHandle(d.insta)}\n`;
+    if (d.li && d.li !== 'null') vCard += `item1.URL;type=LinkedIn:https://linkedin.com/in/${cleanHandle(d.li)}\n`;
+    if (d.tw && d.tw !== 'null') vCard += `item2.URL;type=Twitter:https://twitter.com/${cleanHandle(d.tw)}\n`;
+    if (d.insta && d.insta !== 'null') vCard += `item3.URL;type=Instagram:https://instagram.com/${cleanHandle(d.insta)}\n`;
     
     vCard += "END:VCARD";
-
+    console.log("vCard");
+    console.log(vCard);
     const blob = new Blob([vCard], { type: "text/vcard;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');

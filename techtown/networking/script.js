@@ -267,6 +267,8 @@ window.downloadVcf = function(btn) {
     if (d.insta && d.insta !== 'null') vCard += `URL;type=Instagram:https://instagram.com/${cleanHandle(d.insta)}\n`;
     
     vCard += "END:VCARD";
+    console.log("vCard");
+    console.log(vCard);
 
     const blob = new Blob([vCard], { type: "text/vcard;charset=utf-8" });
     const url = URL.createObjectURL(blob);
