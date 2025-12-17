@@ -196,6 +196,7 @@
         const API_BASE = "https://api.deafassistant.com/contact/";
         const STREAM_NAME = "wetecha";
         const STORAGE_KEY = "cc_user_data";
+        const UUID = uuidv4();
 
         // --- STATE MANAGEMENT ---
         let pollingInterval = 2000;
@@ -263,7 +264,7 @@
             // Gather Data
             const formData = {
                 streamName: STREAM_NAME,
-                contactUid: uuidv4(),
+                contactUid: UUID,
                 contactName: document.getElementById('inpName').value.trim(),
                 contactEmail: document.getElementById('inpEmail').value.trim(),
                 contactInstagram: document.getElementById('inpInsta').value.trim(),
@@ -322,7 +323,7 @@
 
         async function fetchContacts() {
             try {
-                const response = await fetch(`${API_BASE}GetStreamContacts?streamName=${STREAM_NAME}&contactUid=${contactUid}`);
+                const response = await fetch(`${API_BASE}GetStreamContacts?streamName=${STREAM_NAME}&contactUid=${UUID}`);
                 if (!response.ok) throw new Error("Fetch failed");
                 
                 const data = await response.json();
