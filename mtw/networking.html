@@ -322,7 +322,7 @@
 
         async function fetchContacts() {
             try {
-                const response = await fetch(`${API_BASE}GetStreamContacts?streamName=${STREAM_NAME}`);
+                const response = await fetch(`${API_BASE}GetStreamContacts?streamName=${STREAM_NAME}&contactUid=${contactUid}`);
                 if (!response.ok) throw new Error("Fetch failed");
                 
                 const data = await response.json();
