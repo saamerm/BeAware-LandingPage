@@ -1,6 +1,15 @@
+import { CONFIG } from './config.js';
 // Helper functions that don't depend on the app's specific logic.
-
 export function uuidv4() {
+    // Check if local storage has a value for contact uid already that is not null or empty, if so, return that instead
+    const storedData = localStorage.getItem(CONFIG.STORAGE_KEY);
+
+    if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        if (parsedData.contactUid && parsedData.contactUid !== "") {
+            return parsedData.contactUid;
+        } 
+    }
     return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
         (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     );
