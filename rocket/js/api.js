@@ -92,12 +92,17 @@ export function getTranscript() {
                 else if (languageCode === response.outputLanguage5) textToRead = data.translation5;
 
                 if (data.customQuestionPrompt && data.customQuestionPrompt.trim() !== "") {
-                    $("#openModal").show();
+                    $("#question-section").show();
                     $("#openModal a").text(data.customQuestionPrompt);
                     $("#askQuestionModalLabel").text(data.customQuestionPrompt);
                     $("#questionLabel").text(data.customQuestionPrompt);
                 } else {
-                    $("#openModal").hide();
+                    $("#question-section").hide();
+                }
+                if (data.isProximityEnabled) {
+                    $("#networking-section").show();
+                } else {
+                    $("#networking-section").hide();
                 }
                 if (textToRead) {
                     readLogic(textToRead, languageCode);
@@ -123,15 +128,19 @@ export function checkLanguage() {
             updateResponseLanguages(data);
             populateLanguageMenu();
             if (data.customQuestionPrompt && data.customQuestionPrompt.trim() !== "") {
-                $("#openModal").show();
+                $("#question-section").show();
                 $("#openModal a").text(data.customQuestionPrompt);
                 $("#askQuestionModalLabel").text(data.customQuestionPrompt);
                 $("#questionLabel").text(data.customQuestionPrompt);
             } else {
-                $("#openModal").hide();
+                $("#question-section").hide();
             }
-
-            // Set initial language
+            if (data.isProximityEnabled) {
+                $("#networking-section").show();
+            } else {
+                $("#networking-section").hide();
+            }
+        // Set initial language
             let initLang = (response.inputLanguage && languageData[response.inputLanguage]) ? response.inputLanguage : DEFAULT_LANGUAGE;
             // We need to set languageCode? translate() does that.
             translate(initLang);
@@ -187,12 +196,17 @@ export function getMockTranscript() {
     else if (languageCode === response.outputLanguage5) textToRead = response.output5;
 
     if (simulatedApiData.customQuestionPrompt && simulatedApiData.customQuestionPrompt.trim() !== "") {
-        $("#openModal").show();
+        $("#question-section").show();
         $("#openModal a").text(simulatedApiData.customQuestionPrompt);
         $("#askQuestionModalLabel").text(simulatedApiData.customQuestionPrompt);
         $("#questionLabel").text(simulatedApiData.customQuestionPrompt);
     } else {
-        $("#openModal").hide();
+        $("#question-section").hide();
+    }
+    if (simulatedApiData.isProximityEnabled) {
+        $("#networking-section").show();
+    } else {
+        $("#networking-section").hide();
     }
     if (textToRead) {
         readLogic(textToRead, languageCode);
