@@ -57,32 +57,33 @@
     <h2 id="sidebar-heading" class="visually-hidden">Settings Menu</h2> <!-- Hidden heading for screen readers -->
     <button class="close-btn" id="close-menu-btn" aria-label="Close settings menu">×</button>
     
-    <div class="menu-section" id="display-section" role="radiogroup" aria-labelledby="display-section-label">
-        <h4 id="display-section-label">🖥️ Display</h4>
-        <div class="menu-option" role="radio" data-action="theme" data-value="light" tabindex="-1">🌞 Light Mode</div>
-        <div class="menu-option" role="radio" data-action="theme" data-value="dark" tabindex="-1">🌙 Dark Mode</div>
-    </div>
-
     <div class="menu-section" id="language-section" role="radiogroup" aria-labelledby="language-section-label">
         <h4 id="language-section-label">🌐 Language</h4>
         <!-- Language options will be dynamically inserted here by JavaScript -->
         <!-- They should also get role="radio" and tabindex -->
     </div>
-    
+    <div class="menu-section" id="question-section">
+      <h4 id="openModal" aria-haspopup="dialog" aria-controls="askQuestionModal">❓ <a href="javascript:void(0)">Ask a Question</a></h4>
+    </div>    
+    <div class="menu-section" id="networking-section">
+      <h4 id="openNetworking">🤝 <a href="https://deafassistant.com/rocket/networking">Networking</a></h4>
+    </div>    
     <div class="menu-section" id="audio-section" role="radiogroup" aria-labelledby="audio-section-label">
         <h4 id="audio-section-label">🔊 Audio</h4>
         <div class="menu-option" role="radio" data-action="audio" data-value="unmute" tabindex="-1">🔈 Unmute</div>
         <div class="menu-option" role="radio" data-action="audio" data-value="mute" tabindex="-1">🔇 Mute</div>
     </div>
-    
+    <div class="menu-section" id="display-section" role="radiogroup" aria-labelledby="display-section-label">
+      <h4 id="display-section-label">🖥️ Display</h4>
+      <div class="menu-option" role="radio" data-action="theme" data-value="light" tabindex="-1">🌞 Light Mode</div>
+      <div class="menu-option" role="radio" data-action="theme" data-value="dark" tabindex="-1">🌙 Dark Mode</div>
+    </div>
+  
     <div class="menu-section" id="stream-section" role="radiogroup" aria-labelledby="stream-section-label">
       <h4 id="stream-section-label">📡 Stream</h4>
       <!-- JS will set aria-checked and tabindex -->
       <div class="menu-option" role="radio" data-action="stream" data-value="on" tabindex="-1">✅ On</div>
       <div class="menu-option" role="radio" data-action="stream" data-value="off" tabindex="-1">🚫 Off</div>
-    </div>
-    <div class="menu-section" id="question-section">
-      <h4 id="openModal" aria-haspopup="dialog" aria-controls="askQuestionModal">❓ <a href="javascript:void(0)">Ask a Question</a></h4>
     </div>
   </aside>
 
@@ -103,7 +104,7 @@
       <div style="display: flex; justify-content: center; padding: 0px 0px 10px 0px">
         <button id="get-live-caption" class="center ios-button ios-button-text">Show Captions</button>
       </div>
-      <div id="live-caption-container" style="height: 400px; border: #173ca0; border-style: solid;">
+      <div id="live-caption-container" style="height: 400px; border: #272727; border-style: solid;">
         <div id="live-caption-empty" style="font-size: 1.5em;" class="scroller scroller-empty">Transcription will display here</div>
         <!-- aria-live="assertive" is good for live transcript -->
         <div id="live-caption" aria-live="assertive" aria-atomic="false" class="scroller live-caption" role="log"></div>
@@ -144,33 +145,77 @@
     </div>
   </main>
   <!-- Modal -->
-  <div class="modal fade" id="askQuestionModal" tabindex="-1" aria-labelledby="askQuestionModalLabel" aria-hidden="true">
+  <div
+    class="modal fade"
+    id="askQuestionModal"
+    tabindex="-1"
+    aria-labelledby="askQuestionModalLabel"
+    aria-describedby="askQuestionModalDesc"
+    aria-hidden="true"
+  >
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="askQuestionModalLabel">Ask a Question</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="askQuestionModalLabel">
+                    Ask a Question
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close modal"
+                >
+                </button>
+            </div>
+
+            <div class="modal-body" id="askQuestionModalDesc">
+                <form id="questionForm">
+                    <div class="form-floating mb-3">
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="name"
+                          placeholder="Name (optional)"
+                        />
+                        <label for="name">
+                            Name (optional)
+                        </label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="question"
+                          placeholder="Your Question"
+                          required
+                          aria-describedby="questionHelp"
+                        />
+                        <label for="question">
+                            Your Question
+                            <span aria-hidden="true" class="text-danger">
+                                *
+                            </span>
+                        </label>
+                        <div id="questionHelp" class="form-text">
+                          This field is required.
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary me-2">
+                            Submit
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-secondary"
+                          data-bs-dismiss="modal"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="modal-body">
-          <form id="questionForm" aria-describedby="questionInstructions">
-            <div class="form-floating mb-3">
-              <input type="text" class="form-control" id="name" placeholder="Name (optional)"/>
-              <!-- Only this one matters -->
-              <label for="name" class="form-label">Name (optional)</label>
-            </div>
-            <div class="form-floating mb-3">
-              <!-- <div id="questionInstructions" class="form-text">Please enter your question above.</div> -->
-              <input type="text" class="form-control" id="question" placeholder="Your Question" required aria-required="true" />
-              <!-- Only this one matters -->
-              <label for="question" class="form-label" id="questionLabel">Your Question<span class="text-danger">*</span></label>
-            </div>
-            <div class="d-flex justify-content-end">
-              <button type="submit" class="btn btn-primary me-2">Submit</button>
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
     </div>
   </div>
   <div class="outer-div" id="outer-div" style="display:none;" aria-hidden="true">

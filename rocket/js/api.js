@@ -140,7 +140,7 @@ export function checkLanguage() {
             } else {
                 $("#networking-section").hide();
             }
-        // Set initial language
+            // Set initial language
             let initLang = (response.inputLanguage && languageData[response.inputLanguage]) ? response.inputLanguage : DEFAULT_LANGUAGE;
             // We need to set languageCode? translate() does that.
             translate(initLang);

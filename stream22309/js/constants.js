@@ -149,19 +149,22 @@ export const mockObject = {
     "customQuestionPrompt": "Ask a question about the event",
     "isPremiumCustomer": false,
     "blockStorage": false,
-    "uid": null
+    "uid": null,
+    "isProximityEnabled": true
 };
 
 export const mockObject2 = {
     "id": 59, "timestamp": "2025-01-29T04:36:36.4389888", "roomName": "stream22309", "description": "", "isActivelyStreaming": true,
     "transcript": " What happened to this. So, let's see if the translation gets removed from this text, where is the value? Why is this not working? Let's go on and continue. Is this translation showing nothing. Yes, it is not showing anything. What is actually going on here? I have no idea.",
     "translation": "¿Qué pasó con esto? Entonces, veamos si la traducción se elimina de este texto, ¿dónde está el valor? ¿Por qué esto no funciona? Sigamos adelante y continuemos. ¿Esta traducción no muestra nada? Sí, no está mostrando nada. ¿Qué está pasando aquí? No tengo ni idea.",
-    "translation2": "", "inputLanguage": "en-US", "outputLanguage": "es", "outputLanguage2": "", "isPremiumCustomer": false, "blockStorage": false, "uid": null
+    "translation2": "", "inputLanguage": "en-US", "outputLanguage": "es", "outputLanguage2": "", "isPremiumCustomer": false, "blockStorage": false, "uid": null,
+    "isProximityEnabled": true
 };
 
 export const mockObject3 = {
     "id": 59, "timestamp": "2025-01-29T04:36:36.4389888", "roomName": "stream22309", "description": "", "isActivelyStreaming": true,
     "transcript": " What happened to this. So, let's see if the translation gets removed from this text, where is the value? Why is this not working? Let's go on and continue. Is this translation showing nothing. Yes, it is not showing anything. What is actually going on here? I have no idea.",
     "translation": "حدث التسميات التوضيحية الحية",
-    "translation2": "", "inputLanguage": "en-US", "outputLanguage": "ar", "outputLanguage2": "", "isPremiumCustomer": false, "blockStorage": false, "uid": null
+    "translation2": "", "inputLanguage": "en-US", "outputLanguage": "ar", "outputLanguage2": "", "isPremiumCustomer": false, "blockStorage": false, "uid": null,
+    "isProximityEnabled": true
 };
