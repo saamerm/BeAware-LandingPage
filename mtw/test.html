@@ -1,0 +1,79 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Speech Synthesis Voices</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .voice {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Available Speech Synthesis Voices</h1>
+    <div id="voiceList"></div>
+
+    <script>
+        const voiceListDiv = document.getElementById('voiceList');
+
+        function listVoices() {
+            const voices = window.speechSynthesis.getVoices();
+            voiceListDiv.innerHTML = ''; // Clear previous list
+            voices.forEach((voice, index) => {
+                const div = document.createElement('div');
+                div.className = 'voice';
+                div.textContent = `${index + 1}: ${voice.name} (${voice.lang}) ${voice.default ? '[Default]' : ''}`;
+                voiceListDiv.appendChild(div);
+            });
+        }
+
+        // Some browsers populate voices asynchronously
+        window.speechSynthesis.onvoiceschanged = listVoices;
+
+        // Initial call in case voices are already available
+        listVoices();
+    </script>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Filtered Speech Synthesis Voices</title>
+</head>
+<body>
+    <h1>Selected Voices per Language</h1>
+    <div id="voiceList"></div>
+
+    <script>
+        const voiceListDiv = document.getElementById('voiceList');
+
+        function listFilteredVoices() {
+            const voices = window.speechSynthesis.getVoices();
+            const langMap = {};
+
+            voices.forEach(voice => {
+                // If language not seen yet or this voice is default, use it
+                if (!langMap[voice.lang] || voice.default) {
+                    langMap[voice.lang] = voice;
+                }
+            });
+
+            voiceListDiv.innerHTML = '';
+            Object.keys(langMap).forEach((lang, idx) => {
+                const voice = langMap[lang];
+                const div = document.createElement('div');
+                div.textContent = `${idx + 1}: ${voice.name} (${voice.lang}) ${voice.default ? '[Default]' : ''}`;
+                voiceListDiv.appendChild(div);
+            });
+        }
+
+        window.speechSynthesis.onvoiceschanged = listFilteredVoices;
+        listFilteredVoices();
+    </script>
+</body>
+</html>
