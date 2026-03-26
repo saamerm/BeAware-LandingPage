@@ -218,6 +218,13 @@
                         <input type="number" id="subtitleBottomNumber" min="0" max="1000" value="5">
                     </div>
                 </div>
+                <div class="form-group">
+                    <label class="checkbox-label"><input type="checkbox" id="enableFontSize">Custom FontSize (px)</label>
+                    <div id="fontSizeControls" class="slider-group hidden">
+                        <input type="range" id="textFontSlider" min="12" max="1000" value="24">
+                        <input type="number" id="textFontNumber" min="12" max="1000" value="24">
+                    </div>
+                </div>
                 
                 <div class="form-group">
                     <label class="checkbox-label"><input type="checkbox" id="enableScrollSpeed">Custom Caption Scroll Speed (ms)</label>
@@ -262,6 +269,15 @@
                 </div>
             </div>
 
+            <div class="result-area" id="localhostUrlArea">
+                <label>Localhost URL Always on Top Video Overlay</label>
+                <div id="generatedUrlLocalhost" class="generated-url-display"></div>
+                <div class="button-group">
+                    <button id="previewLocalhostButton" class="btn btn-secondary">Generate Preview</button>
+                    <button class="btn btn-primary copy-button">Copy URL</button>
+                </div>
+            </div>
+
             <div id="preview-container" class="hidden">
                 <p id="preview-note">Note: The preview does not update automatically. Click "Generate Preview" again after making changes.</p>
                 
@@ -288,9 +304,13 @@
                 enableTextColorCheck: document.getElementById('enableTextColor'),
                 textColorPicker: document.getElementById('textColorPicker'),
                 enableBottomDistanceCheck: document.getElementById('enableBottomDistance'),
+                enableFontSizeCheck: document.getElementById('enableFontSize'),
                 bottomDistanceControls: document.getElementById('bottomDistanceControls'),
+                fontSizeControls: document.getElementById('fontSizeControls'),
                 subtitleBottomSlider: document.getElementById('subtitleBottomSlider'),
                 subtitleBottomNumber: document.getElementById('subtitleBottomNumber'),
+                textFontSlider: document.getElementById('textFontSlider'),
+                textFontNumber: document.getElementById('textFontNumber'),
                 enableTranslationNumberCheck: document.getElementById('enableTranslationNumber'),
                 translationNumberControls: document.getElementById('translationNumberControls'),
                 translationNumberSlider: document.getElementById('translationNumberSlider'),
@@ -327,6 +347,7 @@
                     }
                     if (elements.enableTranslationNumberCheck.checked) params.push(`translationNumber=${elements.translationNumber.value}`);
                     if (elements.enableBottomDistanceCheck.checked) params.push(`subtitleBottom=${elements.subtitleBottomNumber.value}`);
+                    if (elements.enableFontSizeCheck.checked) params.push(`subtitleBottom=${elements.textFontNumber.value}`);                    
                     if (elements.enableScrollSpeedCheck.checked) params.push(`scrollSpeed=${elements.scrollSpeedNumber.value}`);
                     if (elements.enableChromaKeyCheck.checked) {
                         params.push(`chroma=${elements.chromaColorPicker.value.substring(1)}`);
@@ -345,6 +366,7 @@
                 elements.textColorOptions.classList.toggle('hidden', !elements.alternateLookCheck.checked || !showCaptions);
                 elements.textColorPicker.classList.toggle('hidden', !elements.enableTextColorCheck.checked || !elements.alternateLookCheck.checked || !showCaptions);
                 elements.bottomDistanceControls.classList.toggle('hidden', !elements.enableBottomDistanceCheck.checked || !showCaptions);
+                elements.fontSizeControls.classList.toggle('hidden', !elements.enableFontSizeCheck.checked || !showCaptions);
                 elements.translationNumberControls.classList.toggle('hidden', !elements.enableTranslationNumberCheck.checked || !showCaptions);
                 elements.scrollSpeedControls.classList.toggle('hidden', !elements.enableScrollSpeedCheck.checked || !showCaptions);
                 elements.chromaKeyControls.classList.toggle('hidden', !elements.enableChromaKeyCheck.checked || !showCaptions);
@@ -355,6 +377,7 @@
                 number.addEventListener('input', () => slider.value = number.value);
             }
             syncInputs(elements.subtitleBottomSlider, elements.subtitleBottomNumber);
+            syncInputs(elements.textFontSlider, elements.textFontNumber);
             syncInputs(elements.scrollSpeedSlider, elements.scrollSpeedNumber);
             syncInputs(elements.translationNumberSlider, elements.translationNumber);
 
