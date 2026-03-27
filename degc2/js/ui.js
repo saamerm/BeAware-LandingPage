@@ -67,7 +67,11 @@ export function getValueFromUrlParams() {
     }
     if (fontSizeParam) {
         const el = document.querySelector('.live-caption');
+        const el2 = document.querySelector('.overlay2');
+        const el3 = document.querySelector('.overlay3');
         if (el) el.style.fontSize = fontSizeParam;
+        if (el2) el2.style.fontSize = fontSizeParam;
+        if (el3) el3.style.fontSize = fontSizeParam;
     }
 
     if (autoRetrieveParam) {
