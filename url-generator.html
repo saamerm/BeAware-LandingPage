@@ -299,8 +299,10 @@
                 streamNameInput: document.getElementById('streamName'),
                 generatedUrlAV: document.getElementById('generatedUrlAV'),
                 generatedUrlConference: document.getElementById('generatedUrlConference'),
+                generatedUrlLocalhost: document.getElementById('generatedUrlLocalhost'),
                 previewButton: document.getElementById('previewButton'),
                 previewOnlineButton: document.getElementById('previewOnlineButton'),
+                previewLocalhostButton: document.getElementById('previewLocalhostButton'),
                 previewContainer: document.getElementById('preview-container'),
                 previewFrame: document.getElementById('previewFrame'),
                 optionsContainer: document.getElementById('optionsContainer'),
@@ -342,7 +344,8 @@
                 const streamName = elements.streamNameInput.value.trim() || 'your-stream-name';
                 const baseUrls = {
                     av: `https://deafassistant.com/${streamName}`,
-                    conference: `http://10.0.199:8080/index.html`
+                    conference: `http://10.0.199:8080/index.html`,
+                    localhost: `http://localhost:8080/index.html`
                 };
                 
                 const params = [];
@@ -373,6 +376,7 @@
                 elements.generatedUrlAV.textContent = baseUrls.av + queryString;
                 // The conference URL doesn't need video-specific parameters
                 elements.generatedUrlConference.textContent = baseUrls.conference + queryString;
+                elements.generatedUrlLocalhost.textContent = baseUrls.localhost + queryString;                
             }
 
             function toggleVisibility() {
@@ -442,11 +446,16 @@
                 elements.previewFrame.src = elements.generatedUrlConference.textContent;
                 elements.previewContainer.classList.remove('hidden');
             });
+            elements.previewLocalhostButton.addEventListener('click', () => {
+                elements.previewFrame.src = elements.generatedUrlLocalhost.textContent;
+                elements.previewContainer.classList.remove('hidden');
+            });
             
             toggleVisibility();
             generateUrl();
 
             $('#conferenceUrlArea').hide(); // Not needed for web, so uncomment it there
+            // $('#localhostUrlArea').hide(); // Not needed for web, so uncomment it there            
             // $('#streamNameGroup').hide(); // Not needed for app, so uncomment it there
 
         });
