@@ -285,6 +285,15 @@
                 </div>
             </div>
 
+            <div class="result-area" id="ipv6Area">
+                <label>IPV6 Video Overlay</label>
+                <div id="generatedUrlIpv6" class="generated-url-display"></div>
+                <div class="button-group">
+                    <button id="previewIpv6Button" class="btn btn-secondary">Generate Preview</button>
+                    <button class="btn btn-primary copy-button">Copy URL</button>
+                </div>
+            </div>
+
             <div id="preview-container" class="hidden">
                 <p id="preview-note">Note: The preview does not update automatically. Click "Generate Preview" again after making changes.</p>
                 
@@ -300,9 +309,11 @@
                 generatedUrlAV: document.getElementById('generatedUrlAV'),
                 generatedUrlConference: document.getElementById('generatedUrlConference'),
                 generatedUrlLocalhost: document.getElementById('generatedUrlLocalhost'),
+                generatedUrlIpv6: document.getElementById('generatedUrlIpv6'),
                 previewButton: document.getElementById('previewButton'),
                 previewOnlineButton: document.getElementById('previewOnlineButton'),
                 previewLocalhostButton: document.getElementById('previewLocalhostButton'),
+                previewIpv6Button: document.getElementById('previewIpv6Button'),
                 previewContainer: document.getElementById('preview-container'),
                 previewFrame: document.getElementById('previewFrame'),
                 optionsContainer: document.getElementById('optionsContainer'),
@@ -344,8 +355,9 @@
                 const streamName = elements.streamNameInput.value.trim() || 'your-stream-name';
                 const baseUrls = {
                     av: `https://deafassistant.com/${streamName}`,
-                    conference: `http://10.0.199:8080/index.html`,
-                    localhost: `http://localhost:8080/index.html`
+                    conference: `\(localUrl)index.html`,
+                    localhost: `http://localhost:8080/index.html`,
+                    ipv6: `http://[::1]:8080/index.html`
                 };
                 
                 const params = [];
@@ -376,7 +388,8 @@
                 elements.generatedUrlAV.textContent = baseUrls.av + queryString;
                 // The conference URL doesn't need video-specific parameters
                 elements.generatedUrlConference.textContent = baseUrls.conference + queryString;
-                elements.generatedUrlLocalhost.textContent = baseUrls.localhost + queryString;                
+                elements.generatedUrlLocalhost.textContent = baseUrls.localhost + queryString;
+                elements.generatedUrlIpv6.textContent = baseUrls.ipv6 + queryString;                
             }
 
             function toggleVisibility() {
@@ -450,12 +463,17 @@
                 elements.previewFrame.src = elements.generatedUrlLocalhost.textContent;
                 elements.previewContainer.classList.remove('hidden');
             });
+            elements.previewIpv6Button.addEventListener('click', () => {
+                elements.previewFrame.src = elements.generatedUrlIpv6.textContent;
+                elements.previewContainer.classList.remove('hidden');
+            });
             
             toggleVisibility();
             generateUrl();
 
-            $('#conferenceUrlArea').hide(); // Not needed for web, so uncomment it there
-            // $('#localhostUrlArea').hide(); // Not needed for web, so uncomment it there            
+            $('#localhostUrlArea').hide(); // Not needed for web, so uncomment it there
+            // $('#conferenceUrlArea').hide(); 
+            $('#ipv6Area').hide(); // Not needed for web, so uncomment it there
             // $('#streamNameGroup').hide(); // Not needed for app, so uncomment it there
 
         });
