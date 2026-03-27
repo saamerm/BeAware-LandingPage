@@ -209,7 +209,14 @@
                             </div>
                          </div>
                     </div>
-                </div>
+                    <div id="boxHeightCheckbox" class="form-group sub-option hidden">
+                         <label class="checkbox-label"><input type="checkbox" id="enableBoxHeight">Subtitle Box Height-To control number of rows visible</label>
+                         <div id="boxHeightControls" class="slider-group hidden">
+                            <input type="range" id="boxHeightSlider" min="10" max="1000" value="200">
+                            <input type="number" id="boxHeightNumber" min="10" max="1000" value="200">
+                        </div>
+                    </div>
+               </div>
 
                 <div class="form-group">
                     <label class="checkbox-label"><input type="checkbox" id="enableBottomDistance">Custom Distance from Bottom (%)</label>
@@ -301,16 +308,21 @@
                 autoStartCheck: document.getElementById('autoStart'),
                 alternateLookCheck: document.getElementById('alternateLook'),
                 textColorOptions: document.getElementById('textColorOptions'),
+                boxHeightCheckbox: document.getElementById('boxHeightCheckbox'),
                 enableTextColorCheck: document.getElementById('enableTextColor'),
+                enableBoxHeightCheck: document.getElementById('enableBoxHeight'),
                 textColorPicker: document.getElementById('textColorPicker'),
                 enableBottomDistanceCheck: document.getElementById('enableBottomDistance'),
                 enableFontSizeCheck: document.getElementById('enableFontSize'),
                 bottomDistanceControls: document.getElementById('bottomDistanceControls'),
                 fontSizeControls: document.getElementById('fontSizeControls'),
+                boxHeightControls: document.getElementById('boxHeightControls'),
                 subtitleBottomSlider: document.getElementById('subtitleBottomSlider'),
                 subtitleBottomNumber: document.getElementById('subtitleBottomNumber'),
                 textFontSlider: document.getElementById('textFontSlider'),
                 textFontNumber: document.getElementById('textFontNumber'),
+                boxHeightSlider: document.getElementById('boxHeightSlider'),
+                boxHeightNumber: document.getElementById('boxHeightNumber'),
                 enableTranslationNumberCheck: document.getElementById('enableTranslationNumber'),
                 translationNumberControls: document.getElementById('translationNumberControls'),
                 translationNumberSlider: document.getElementById('translationNumberSlider'),
@@ -344,6 +356,9 @@
                             const selectedColor = document.querySelector('input[name="videoTextColor"]:checked').value;
                             params.push(`videoTextColor=${selectedColor}`);
                         }
+                        if (elements.enableBoxHeightCheck.checked) {
+                            params.push(`height=${elements.boxHeightNumber.value}`);                    
+                        }
                     }
                     if (elements.enableTranslationNumberCheck.checked) params.push(`translationNumber=${elements.translationNumber.value}`);
                     if (elements.enableBottomDistanceCheck.checked) params.push(`subtitleBottom=${elements.subtitleBottomNumber.value}`);
@@ -364,7 +379,9 @@
                 const showCaptions = elements.showCaptionsCheck.checked;
                 elements.optionsContainer.classList.toggle('hidden', !showCaptions);
                 elements.textColorOptions.classList.toggle('hidden', !elements.alternateLookCheck.checked || !showCaptions);
+                elements.boxHeightCheckbox.classList.toggle('hidden', !elements.alternateLookCheck.checked || !showCaptions);
                 elements.textColorPicker.classList.toggle('hidden', !elements.enableTextColorCheck.checked || !elements.alternateLookCheck.checked || !showCaptions);
+                elements.boxHeightControls.classList.toggle('hidden', !elements.alternateLookCheck.checked || !elements.enableBoxHeightCheck.checked || !showCaptions);
                 elements.bottomDistanceControls.classList.toggle('hidden', !elements.enableBottomDistanceCheck.checked || !showCaptions);
                 elements.fontSizeControls.classList.toggle('hidden', !elements.enableFontSizeCheck.checked || !showCaptions);
                 elements.translationNumberControls.classList.toggle('hidden', !elements.enableTranslationNumberCheck.checked || !showCaptions);
@@ -378,6 +395,7 @@
             }
             syncInputs(elements.subtitleBottomSlider, elements.subtitleBottomNumber);
             syncInputs(elements.textFontSlider, elements.textFontNumber);
+            syncInputs(elements.boxHeightSlider, elements.boxHeightNumber);
             syncInputs(elements.scrollSpeedSlider, elements.scrollSpeedNumber);
             syncInputs(elements.translationNumberSlider, elements.translationNumber);
 
