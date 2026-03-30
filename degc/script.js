@@ -58,6 +58,7 @@ $(document).ready(function () {
   // Initial language load is now handled by checkLanguage -> populateLanguageMenu -> translate
 
   $("#get-live-caption, #live-caption-empty2, #live-caption2").on("click", buttonTapped);
+  $("#get-pip").on("click", pipRequested);
   // Mute/Unmute logic is triggered by sidebar, but original buttons can remain hidden
   $("#mute").hide();
   $("#unmute").show(); // Show X-mark initially (muted state)
@@ -403,7 +404,100 @@ function checkForAdvancedOverlayParam(urlParams){
     }
   }
 }
+function pipRequested() {
+  // Create canvas for rendering captions
+  const captionCanvas = document.createElement('canvas');
+  captionCanvas.width = 640;
+  captionCanvas.height = 360;
+  const captionCtx = captionCanvas.getContext('2d');
 
+  // Create hidden video element for PiP
+  const captionVideo = document.createElement('video');
+  captionVideo.muted = true;
+  captionVideo.autoplay = true;
+  captionVideo.playsInline = true;
+  captionVideo.style.position = "fixed";
+  captionVideo.style.top = "0";
+  captionVideo.style.left = "0";
+  captionVideo.style.width = "1px";
+  captionVideo.style.height = "1px";
+  captionVideo.style.opacity = "0";
+  captionVideo.style.pointerEvents = "none";
+  document.body.appendChild(captionVideo);
+
+  // Start canvas stream
+  captionVideo.srcObject = captionCanvas.captureStream(30);
+  captionVideo.play().catch(err => console.log("Autoplay waiting...", err));
+
+  // Animation loop to draw captions on canvas
+  function drawCaptions() {
+    const liveCaptionDiv = document.getElementById('live-caption');
+    const captionText = liveCaptionDiv ? liveCaptionDiv.innerText : '';
+    
+    // Clear canvas
+    captionCtx.fillStyle = "black";
+    captionCtx.fillRect(0, 0, captionCanvas.width, captionCanvas.height);
+    
+    // Draw caption text
+    captionCtx.fillStyle = "white";
+    captionCtx.font = "32px Arial";
+    captionCtx.textAlign = "center";
+    captionCtx.textBaseline = "middle";
+    
+    // Word wrap and center text
+    const words = captionText.split(' ');
+    const lines = [];
+    let currentLine = '';
+    
+    words.forEach(word => {
+      const testLine = currentLine ? currentLine + ' ' + word : word;
+      const metrics = captionCtx.measureText(testLine);
+      if (metrics.width > 600) {
+        if (currentLine) lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    });
+    if (currentLine) lines.push(currentLine);
+    
+    // Draw lines centered
+    const startY = (captionCanvas.height - lines.length * 40) / 2;
+    lines.forEach((line, index) => {
+      captionCtx.fillText(line, captionCanvas.width / 2, startY + index * 40);
+    });
+    
+    requestAnimationFrame(drawCaptions);
+  }
+  drawCaptions();
+
+  // Create PiP button
+  const pipButton = document.createElement('button');
+  pipButton.innerText = "Request PIP";
+  pipButton.style.padding = "10px 20px";
+  pipButton.style.fontSize = "16px";
+  pipButton.style.position = "relative";
+  pipButton.style.zIndex = "9999";
+  pipButton.style.cursor = "pointer";
+  pipButton.style.marginTop = "10px";
+
+  // Find a good place to insert the button (near live-caption)
+  const liveCaptionElement = document.getElementById('live-caption');
+  if (liveCaptionElement) {
+    liveCaptionElement.parentNode.insertBefore(pipButton, liveCaptionElement.nextSibling);
+  } else {
+    document.body.appendChild(pipButton);
+  }
+
+  // PiP click handler
+  pipButton.addEventListener('click', async () => {
+    try {
+      await captionVideo.requestPictureInPicture();
+    } catch (error) {
+      console.error("PiP failed:", error);
+    }
+  });
+}
 function buttonTapped() {
   // startTimer/stopTimer update button text based on languageCode
   // which should be set by translate() before this can be reliably called.
