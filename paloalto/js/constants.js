@@ -1,4 +1,4 @@
-export const API_URL = "https://api.deafassistant.com/stream/LiteGetStream?streamName=synergyseasummit";
+export const API_URL = "https://api.deafassistant.com/stream/LiteGetStream?streamName=paloalto";
 
 export const LAYOVER_HTML = `
   <div class="inner-div">
@@ -137,7 +137,7 @@ export const languageData = {
 
 export const mockObject = {
     "timestamp": "2024-12-10T20:56:50.4571326",
-    "roomName": "synergyseasummit",
+    "roomName": "paloalto",
     "description": "",
     "transcript": "The event will start shortly.",
     "isActivelyStreaming": true,
@@ -154,7 +154,7 @@ export const mockObject = {
 };
 
 export const mockObject2 = {
-    "id": 59, "timestamp": "2025-01-29T04:36:36.4389888", "roomName": "synergyseasummit", "description": "", "isActivelyStreaming": true,
+    "id": 59, "timestamp": "2025-01-29T04:36:36.4389888", "roomName": "paloalto", "description": "", "isActivelyStreaming": true,
     "transcript": " What happened to this. So, let's see if the translation gets removed from this text, where is the value? Why is this not working? Let's go on and continue. Is this translation showing nothing. Yes, it is not showing anything. What is actually going on here? I have no idea.",
     "translation": "¿Qué pasó con esto? Entonces, veamos si la traducción se elimina de este texto, ¿dónde está el valor? ¿Por qué esto no funciona? Sigamos adelante y continuemos. ¿Esta traducción no muestra nada? Sí, no está mostrando nada. ¿Qué está pasando aquí? No tengo ni idea.",
     "translation2": "", "inputLanguage": "en-US", "outputLanguage": "es", "outputLanguage2": "", "isPremiumCustomer": false, "blockStorage": false, "uid": null,
@@ -162,7 +162,7 @@ export const mockObject2 = {
 };
 
 export const mockObject3 = {
-    "id": 59, "timestamp": "2025-01-29T04:36:36.4389888", "roomName": "synergyseasummit", "description": "", "isActivelyStreaming": true,
+    "id": 59, "timestamp": "2025-01-29T04:36:36.4389888", "roomName": "paloalto", "description": "", "isActivelyStreaming": true,
     "transcript": " What happened to this. So, let's see if the translation gets removed from this text, where is the value? Why is this not working? Let's go on and continue. Is this translation showing nothing. Yes, it is not showing anything. What is actually going on here? I have no idea.",
     "translation": "حدث التسميات التوضيحية الحية",
     "translation2": "", "inputLanguage": "en-US", "outputLanguage": "ar", "outputLanguage2": "", "isPremiumCustomer": false, "blockStorage": false, "uid": null,

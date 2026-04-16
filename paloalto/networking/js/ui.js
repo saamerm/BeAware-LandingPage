@@ -172,7 +172,7 @@ export function downloadVcfLogic(btn) {
 
     // --- 3. Construct VCard ---
     let vCard = "BEGIN:VCARD\nVERSION:4.0\n";
-    let location = "synergyseasummit";
+    let location = "paloalto";
     let date = new Date();
     // N is structured: Family;Given;Middle;;
     vCard += `N:${familyName};${givenName};${middleName};;\n`;

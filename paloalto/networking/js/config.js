@@ -2,6 +2,6 @@
 
 export const CONFIG = {
     API_BASE: "https://api.deafassistant.com/contact/",
-    STREAM_NAME: "synergyseasummit",
+    STREAM_NAME: "paloalto",
     STORAGE_KEY: "cc_user_data"
 };
