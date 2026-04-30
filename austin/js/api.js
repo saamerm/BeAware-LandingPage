@@ -71,50 +71,141 @@ function swapToExistingLanguage() {
     }
 }
 
+// Keep track of the full concatenated translations outside the function 
+// so they persist between API calls.
+let accumulatedTranslations = { t1: "", t2: "", t3: "", t4: "", t5: "" };
+let lastTranscript = "";
+
 export function getTranscript() {
     $.support.cors = true;
-    $.getJSON(API_URL, function (data) {
-        if (data) {
-            if (data.transcript !== undefined) {
-                if (checkIfLanguageChanged(data)) {
-                    updateResponseLanguages(data);
+    $.getJSON(API_URL, function (t) {
+        if (t) {
+            if (void 0 !== t.transcript) {
+
+                // If the transcript gets significantly shorter, it means the event restarted or cleared. 
+                // We should reset our accumulated translations to avoid displaying old text.
+                if (lastTranscript.length > 0 && t.transcript.length < lastTranscript.length * 0.5) {
+                    accumulatedTranslations = { t1: "", t2: "", t3: "", t4: "", t5: "" };
+                }
+                lastTranscript = t.transcript;
+
+                if (checkIfLanguageChanged(t)) {
+                    updateResponseLanguages(t);
                     populateLanguageMenu();
                     swapToExistingLanguage();
-                };
-                updateResponseData(data);
+                }
+                updateResponseData(t);
 
-                let textToRead = "";
-                if (languageCode === response.inputLanguage) textToRead = data.transcript;
-                else if (languageCode === response.outputLanguage) textToRead = data.translation;
-                else if (languageCode === response.outputLanguage2) textToRead = data.translation2;
-                else if (languageCode === response.outputLanguage3) textToRead = data.translation3;
-                else if (languageCode === response.outputLanguage4) textToRead = data.translation4;
-                else if (languageCode === response.outputLanguage5) textToRead = data.translation5;
+                // Apply the merge to all potential translation windows seamlessly
+                accumulatedTranslations.t1 = mergeTranslations(accumulatedTranslations.t1, t.translation);
+                accumulatedTranslations.t2 = mergeTranslations(accumulatedTranslations.t2, t.translation2);
+                accumulatedTranslations.t3 = mergeTranslations(accumulatedTranslations.t3, t.translation3);
+                accumulatedTranslations.t4 = mergeTranslations(accumulatedTranslations.t4, t.translation4);
+                accumulatedTranslations.t5 = mergeTranslations(accumulatedTranslations.t5, t.translation5);
 
-                if (data.customQuestionPrompt && data.customQuestionPrompt.trim() !== "") {
+                let o = "";
+
+                // Select output text depending on selected language
+                if (languageCode === response.inputLanguage) {
+                    o = t.transcript;
+                } else if (languageCode === response.outputLanguage) {
+                    o = accumulatedTranslations.t1;
+                } else if (languageCode === response.outputLanguage2) {
+                    o = accumulatedTranslations.t2;
+                } else if (languageCode === response.outputLanguage3) {
+                    o = accumulatedTranslations.t3;
+                } else if (languageCode === response.outputLanguage4) {
+                    o = accumulatedTranslations.t4;
+                } else if (languageCode === response.outputLanguage5) {
+                    o = accumulatedTranslations.t5;
+                }
+
+                // Question modal setup
+                if (t.customQuestionPrompt && "" !== t.customQuestionPrompt.trim()) {
                     $("#question-section").show();
-                    $("#openModal a").text(data.customQuestionPrompt);
-                    $("#askQuestionModalLabel").text(data.customQuestionPrompt);
-                    $("#questionLabel").text(data.customQuestionPrompt);
+                    $("#openModal a").text(t.customQuestionPrompt);
+                    $("#askQuestionModalLabel").text(t.customQuestionPrompt);
+                    $("#questionLabel").text(t.customQuestionPrompt);
                 } else {
                     $("#question-section").hide();
                 }
-                if (data.isProximityEnabled) {
+
+                // Networking proximity setup
+                if (t.isProximityEnabled) {
                     $("#networking-section").show();
                 } else {
                     $("#networking-section").hide();
                 }
-                if (textToRead) {
-                    readLogic(textToRead, languageCode);
+
+                // Update UI text display
+                if (o) {
+                    readLogic(o, languageCode);
                 }
             }
-            if (data.isActivelyStreaming === false && isStreamingCaptions) {
+
+            // Check if stream ended
+            if (t.isActivelyStreaming === false && isStreamingCaptions) {
                 buttonTapped();
             }
         }
-    }).fail(function (jqXHR, textStatus, errorThrown) {
-        console.error("Error fetching transcript:", textStatus, errorThrown);
+    }).fail(function (t, o, n) {
+        console.error("Error fetching transcript:", o, n);
     });
+}
+
+// Helper function to smartly merge overlapping text windows
+export function mergeTranslations(oldText, newText) {
+    if (!oldText) return newText || "";
+    if (!newText) return oldText;
+
+    // Only check against the last 1000 characters of old text for performance
+    let a = oldText.length > 1000 ? oldText.slice(-1000) : oldText;
+    let b = newText;
+
+    let aLower = a.toLowerCase();
+    let bLower = b.toLowerCase();
+
+    let maxMatchLen = 0, matchPosA = -1, matchPosB = -1;
+
+    // Find the Longest Common Substring
+    for (let i = 0; i < aLower.length; i++) {
+        for (let j = 0; j < bLower.length; j++) {
+            if (aLower[i] === bLower[j]) {
+                let k = 1;
+                while (i + k < aLower.length && j + k < bLower.length && aLower[i + k] === bLower[j + k]) {
+                    k++;
+                }
+                // In case of duplicate phrases, prefer the match furthest along in the old text
+                if (k > maxMatchLen || (k === maxMatchLen && i > matchPosA)) {
+                    maxMatchLen = k;
+                    matchPosA = i;
+                    matchPosB = j;
+                }
+            }
+        }
+    }
+
+    let distA = a.length - (matchPosA + maxMatchLen);
+    let distB = matchPosB;
+
+    // Ensure the match isn't just a random word coincidence by enforcing length and edge proximity
+    let isValidMatch = maxMatchLen >= 15 ||
+        maxMatchLen === a.length ||
+        maxMatchLen === b.length ||
+        (maxMatchLen >= 8 && distA <= 2) ||
+        (maxMatchLen >= 8 && distB <= 2) ||
+        (maxMatchLen >= 5 && distA <= 2 && distB <= 2);
+
+    if (isValidMatch) {
+        // Stitch the strings directly at the overlap index to prevent duplicating text
+        return oldText.slice(0, oldText.length - a.length + matchPosA) + newText.slice(matchPosB);
+    }
+
+    // Fallback to strict appending if the sentence doesn't overlap at all
+    if (newText.length > 0 && newText.length < 20 && oldText.toLowerCase().endsWith(newText.toLowerCase())) {
+        return oldText;
+    }
+    return oldText + (oldText.endsWith(" ") ? "" : " ") + newText;
 }
 
 export function checkLanguage() {
