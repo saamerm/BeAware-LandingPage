@@ -72,7 +72,7 @@ function swapToExistingLanguage() {
 }
 
 // Keep track of the full concatenated translations outside the function 
-// so they persist between API calls.
+// so they persist between API calls and can be fully viewed if the user switches languages.
 let accumulatedTranslations = { t1: "", t2: "", t3: "", t4: "", t5: "" };
 let lastTranscript = "";
 
@@ -82,8 +82,7 @@ export function getTranscript() {
         if (t) {
             if (void 0 !== t.transcript) {
 
-                // If the transcript gets significantly shorter, it means the event restarted or cleared. 
-                // We should reset our accumulated translations to avoid displaying old text.
+                // If the transcript gets significantly shorter, the host likely restarted the event. Reset translations.
                 if (lastTranscript.length > 0 && t.transcript.length < lastTranscript.length * 0.5) {
                     accumulatedTranslations = { t1: "", t2: "", t3: "", t4: "", t5: "" };
                 }
@@ -96,7 +95,7 @@ export function getTranscript() {
                 }
                 updateResponseData(t);
 
-                // Apply the merge to all potential translation windows seamlessly
+                // Apply the phrase merge to all 5 background translations simultaneously
                 accumulatedTranslations.t1 = mergeTranslations(accumulatedTranslations.t1, t.translation);
                 accumulatedTranslations.t2 = mergeTranslations(accumulatedTranslations.t2, t.translation2);
                 accumulatedTranslations.t3 = mergeTranslations(accumulatedTranslations.t3, t.translation3);
@@ -105,7 +104,8 @@ export function getTranscript() {
 
                 let o = "";
 
-                // Select output text depending on selected language
+                // Note: assuming 'response' object exists globally as in your code. 
+                // Alternatively, you can use 't.inputLanguage' and 't.outputLanguage'.
                 if (languageCode === response.inputLanguage) {
                     o = t.transcript;
                 } else if (languageCode === response.outputLanguage) {
@@ -120,7 +120,6 @@ export function getTranscript() {
                     o = accumulatedTranslations.t5;
                 }
 
-                // Question modal setup
                 if (t.customQuestionPrompt && "" !== t.customQuestionPrompt.trim()) {
                     $("#question-section").show();
                     $("#openModal a").text(t.customQuestionPrompt);
@@ -130,20 +129,17 @@ export function getTranscript() {
                     $("#question-section").hide();
                 }
 
-                // Networking proximity setup
                 if (t.isProximityEnabled) {
                     $("#networking-section").show();
                 } else {
                     $("#networking-section").hide();
                 }
 
-                // Update UI text display
                 if (o) {
                     readLogic(o, languageCode);
                 }
             }
 
-            // Check if stream ended
             if (t.isActivelyStreaming === false && isStreamingCaptions) {
                 buttonTapped();
             }
@@ -153,21 +149,70 @@ export function getTranscript() {
     });
 }
 
-// Helper function to smartly merge overlapping text windows
-export function mergeTranslations(oldText, newText) {
+// Helper function using your Phrase Array overlap logic
+function mergeTranslations(oldText, newText) {
     if (!oldText) return newText || "";
     if (!newText) return oldText;
 
-    // Only check against the last 1000 characters of old text for performance
+    let oldPhrases = splitIntoPhrases(oldText);
+    let newPhrases = splitIntoPhrases(newText);
+
+    if (newPhrases.length === 0) return oldText;
+    if (oldPhrases.length === 0) return newText;
+
+    let bestMatch = null;
+    // Only search in the tail end of old phrases to save time and avoid historical false positives
+    let searchStartIndex = Math.max(0, oldPhrases.length - 25);
+
+    // 2. Search for the longest contiguous matching array sequence
+    for (let i = 0; i < newPhrases.length; i++) {
+        for (let j = searchStartIndex; j < oldPhrases.length; j++) {
+            // Ignore case for overlap (fixes capitalizations like "¿por qué" -> "¿Por qué")
+            if (oldPhrases[j].toLowerCase() === newPhrases[i].toLowerCase()) {
+
+                let matchLength = 0;
+                while (i + matchLength < newPhrases.length &&
+                    j + matchLength < oldPhrases.length &&
+                    oldPhrases[j + matchLength].toLowerCase() === newPhrases[i + matchLength].toLowerCase()) {
+                    matchLength++;
+                }
+
+                let anchorPhrase = newPhrases[i];
+                let oldPhrasesDropped = oldPhrases.length - j;
+
+                // Ensure match is confident (long enough, multi-phrase, or complete match)
+                if (anchorPhrase.length >= 8 || matchLength > 1 || matchLength === newPhrases.length) {
+
+                    // Protect against tiny 1-word coincidences wiping out chunks of valid text
+                    if (matchLength === 1 && anchorPhrase.length < 8 && oldPhrasesDropped > 3) {
+                        continue;
+                    }
+
+                    let oldReplaceIndex = j - i;
+                    if (oldReplaceIndex < 0) oldReplaceIndex = 0;
+
+                    bestMatch = { oldReplaceIndex: oldReplaceIndex };
+                    break;
+                }
+            }
+        }
+        if (bestMatch) break; // Break early as we found the earliest reliable anchor
+    }
+
+    // 3. Perform the Stitching 
+    if (bestMatch) {
+        let keptOld = oldPhrases.slice(0, bestMatch.oldReplaceIndex);
+        return keptOld.join(" ") + (keptOld.length > 0 ? " " : "") + newPhrases.join(" ");
+    }
+
+    // 4. Fallback: If no exact phrase matches (eg: middle of an unpunctuated sentence), use Longest Common Substring
     let a = oldText.length > 1000 ? oldText.slice(-1000) : oldText;
     let b = newText;
+    let maxMatchLen = 0, matchPosA = -1, matchPosB = -1;
 
     let aLower = a.toLowerCase();
     let bLower = b.toLowerCase();
 
-    let maxMatchLen = 0, matchPosA = -1, matchPosB = -1;
-
-    // Find the Longest Common Substring
     for (let i = 0; i < aLower.length; i++) {
         for (let j = 0; j < bLower.length; j++) {
             if (aLower[i] === bLower[j]) {
@@ -175,7 +220,6 @@ export function mergeTranslations(oldText, newText) {
                 while (i + k < aLower.length && j + k < bLower.length && aLower[i + k] === bLower[j + k]) {
                     k++;
                 }
-                // In case of duplicate phrases, prefer the match furthest along in the old text
                 if (k > maxMatchLen || (k === maxMatchLen && i > matchPosA)) {
                     maxMatchLen = k;
                     matchPosA = i;
@@ -188,25 +232,38 @@ export function mergeTranslations(oldText, newText) {
     let distA = a.length - (matchPosA + maxMatchLen);
     let distB = matchPosB;
 
-    // Ensure the match isn't just a random word coincidence by enforcing length and edge proximity
-    let isValidMatch = maxMatchLen >= 15 ||
-        maxMatchLen === a.length ||
-        maxMatchLen === b.length ||
-        (maxMatchLen >= 8 && distA <= 2) ||
-        (maxMatchLen >= 8 && distB <= 2) ||
+    let isValidLCS = maxMatchLen >= 15 ||
+        (maxMatchLen >= 8 && distA <= 10) ||
+        (maxMatchLen >= 8 && distB <= 10) ||
         (maxMatchLen >= 5 && distA <= 2 && distB <= 2);
 
-    if (isValidMatch) {
-        // Stitch the strings directly at the overlap index to prevent duplicating text
+    if (isValidLCS) {
         return oldText.slice(0, oldText.length - a.length + matchPosA) + newText.slice(matchPosB);
     }
 
-    // Fallback to strict appending if the sentence doesn't overlap at all
-    if (newText.length > 0 && newText.length < 20 && oldText.toLowerCase().endsWith(newText.toLowerCase())) {
-        return oldText;
-    }
+    // 5. Final Fallback: Complete gap in transcript, append directly
     return oldText + (oldText.endsWith(" ") ? "" : " ") + newText;
 }
+
+// 1. Split text into phrases keeping multilingual punctuation marks
+function splitIntoPhrases(text) {
+    // Splits by English, Arabic, Chinese, and Spanish punctuation
+    let parts = text.split(/([.?!,;،؛；。？！\n]+)/);
+    let phrases = [];
+    for (let k = 0; k < parts.length; k += 2) {
+        let phrase = parts[k].trim();
+        let punct = parts[k + 1] ? parts[k + 1].trim() : "";
+        if (phrase || punct) {
+            if (phrase === "" && phrases.length > 0) {
+                phrases[phrases.length - 1] += punct; // Append orphaned punctuation
+            } else {
+                phrases.push((phrase + punct).trim());
+            }
+        }
+    }
+    return phrases.filter(p => p.length > 0);
+}
+
 
 export function checkLanguage() {
     if (isTesting) {
