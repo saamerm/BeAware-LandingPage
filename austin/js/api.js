@@ -93,7 +93,6 @@ export function getTranscript() {
                     populateLanguageMenu();
                     swapToExistingLanguage();
                 }
-                updateResponseData(t);
 
                 // Apply the phrase merge to all 5 background translations simultaneously
                 accumulatedTranslations.t1 = mergeTranslations(accumulatedTranslations.t1, t.translation);
@@ -101,7 +100,12 @@ export function getTranscript() {
                 accumulatedTranslations.t3 = mergeTranslations(accumulatedTranslations.t3, t.translation3);
                 accumulatedTranslations.t4 = mergeTranslations(accumulatedTranslations.t4, t.translation4);
                 accumulatedTranslations.t5 = mergeTranslations(accumulatedTranslations.t5, t.translation5);
-
+                t.translation = accumulatedTranslations.t1
+                t.translation2 = accumulatedTranslations.t2
+                t.translation3 = accumulatedTranslations.t3
+                t.translation4 = accumulatedTranslations.t4
+                t.translation5 = accumulatedTranslations.t5
+                updateResponseData(t);
                 let o = "";
 
                 // Note: assuming 'response' object exists globally as in your code. 
