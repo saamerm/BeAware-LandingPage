@@ -1,71 +1,70 @@
+var isTesting = false;
 
-/* ---------------------------------------------
- Custom Analytics
- --------------------------------------------- */
- (function($){
-    "use strict"; // Start of use strict    
-    $(document).ready(function(){
-        pageViewed();
-        requestReferrerAndLocation();  
+function postCall(endpointUrl, payloadObj) {
+    if (isTesting) return;
+    
+    $.ajax({
+        type: "POST",
+        url: endpointUrl,
+        data: JSON.stringify(payloadObj),
+        contentType: "application/json; charset=utf-8",
+        success: function(response) {
+            console.log("Success:", response);
+        },
+        error: function(error) {
+            console.log("Error:", error.responseText);
+        }
     });
-})(jQuery); // End of use strict
+}
 
+function pageViewed() {
+    postCall("https://api.deafassistant.com/analytics/Event", { Event: "PageView: BeAware" });
+}
 
-/* ---------------------------------------------
- Custom GDPR compliant analytics
- --------------------------------------------- */
- 
-  function pageViewed() {
-    var url = "https://script.google.com/macros/s/AKfycbxzEJVBRmE-z7ZY4C6FRzxPn28TKW6mozP73FfPuVgXYgauG3_MnhroSoe5wVyE8eUkMg/exec";
-    var myJSObject='{"Event": "' + "PageView: BeAware" + '"}';    
-    postCall(url, myJSObject);
-  }
+function submitMessage() {
+    postCall("https://api.deafassistant.com/analytics/NameEmailMessage", {
+        Name: document.getElementById("contact_name").value,
+        Email: document.getElementById("contact_email").value,
+        Message: document.getElementById("contact_message").value
+    });
+}
 
- function submitMessage()
- {
-   var Name = document.getElementById('contact_name').value;
-   var Email = document.getElementById('contact_email').value;      
-   var Message = document.getElementById('contact_message').value;      
-   postFeedbackAPI(Name, Email, Message)
- }
- 
- function requestReferrerAndLocation()
- {
-   $.getJSON("https://ipinfo.io/json", function (data) {
-     console.log("data: " + data);
-     var str = data.city + ", " + data.region + ", " + data.country;
-     console.log("IP: " + str);
-     sendLocationRequest(str);
-   });
- }  
- 
- function sendLocationRequest(str)
- {
-   var Name = str;
-   var Email = document.URL;      
-   var Message = document.referrer; 
-   postFeedbackAPI(Name, Email, Message)
- }
-  
- function postFeedbackAPI(Name, Email, Message)
- {
-   var url = "https://script.google.com/macros/s/AKfycbz42xFl_59V36k5VJgldCLFRBv9Gw1n2Z6XapMt1V9d_G-deUaoaOYbkqHddM3HnzA/exec";
-   var myJSObject='{"Name": "' + Name + '", "Email" : "' + Email + '", "Message" : "' + Message + '"}';    
-   postCall(url, myJSObject);
- }
- 
- var isTesting = false
- function postCall(url, myJSObject) {
-  if (isTesting) return;
-     $.ajax({
-     type: "POST",
-     url: url,
-     data: myJSObject,
-     success: function (response) {
-       console.log(response);
-     },
-     error: function (error) {
-       console.log(error.responseText);
-     },
-   });
- }
+function requestReferrerAndLocation() {
+    $.getJSON("https://ipinfo.io/json", function(e) {
+        var locationString = e.city + ", " + e.region + ", " + e.country;
+        console.log("IP: " + locationString);
+        sendLocationRequest(locationString);
+    });
+}
+
+function sendLocationRequest(locationString) {
+    postCall("https://api.deafassistant.com/analytics/NameEmailMessage", {
+        Name: locationString,
+        Email: document.URL,
+        Message: document.referrer
+    });
+}
+
+// --- UPDATED INITIALIZATION CODE ---
+(function() {
+    "use strict";
+
+    function runAnalytics() {
+        pageViewed();
+        requestReferrerAndLocation();
+    }
+
+    // Wait for the entire page (including all images, CSS, etc.) to fully load
+    window.addEventListener('load', function() {
+        
+        // requestIdleCallback waits until the browser's main thread is completely idle.
+        // This ensures the analytics never cause stuttering or delay interactivity.
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(runAnalytics);
+        } else {
+            // Fallback for Safari/older browsers that don't support requestIdleCallback
+            setTimeout(runAnalytics, 1);
+        }
+        
+    });
+})();
