@@ -1,5 +1,17 @@
 
 /* Your existing CSS */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top, 0px);
+  background-color: #016B6B;
+  z-index: 9999;
+  pointer-events: none;
+}
+
 body {
   width: 100%;
   margin: 0;
