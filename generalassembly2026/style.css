@@ -1,17 +1,5 @@
 
 /* Your existing CSS */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: env(safe-area-inset-top, 0px);
-  background-color: #016B6B;
-  z-index: 9999;
-  pointer-events: none;
-}
-
 body {
   width: 100%;
   margin: 0;
@@ -128,13 +116,13 @@ input:focus {
   align-items: center;
   gap: 10px;
   border-radius: 24px;
-  background: linear-gradient(to top left, #016B6B, #016B6BBB);
+  background: linear-gradient(to top left, 006b6b, 006b6bBB);
   box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
   border: none;
   cursor: pointer;
 }
 .ios-button:hover {
-  background-color: #016B6B;
+  background-color: 006b6b;
   transform: translateY(2px);
   box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0);
 }
@@ -169,7 +157,7 @@ input:focus {
 }
 
 #header {
-  background-color: #016B6B; /* Your original color */
+  background-color: 006b6b; /* Your original color */
   font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Verdana, Arial, sans-serif;
   display: flex; /* Changed for menu toggle */
   justify-content: space-between; /* Changed for menu toggle */
@@ -336,7 +324,7 @@ a.active {
 }
 
 #live-caption-container {
-  border: 1px solid #016B6B; /* from your HTML */
+  border: 1px solid 006b6b; /* from your HTML */
 }
 
 /* --- DARK MODE STYLES (Class-based) --- */
