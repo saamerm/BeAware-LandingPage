@@ -91,7 +91,9 @@ function checkForAdvancedOverlayParam(urlParams) {
             $("#live-caption2").css({ height: hParam });
         }
         if (vColorParam) {
-            $("#live-caption2").css({ color: vColorParam });
+            // Hex without '#' (same formats as videoBackgroundColor) or a CSS color name
+            const textColor = /^[0-9a-f]{3,4}$|^[0-9a-f]{6}$|^[0-9a-f]{8}$/i.test(vColorParam) ? `#${vColorParam}` : vColorParam;
+            $("#live-caption2").css({ color: textColor });
         }
         if (bgColorParam) {
             // Hex without '#' (3, 4, 6 or 8 digits; 8 = RRGGBBAA) or a CSS color name
