@@ -83,6 +83,7 @@ function checkForAdvancedOverlayParam(urlParams) {
     var advancedOverlayParam = urlParams.get("advancedOverlay") === 'true';
     const hParam = urlParams.get("height");
     const vColorParam = urlParams.get("videoTextColor");
+    const bgColorParam = urlParams.get("videoBackgroundColor");
 
     if (advancedOverlayParam) {
         $("#live-caption2").removeClass("overlay2").addClass("overlay3");
@@ -92,7 +93,13 @@ function checkForAdvancedOverlayParam(urlParams) {
         if (vColorParam) {
             $("#live-caption2").css({ color: vColorParam });
         }
-        if (vColorParam === "white") {
+        if (bgColorParam) {
+            // Hex without '#' (3, 4, 6 or 8 digits; 8 = RRGGBBAA) or a CSS color name
+            const bgColor = /^[0-9a-f]{3,4}$|^[0-9a-f]{6}$|^[0-9a-f]{8}$/i.test(bgColorParam)
+                ? `#${bgColorParam}`
+                : bgColorParam;
+            $("#live-caption2").css({ background: bgColor });
+        } else if (vColorParam === "white") {
             $("#live-caption2").css({ background: "rgba(0, 0, 0, 0.8)" });
         } else if (vColorParam === "black") {
             $("#live-caption2").css({ background: "rgba(255, 255, 255, 0.8)" });
