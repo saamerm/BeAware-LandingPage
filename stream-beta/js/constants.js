@@ -8,7 +8,7 @@ export const API_URL = `https://api.deafassistant.com/stream/${API_PATH}?streamN
 export const LAYOVER_HTML = `
   <div class="inner-div">
     <div id="holder2" class="holder2" style="height: 100px; border: #fafafa11; border-style: solid;">
-      <div id="live-caption-empty2" class="scroller2 scroller-empty">Transcription will display here</div>
+      <div id="live-caption-empty2" class="scroller2 scroller-empty">Tap the button above to start</div>
       <div class="scroller2"><div id="live-caption2" class="overlay2"></div></div>
     </div>
   </div>
@@ -21,7 +21,7 @@ export const languageData = {
         "caption-header": "Captions & Translations",
         "get-live-caption": "Show Captions",
         "get-live-caption-stop": "Stop Streaming",
-        "live-caption-empty": "Transcription will display here",
+        "live-caption-empty": "Tap the button above to start",
         "hotmail": "PS: I love you. Get free event subtitles & translations",
         "name": "English"
     },
@@ -29,8 +29,8 @@ export const languageData = {
         "caption-header": "Sous-titrage en direct",
         "get-live-caption": "Obtenir des sous-titres en direct",
         "get-live-caption-stop": "Arrêter le streaming",
-        "live-caption-empty": "La transcription s'affichera ici",
-        "hotmail": "PS je t'aime. Obtenez votre transcription gratuite de l'événement en direct sur ",
+        "live-caption-empty": "Appuyez sur le bouton ci-dessus pour commencer",
+        "hotmail": "PS je t'aime. Obtenez vos sous-titres gratuits de l'événement en direct sur ",
         "name": "Français"
     },
     'de': {
@@ -101,8 +101,8 @@ export const languageData = {
         "caption-header": "Subtítulos en vivo de eventos",
         "get-live-caption": "Obtener subtítulos en vivo",
         "get-live-caption-stop": "Dejar de transmitir",
-        "live-caption-empty": "La transcripción se mostrará aquí.",
-        "hotmail": "PD Te amo. Obtenga su transcripción gratuita de eventos en vivo",
+        "live-caption-empty": "Toque el botón de arriba para comenzar",
+        "hotmail": "PD Te amo. Obtenga subtítulos gratuitos de eventos en vivo",
         "name": "Español"
     },
     'bn': {

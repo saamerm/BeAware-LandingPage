@@ -456,3 +456,21 @@ body.dark-mode .close-btn {
   );  
 
 }
+/* --- Caption box: always-visible scrollbar and use of the page height --- */
+/* The default macOS "show scroll bars only when scrolling" setting hides overlay scrollbars; a styled
+   ::-webkit-scrollbar is always drawn (Chrome, Safari, Edge). Firefox on macOS follows the OS setting. */
+#live-caption { scrollbar-width: auto; }
+#live-caption::-webkit-scrollbar { width: 14px; }
+#live-caption::-webkit-scrollbar-track { background: rgba(127, 127, 127, 0.18); border-radius: 7px; }
+#live-caption::-webkit-scrollbar-thumb { background: #6b6b6b; border-radius: 7px; border: 3px solid transparent; background-clip: content-box; min-height: 40px; }
+body.dark-mode #live-caption::-webkit-scrollbar-thumb { background: #b5b5b5; background-clip: content-box; }
+@supports not selector(::-webkit-scrollbar) {
+  #live-caption { scrollbar-color: #6b6b6b rgba(127, 127, 127, 0.18); }
+}
+
+#live-caption-container { --caption-h: 400px; height: var(--caption-h); }
+#live-caption { max-height: calc(var(--caption-h) - 30px); }
+/* Laptop/desktop: fill the window height instead of a fixed 400px (phones keep the old size). */
+@media (min-width: 900px) and (min-height: 600px) {
+  #live-caption-container { --caption-h: clamp(400px, calc(100vh - 250px), 820px); }
+}

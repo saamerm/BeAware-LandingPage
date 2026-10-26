@@ -185,7 +185,7 @@ export function loadLang(lang) {
         if (!languageData[lang]) {
             console.error("Default language data missing. UI text will not update.");
             $("#caption-header").text("Live Captioning");
-            $("#live-caption-empty").text("Transcription will appear here.");
+            $("#live-caption-empty").text("Tap the button above to start");
             return;
         }
     }
@@ -330,15 +330,21 @@ export function showRightTranscript() {
     const liveCaption = $("#live-caption");
     const liveCaption2 = $("#live-caption2");
 
-    if (liveCaption.length && liveCaption.html() !== currentTranscriptText) {
-        liveCaption.html(currentTranscriptText);
-        liveCaption.scrollTop(liveCaption[0].scrollHeight);
-        liveCaption.stop().animate({ scrollTop: liveCaption[0].scrollHeight }, scrollSpeedParam);
-    }
-    if (liveCaption2.length && liveCaption2.html() !== currentTranscriptText) {
-        liveCaption2.html(currentTranscriptText);
-        liveCaption2.scrollTop(liveCaption2[0].scrollHeight);
-        liveCaption2.stop().animate({ scrollTop: liveCaption2[0].scrollHeight }, scrollSpeedParam);
+    updateCaptionBox(liveCaption, currentTranscriptText, scrollSpeedParam);
+    updateCaptionBox(liveCaption2, currentTranscriptText, scrollSpeedParam);
+}
+
+// Follow the live text only while the viewer is at (or near) the bottom. Someone who scrolled up to
+// re-read stays where they are instead of being pulled back on every update; scrolling back down
+// to the end resumes following.
+function updateCaptionBox($box, text, scrollSpeed) {
+    if (!$box.length || $box.html() === text) return;
+    const box = $box[0];
+    const followLive = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+    $box.html(text);
+    if (followLive) {
+        $box.scrollTop(box.scrollHeight);
+        $box.stop().animate({ scrollTop: box.scrollHeight }, scrollSpeed);
     }
 }
 
