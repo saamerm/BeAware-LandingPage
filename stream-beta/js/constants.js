@@ -3,7 +3,29 @@
 const STREAM_CONFIG = window.STREAM_CONFIG || {};
 export const STREAM_NAME = STREAM_CONFIG.name || location.pathname.split('/')[1] || 'WeTech';
 const API_PATH = STREAM_CONFIG.apiPath || 'LiteGetStream';
-export const API_URL = `https://api.deafassistant.com/stream/${API_PATH}?streamName=${encodeURIComponent(STREAM_NAME)}`;
+
+// "Require authentication": the admin's secure QR code is this page's URL plus ?auth=<code>. The code is
+// kept on the device (so reloads and later visits keep working) and removed from the address bar, so a
+// screenshot or a shared link of the page does not carry it.
+const AUTH_KEY = `cc_auth_${STREAM_NAME}`;
+function resolveAuthCode() {
+    const params = new URLSearchParams(location.search);
+    const fromUrl = params.get('auth');
+    try {
+        if (fromUrl) {
+            localStorage.setItem(AUTH_KEY, fromUrl);
+            params.delete('auth');
+            const query = params.toString();
+            history.replaceState(null, '', location.pathname + (query ? `?${query}` : '') + location.hash);
+            return fromUrl;
+        }
+        return localStorage.getItem(AUTH_KEY) || '';
+    } catch (e) {
+        return fromUrl || ''; // storage blocked (private mode): works for this page load only
+    }
+}
+export const AUTH_CODE = resolveAuthCode();
+export const API_URL = `https://api.deafassistant.com/stream/${API_PATH}?streamName=${encodeURIComponent(STREAM_NAME)}${AUTH_CODE ? `&auth=${encodeURIComponent(AUTH_CODE)}` : ''}`;
 
 export const LAYOVER_HTML = `
   <div class="inner-div">

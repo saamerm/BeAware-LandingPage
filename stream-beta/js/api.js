@@ -17,7 +17,8 @@ import {
     updateSidebarActiveStates,
     populateLanguageMenu,
     translate,
-    buttonTapped
+    buttonTapped,
+    showAccessNotice
 } from './ui.js';
 import { readLogic } from './speech.js';
 import { normalizeLang } from './utils.js';
@@ -84,6 +85,7 @@ export function getTranscript() {
     const separator = API_URL.includes('?') ? '&' : '?';
     const urlWithCursor = `${API_URL}${separator}transcriptCursor=${transcriptCursor}`;
     $.getJSON(urlWithCursor, function (data) {
+        if (showAccessNotice(data)) return;
         if (data) {
             if (data.transcript !== undefined) {
                 if (checkIfLanguageChanged(data)) {
@@ -147,6 +149,7 @@ export function checkLanguage() {
     }
     $.support.cors = true;
     $.getJSON(API_URL, function (data) {
+        if (showAccessNotice(data)) return;
         if (data) {
             updateResponseLanguages(data);
             populateLanguageMenu();

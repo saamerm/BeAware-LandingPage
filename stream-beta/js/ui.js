@@ -109,6 +109,21 @@ function checkForAdvancedOverlayParam(urlParams) {
     }
 }
 
+// The API answers {authRequired: true} (the admin turned on "Require authentication" and this device has
+// no valid code) or {expired: true, message} (the captions' availability period ended) instead of captions.
+// Returns true when the response was such a notice, which replaces the caption area.
+export function showAccessNotice(data) {
+    if (!data || !(data.authRequired || data.expired)) return false;
+    if (isStreamingCaptions) buttonTapped(); // stop following a stream we may no longer read
+    const text = data.authRequired
+        ? "You need a special QR code from your event admin to view this session."
+        : (data.message || "This event has ended and its captions are no longer available.");
+    $("#live-caption-empty, #live-caption-empty2").text(text).show();
+    $("#live-caption").hide();
+    $("#get-live-caption").hide();
+    return true;
+}
+
 export function updateSidebarActiveStates() {
     // Theme state
     const displaySection = $('#display-section');
