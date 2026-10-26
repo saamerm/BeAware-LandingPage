@@ -1,0 +1,5 @@
+# Shared stream-page files: browsers and the CDN must revalidate (ETag) on every load,
+# so a deploy reaches viewers on their next page load instead of after 7 days.
+<IfModule mod_headers.c>
+  Header set Cache-Control "no-cache"
+</IfModule>
