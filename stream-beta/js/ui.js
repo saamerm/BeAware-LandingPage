@@ -110,15 +110,6 @@ function checkForAdvancedOverlayParam(urlParams) {
 }
 
 export function updateSidebarActiveStates() {
-    // Stream state
-    const streamSection = $('#stream-section');
-    streamSection.find('.menu-option').attr({ 'aria-checked': 'false', 'tabindex': -1 });
-    const activeStreamOption = isStreamingCaptions ?
-        streamSection.find('.menu-option[data-value="on"]') :
-        streamSection.find('.menu-option[data-value="off"]');
-    activeStreamOption.addClass('active-option').attr({ 'aria-checked': 'true', 'tabindex': 0 });
-    streamSection.find('.menu-option').not(activeStreamOption).removeClass('active-option');
-
     // Theme state
     const displaySection = $('#display-section');
     displaySection.find('.menu-option').attr({ 'aria-checked': 'false', 'tabindex': -1 });

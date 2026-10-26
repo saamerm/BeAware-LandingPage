@@ -108,9 +108,6 @@ $(document).ready(function () {
         $this.attr({ 'aria-checked': 'true', 'tabindex': 0 });
 
         switch (action) {
-            case 'stream':
-                buttonTapped();
-                break;
             case 'theme':
                 if (value === 'dark') {
                     body.addClass('dark-mode');
