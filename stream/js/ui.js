@@ -121,8 +121,6 @@ export function showAccessNotice(data) {
     $("#live-caption-empty, #live-caption-empty2").text(text).show();
     $("#live-caption").hide();
     $("#get-live-caption").hide();
-    // Questions and networking need the same code, so a viewer without it should not be offered them.
-    if (data.authRequired) $("#question-section, #networking-section").hide();
     return true;
 }
 
