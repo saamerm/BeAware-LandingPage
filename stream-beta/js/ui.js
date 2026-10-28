@@ -17,7 +17,7 @@ import {
     fontSizeParam, setFontSizeParam,
     heightParam, setHeightParam
 } from './state.js';
-import { languageData, DEFAULT_LANGUAGE, LAYOVER_HTML, API_URL } from './constants.js';
+import { languageData, DEFAULT_LANGUAGE, LAYOVER_HTML, API_URL, AUTH_CODE } from './constants.js';
 import { iOSSpeakerFix, mute, unmute, stopSpeech } from './speech.js';
 
 export function getValueFromUrlParams() {
@@ -378,7 +378,7 @@ export function modalSetup() {
 
             const streamName = new URL(API_URL).searchParams.get('streamName');
             const submissionText = name ? `${name}: ${question}` : question;
-            const submissionUrl = `https://api.deafassistant.com/question/AddQuestion?streamName=${streamName}&question=${encodeURIComponent(submissionText)}`;
+            const submissionUrl = `https://api.deafassistant.com/question/AddQuestion?streamName=${streamName}&question=${encodeURIComponent(submissionText)}${AUTH_CODE ? `&auth=${encodeURIComponent(AUTH_CODE)}` : ''}`;
 
             try {
                 const res = await fetch(submissionUrl, { method: "POST" });
